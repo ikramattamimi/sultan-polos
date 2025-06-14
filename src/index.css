@@ -1,0 +1,98 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white;
+  }
+
+  h1 {
+    @apply text-4xl font-bold;
+  }
+
+  a.active {
+    @apply text-blue-500;
+  }
+}
+
+@layer components {
+  .navbar {
+    @apply w-screen fixed top-0 px-20 py-5;
+  }
+
+  .navbar-menu {
+    @apply flex items-center gap-10 dark:bg-gray-800 py-5 px-10 rounded-full shadow-xl shadow-gray-800;
+  }
+
+  .navbar ul li {
+    @apply cursor-pointer;
+  }
+
+  .sidebar {
+    @apply 
+    bg-gray-100
+    h-screen 
+    inline-block 
+    left-0 
+    dark:bg-gray-800 
+    p-5 
+    /* border-e-[3px]  */
+    border-gray-400
+    ;
+  }
+
+  .sidebar a{
+    @apply my-1 p-2 rounded-md w-full inline-block;
+
+    &.active {
+      @apply 
+      bg-blue-400 
+      text-gray-50 
+      dark:bg-gray-300 
+      dark:text-gray-900
+      shadow-sm
+      shadow-gray-400
+      ;
+    }
+  }
+
+  .logo {
+    @apply p-2 text-xl font-bold;
+  }
+
+  .card {
+    @apply 
+    rounded-2xl 
+    /* border-[1px] 
+    border-gray-200  */
+    p-5
+    shadow-sm
+    shadow-gray-300
+    ;
+  }
+
+  .admin-layout {
+
+    /*.page {*/
+    /*  @apply h-[70dvh] w-2xl container;*/
+    /*}*/
+
+    main {
+      @apply mt-5 ms-85;
+
+      div {
+        /*@apply h-[70dvh] w-full;*/
+      }
+    }
+
+  }
+
+  .input {
+    @apply w-full bg-white text-gray-800 placeholder-gray-400  
+      dark:bg-gray-600 dark:text-gray-200
+      p-3 rounded-xl shadow-sm shadow-gray-400
+      border-none focus:outline-none  ring-1 ring-gray-300
+      focus:ring-gray-400 focus:ring-2
+      ;
+  }
+}

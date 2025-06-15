@@ -26,7 +26,7 @@ const DarkMode = () => {
 
   return (
     <div>
-      <button className="p-2 rounded-md flex bg-gray-50 ring-1 ring-gray-300 shadow-sm shadow-gray-400" onClick={toggleTheme}>
+      <button className="p-2 rounded-md flex bg-gray-50 ring-1 ring-gray-300 shadow-sm shadow-gray-400 cursor-pointer" onClick={toggleTheme}>
         <div className="p-2 text-xl bg-gray-200 rounded-md dark:bg-transparent text-gray-500">
             <FaSun/>
         </div>

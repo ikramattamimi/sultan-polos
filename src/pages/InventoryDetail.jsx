@@ -1,20 +1,16 @@
 import React, { useState } from "react";
-import CardInventory from "../components/CardInventory.jsx";
-import Input from "../components/Input.jsx";
+import InventoryForm from "../components/InventoryForm.jsx";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { formatPrice } from "../common.js";
 import { supabase } from "../supabaseClient.js";
-import { FaArrowLeft, FaBackward } from "react-icons/fa6";
-import { FaBackspace } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa6";
 
 const InventoryDetail = () => {
-
   const navigate = useNavigate();
-
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { name, type, purchase_price, stock, color, id } = useLoaderData();
+  const { name, type, purchase_price, stock, buffer_stock, unit, color, id, category } = useLoaderData();
 
   const [inventory, setInventory] = useState({
     id,
@@ -23,6 +19,9 @@ const InventoryDetail = () => {
     purchase_price,
     stock,
     color,
+    buffer_stock,
+    unit,
+    category,
   });
 
   const updateInventory = async () => {
@@ -32,8 +31,11 @@ const InventoryDetail = () => {
         .from("inventories")
         .update(inventory)
         .eq("id", inventory.id);
+      
+      alert("Inventory berhasil diupdate");
     } catch (error) {
       console.error(error);
+      alert("Gagal mengupdate inventory");
     } finally {
       setIsLoading(false);
     }
@@ -53,91 +55,38 @@ const InventoryDetail = () => {
       navigate("/inventory");
     } catch (error) {
       console.error(error);
+      alert("Gagal menghapus inventory");
     } finally {
       setIsDeleting(false);
     }
   };
 
+  const handleCancel = () => {
+    navigate('/inventory');
+  };
+
   return (
     <main className="w-full">
-      <h1 className="">Detail Inventory</h1>
-
-      <div className="mt-10 pe-10 w-full">
-        {/* <form action=""> */}
-        <Input
-          required
-          placeholder="Nama Bahan"
-          value={inventory.name}
-          onChange={(e) => setInventory({ ...inventory, name: e.target.value })}
-        />
-
-        <Input
-          required
-          placeholder="Tipe Bahan"
-          value={inventory.type}
-          onChange={(e) => setInventory({ ...inventory, type: e.target.value })}
-        />
-
-        <Input
-          required
-          placeholder="Harga"
-          value={inventory.purchase_price}
-          onChange={(e) =>
-            setInventory({
-              ...inventory,
-              purchase_price: e.target.value,
-            })
-          }
-          type="number"
-        />
-
-        <Input
-          required
-          placeholder="Stock"
-          value={inventory.stock}
-          onChange={(e) =>
-            setInventory({ ...inventory, stock: e.target.value })
-          }
-        />
-
-        <Input
-          required
-          placeholder="Warna"
-          value={inventory.color}
-          onChange={(e) =>
-            setInventory({ ...inventory, color: e.target.value })
-          }
-        />
-
-        <div className="flex gap-3 justify-between">
-          <button
-            className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer"
-            onClick={() => navigate('/inventory')}
-          >
-            <div className="flex items-center">
-              <FaArrowLeft className="mr-2"/><span>Back</span>
-            </div>
-          </button>
-
-          <div className="flex gap-3 justify-end">
-            <button
-              className="dark:bg-white text-white bg-red-400 rounded-lg shadow-xl p-2 cursor-pointer"
-              onClick={deleteInventory}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </button>
-            <button
-              className="dark:bg-white text-white bg-blue-400 rounded-lg shadow-xl p-2 cursor-pointer"
-              onClick={updateInventory}
-            >
-              {isLoading ? "Updating..." : "Update"}
-            </button>
-
-          </div>
-        </div>
-
-        {/* </form> */}
+      <div className="flex items-center mb-6">
+        <button
+          className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors mr-4"
+          onClick={handleCancel}
+        >
+          <FaArrowLeft />
+        </button>
+        <h1 className="text-2xl font-bold">Detail Inventory</h1>
       </div>
+
+      <InventoryForm
+        inventory={inventory}
+        onInventoryChange={setInventory}
+        onSubmit={updateInventory}
+        onCancel={handleCancel}
+        onDelete={deleteInventory}
+        isLoading={isLoading}
+        isDeleting={isDeleting}
+        mode="edit"
+      />
     </main>
   );
 };

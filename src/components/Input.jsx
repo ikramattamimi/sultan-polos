@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 
 const Input = ({
   placeholder = "placeholder",
@@ -14,8 +14,8 @@ const Input = ({
 
   return (
     <div>
-      <div className="my-4 flex items-center">
-        <label htmlFor={id} className='text-sm font-medium mb-2 inline-block min-w-1/6'>
+      <div className="my-4 flex flex-wrap items-center">
+        <label htmlFor={id} className='text-sm font-medium mb-2 inline-block w-full md:w-1/3 xl:w-1/6'>
           {label}
           {required && <span className="text-red-500"> *</span>}
         </label>

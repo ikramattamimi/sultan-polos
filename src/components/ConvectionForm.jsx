@@ -9,6 +9,7 @@ const ConvectionForm = ({ convection, setConvection }) => {
     convection.inventory_id ? 'existing' : 'alternative'
   );
   const [backupInventoryAlt, setBackupInventoryAlt] = useState([]);
+  const [selectedInventory, setSelectedInventory] = useState(null);
 
   useEffect(() => {
     fetchInventories();
@@ -24,6 +25,16 @@ const ConvectionForm = ({ convection, setConvection }) => {
       setBackupInventoryAlt([...convection.inventory_alt]);
     }
   }, [convection.inventory_alt, inventoryMode]);
+
+  // Find selected inventory details when inventory_id changes
+  useEffect(() => {
+    if (convection.inventory_id && inventories.length > 0) {
+      const inventory = inventories.find(inv => parseInt(inv.id) === parseInt(convection.inventory_id));
+      setSelectedInventory(inventory);
+    } else {
+      setSelectedInventory(null);
+    }
+  }, [convection.inventory_id, inventories]);
 
   const fetchInventories = async () => {
     setLoadingInventories(true);
@@ -53,7 +64,8 @@ const ConvectionForm = ({ convection, setConvection }) => {
       setConvection({ 
         ...convection, 
         inventory_alt: [],
-        inventory_id: convection.inventory_id || ''
+        inventory_id: convection.inventory_id || '',
+        inventory_count: convection.inventory_count || 0
       });
     } else {
       // Restore inventory_alt from backup when switching back to alternative
@@ -61,9 +73,27 @@ const ConvectionForm = ({ convection, setConvection }) => {
       setConvection({ 
         ...convection, 
         inventory_id: null,
+        inventory_count: 0,
         inventory_alt: restoredInventoryAlt
       });
     }
+  };
+
+  const handleInventorySelect = (inventoryId) => {
+    setConvection({ 
+      ...convection, 
+      inventory_id: inventoryId || null,
+      inventory_count: inventoryId ? (convection.inventory_count || 0) : 0
+    });
+    setSelectedInventory(inventories.find(inv => inv.id === inventoryId));
+  };
+
+  const handleInventoryCountChange = (count) => {
+    const numericCount = parseInt(count) || 0;
+    setConvection({ 
+      ...convection, 
+      inventory_count: numericCount
+    });
   };
   
   const handleInventoryAltChange = (index, field, value) => {
@@ -145,7 +175,7 @@ const ConvectionForm = ({ convection, setConvection }) => {
       />
 
       {/* Inventory Selection Mode */}
-      <div className="mt-15">
+      <div className="mt-8">
         <h2 className="text-lg font-semibold mb-4">Pilih Sumber Inventory</h2>
         <div className="flex gap-4 mb-6">
           <label className="flex items-center gap-2 cursor-pointer">
@@ -179,18 +209,58 @@ const ConvectionForm = ({ convection, setConvection }) => {
             {loadingInventories ? (
               <div className="text-gray-500">Loading inventories...</div>
             ) : (
-              <select
-                value={convection.inventory_id || ""}
-                onChange={(e) => setConvection({ ...convection, inventory_id: e.target.value || null })}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">-- Pilih Inventory --</option>
-                {inventories.map((inventory) => (
-                  <option key={inventory.id} value={inventory.id}>
-                    {inventory.name} - {inventory.category} ({inventory.type}) - Stock: {inventory.stock}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-4">
+                <select
+                  value={convection.inventory_id || ""}
+                  onChange={(e) => handleInventorySelect(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">-- Pilih Inventory --</option>
+                  {inventories.map((inventory) => (
+                    <option key={inventory.id} value={inventory.id}>
+                      {inventory.name} - {inventory.category} ({inventory.type}) - Stock: {inventory.stock}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Inventory Count Input */}
+                {convection.inventory_id && selectedInventory && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="mb-3">
+                      <h4 className="font-medium text-blue-800">Inventory Terpilih:</h4>
+                      <p className="text-sm text-blue-600">
+                        {selectedInventory.name} - Stock Tersedia: {selectedInventory.stock}
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                      <div>
+                        <label className="block text-sm font-medium mb-2 text-blue-800">
+                          Jumlah yang Diambil:
+                        </label>
+                        <Input
+                          required
+                          placeholder="Masukkan jumlah"
+                          value={convection.inventory_count || ""}
+                          onChange={(e) => handleInventoryCountChange(e.target.value)}
+                          type="number"
+                          min="1"
+                          max={selectedInventory.stock}
+                        />
+                      </div>
+                      
+                      <div className="text-sm text-gray-600">
+                        <p>Sisa stock setelah diambil: {selectedInventory.stock - (convection.inventory_count || 0)}</p>
+                        {(convection.inventory_count || 0) > selectedInventory.stock && (
+                          <p className="text-red-600 font-medium">
+                            ⚠️ Jumlah melebihi stock yang tersedia!
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -202,7 +272,7 @@ const ConvectionForm = ({ convection, setConvection }) => {
               <h3 className="text-lg font-semibold">Inventory Custom</h3>
               <button
                 type="button"
-                className="bg-emerald-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
                 onClick={addInventoryAltItem}
               >
                 Tambah Material
@@ -223,7 +293,7 @@ const ConvectionForm = ({ convection, setConvection }) => {
                     </button>
                   </div>
                   
-                  <div className="gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <Input
                       placeholder="Nama Material"
                       value={item.material_name || ""}

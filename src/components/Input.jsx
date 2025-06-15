@@ -8,7 +8,8 @@ const Input = ({
   id = placeholder,
   onChange,
   label = placeholder,
-  required = false
+  required = false,
+  min
 }) =>
 {
 
@@ -26,6 +27,8 @@ const Input = ({
           placeholder={placeholder}
           value={value}
           onChange={onChange}
+          required={required}
+          min={min}
         />
       </div>
     </div>

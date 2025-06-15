@@ -109,7 +109,7 @@ const ConvectionCreate = () => {
         throw error;
       }
 
-      alert("Convection berhasil dibuat");
+      alert("Konveksi berhasil dibuat");
       navigate("/convection");
     } catch (error) {
       console.error("Error creating convection:", error);
@@ -147,13 +147,6 @@ const ConvectionCreate = () => {
           </button>
           <h1>Tambah Konveksi Baru</h1>
         </div>
-        
-        {/* <button
-          className="text-sm bg-red-500 rounded-sm text-white cursor-pointer"
-          onClick={resetForm}
-        >
-          Reset Form
-        </button> */}
       </div>
       
 
@@ -188,7 +181,7 @@ const ConvectionCreate = () => {
           onClick={createConvection}
           disabled={isLoading}
         >
-          {isLoading ? "Creating..." : "Create Convection"}
+          {isLoading ? "Menyimpan..." : "Simpan Konveksi"}
         </button>
       </div>
     </main>

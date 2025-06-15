@@ -10,7 +10,7 @@ const ConvectionDetail = () => {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const loaderData = useLoaderData();
-  
+
   const [convection, setConvection] = useState({
     id: loaderData.id,
     name: loaderData.name || "",
@@ -20,9 +20,12 @@ const ConvectionDetail = () => {
     color: loaderData.color || "",
     category: loaderData.category || "",
     inventory_id: loaderData.inventory_id || null,
-    inventory_alt: Array.isArray(loaderData.inventory_alt) 
-      ? loaderData.inventory_alt 
-      : (loaderData.inventory_alt ? [loaderData.inventory_alt] : [])
+    inventory_count: loaderData.inventory_count || 0,
+    inventory_alt: Array.isArray(loaderData.inventory_alt)
+      ? loaderData.inventory_alt
+      : loaderData.inventory_alt
+      ? [loaderData.inventory_alt]
+      : [],
   });
 
   const updateConvection = async () => {
@@ -37,9 +40,11 @@ const ConvectionDetail = () => {
         color: convection.color,
         category: convection.category,
         inventory_id: convection.inventory_id,
-        inventory_alt: convection.inventory_alt && convection.inventory_alt.length > 0 
-          ? convection.inventory_alt 
-          : null
+        inventory_count: loaderData.inventory_count || 0,
+        inventory_alt:
+          convection.inventory_alt && convection.inventory_alt.length > 0
+            ? convection.inventory_alt
+            : null,
       };
 
       const { error } = await supabase
@@ -73,7 +78,7 @@ const ConvectionDetail = () => {
       if (error) {
         throw error;
       }
-      
+
       alert("Convection berhasil dihapus");
       navigate("/convection");
     } catch (error) {
@@ -86,25 +91,22 @@ const ConvectionDetail = () => {
 
   return (
     <main className="w-full p-6">
-      <div className="flex items-center mb-6">
-        <h1>Detail Konveksi</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <button
+            className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors mr-4"
+            onClick={() => navigate("/convection")}
+          >
+            <FaArrowLeft />
+          </button>
+          <h1>Detail Konveksi</h1>
+        </div>
       </div>
 
-      <ConvectionForm 
-        convection={convection}
-        setConvection={setConvection}
-      />
+      <ConvectionForm convection={convection} setConvection={setConvection} />
 
-      <div className="flex gap-3 justify-between mt-8 pt-6 border-t border-t-gray-300">
-        <button
-          className="flex items-center gap-2 bg-gray-400 hover:bg-gray-500 text-white rounded-lg shadow-xl px-4 py-2 cursor-pointer transition-colors"
-          onClick={() => navigate('/convection')}
-        >
-          <FaArrowLeft />
-          <span>Back</span>
-        </button>
-
-        <div className="flex gap-3">
+      <div className="pe-10">
+        <div className="flex gap-3 justify-end mt-8 pt-6 border-t border-t-gray-300">
           <button
             className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-xl px-4 py-2 cursor-pointer transition-colors disabled:opacity-50"
             onClick={deleteConvection}
@@ -112,7 +114,7 @@ const ConvectionDetail = () => {
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </button>
-          
+
           <button
             className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-xl px-4 py-2 cursor-pointer transition-colors disabled:opacity-50"
             onClick={updateConvection}

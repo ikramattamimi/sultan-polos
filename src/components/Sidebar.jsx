@@ -13,7 +13,7 @@ const Sidebar = () => {
       <ul>
         <li><NavLink to="/">Dashboard</NavLink></li>
         <li><NavLink to="inventory">Inventory</NavLink></li>
-        <li><NavLink to="convection">Konveksi</NavLink></li>
+        <li><NavLink to="convection">Convection</NavLink></li>
         <li><NavLink to="report">Report</NavLink></li>
       </ul>
 

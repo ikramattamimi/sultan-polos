@@ -8,8 +8,8 @@ import RootLayout from "./layouts/RootLayout.jsx";
 import Home from "./pages/Home.jsx";
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminHome from "./pages/AdminHome.jsx";
-import Inventory from "./pages/Inventory.jsx";
 import Convection from "./pages/Convection.jsx";
+import Inventory from "./pages/Inventory.jsx";
 import Report from "./pages/Report.jsx";
 import GuestLayout from "./layouts/GuestLayout.jsx";
 import InventoryDetail from "./pages/InventoryDetail.jsx";
@@ -44,7 +44,7 @@ function App() {
             <Route
               path=":id"
               element={<InventoryDetail />}
-              loader={inventoryDetailLoader}
+              loader={convectionDetailLoader}
             />
             <Route path="create" element={<InventoryCreate />} />
           </Route>
@@ -78,7 +78,7 @@ function App() {
   return (
     <RouterProvider router={router} />
     // <div className="w-screen">
-    //   <h1 className="text-center">App Inventory Management</h1>
+    //   <h1 className="text-center">App Convection Management</h1>
     // </div>
   );
 }

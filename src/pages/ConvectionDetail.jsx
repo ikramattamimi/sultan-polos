@@ -1,129 +1,92 @@
 import React, { useState } from "react";
+import ConvectionForm from "../components/ConvectionForm.jsx";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import { FaArrowLeft } from "react-icons/fa6";
-import ConvectionForm from "../components/ConvectionForm.jsx";
 
 const ConvectionDetail = () => {
   const navigate = useNavigate();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loaderData = useLoaderData();
+  const { name, type, purchase_price, stock, buffer_stock, unit, color, id, category } = useLoaderData();
 
-  const [convection, setConvection] = useState({
-    id: loaderData.id,
-    name: loaderData.name || "",
-    type: loaderData.type || "",
-    selling_price: loaderData.selling_price || "",
-    stock: loaderData.stock || "",
-    color: loaderData.color || "",
-    category: loaderData.category || "",
-    inventory_id: loaderData.inventory_id || null,
-    inventory_count: loaderData.inventory_count || 0,
-    inventory_alt: Array.isArray(loaderData.inventory_alt)
-      ? loaderData.inventory_alt
-      : loaderData.inventory_alt
-      ? [loaderData.inventory_alt]
-      : [],
+  const [inventory, setInventory] = useState({
+    id,
+    name,
+    type,
+    purchase_price,
+    stock,
+    color,
+    buffer_stock,
+    unit,
+    category,
   });
 
-  const updateConvection = async () => {
+  const updateInventory = async () => {
     setIsLoading(true);
     try {
-      // Prepare data for update
-      const updateData = {
-        name: convection.name,
-        type: convection.type,
-        selling_price: parseFloat(convection.selling_price) || 0,
-        stock: parseInt(convection.stock) || 0,
-        color: convection.color,
-        category: convection.category,
-        inventory_id: convection.inventory_id,
-        inventory_count: loaderData.inventory_count || 0,
-        inventory_alt:
-          convection.inventory_alt && convection.inventory_alt.length > 0
-            ? convection.inventory_alt
-            : null,
-      };
-
-      const { error } = await supabase
-        .from("convections")
-        .update(updateData)
-        .eq("id", convection.id);
-
-      if (error) {
-        throw error;
-      }
-
+      await supabase
+        .from("inventories")
+        .update(inventory)
+        .eq("id", inventory.id);
+      
       alert("Convection berhasil diupdate");
     } catch (error) {
-      console.error("Error updating convection:", error);
-      alert("Gagal mengupdate convection: " + error.message);
+      console.error(error);
+      alert("Gagal mengupdate inventory");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteConvection = async () => {
-    if (!window.confirm("Apakah anda yakin ingin menghapus data ini?")) return;
+  const deleteInventory = async () => {
+    if (!window.confirm("Apakah anda yakin ingin menghapus inventory ini?")) return;
 
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from("convections")
+      await supabase
+        .from("inventories")
         .delete()
-        .eq("id", convection.id);
-
-      if (error) {
-        throw error;
-      }
-
+        .eq("id", inventory.id);
+      
       alert("Convection berhasil dihapus");
-      navigate("/convection");
+      navigate("/inventory");
     } catch (error) {
-      console.error("Error deleting convection:", error);
-      alert("Gagal menghapus convection: " + error.message);
+      console.error(error);
+      alert("Gagal menghapus inventory");
     } finally {
       setIsDeleting(false);
     }
   };
 
+  const handleCancel = () => {
+    navigate('/inventory');
+  };
+
   return (
-    <main className="w-full p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <button
-            className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors mr-4"
-            onClick={() => navigate("/convection")}
-          >
-            <FaArrowLeft />
-          </button>
-          <h1>Detail Konveksi</h1>
-        </div>
+    <main className="w-full">
+      <div className="flex items-center mb-6">
+        <button
+          className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors mr-4"
+          onClick={handleCancel}
+        >
+          <FaArrowLeft />
+        </button>
+        <h1 className="text-2xl font-bold">Detail Convection</h1>
       </div>
 
-      <ConvectionForm convection={convection} setConvection={setConvection} />
-
-      <div className="pe-10">
-        <div className="flex gap-3 justify-end mt-8 pt-6 border-t border-t-gray-300">
-          <button
-            className="bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-xl px-4 py-2 cursor-pointer transition-colors disabled:opacity-50"
-            onClick={deleteConvection}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </button>
-
-          <button
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-lg shadow-xl px-4 py-2 cursor-pointer transition-colors disabled:opacity-50"
-            onClick={updateConvection}
-            disabled={isLoading}
-          >
-            {isLoading ? "Updating..." : "Update"}
-          </button>
-        </div>
-      </div>
+      <ConvectionForm
+        inventory={inventory}
+        onInventoryChange={setInventory}
+        onSubmit={updateInventory}
+        onCancel={handleCancel}
+        onDelete={deleteInventory}
+        isLoading={isLoading}
+        isDeleting={isDeleting}
+        mode="edit"
+      />
     </main>
   );
 };

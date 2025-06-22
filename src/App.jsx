@@ -4,82 +4,87 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import RootLayout from "./layouts/RootLayout.jsx";
-import Home from "./pages/Home.jsx";
+
 import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminHome from "./pages/AdminHome.jsx";
-import Convection from "./pages/Convection.jsx";
-import Inventory from "./pages/Inventory.jsx";
+import ConvectionPage from "./pages/ConvectionPage.jsx";
 import Report from "./pages/Report.jsx";
-import GuestLayout from "./layouts/GuestLayout.jsx";
-import InventoryDetail from "./pages/InventoryDetail.jsx";
-import InventoryCreate from "./pages/InventoryCreate.jsx";
 
 import {
-  convectionDetailLoader,
+  productsLoader,
+  dashboardLoader,
+  convectionsLoader,
   convectionLoader,
-  inventoryDetailLoader,
-  inventoryLoader,
+  salesReportLoader,
+  masterDataLoader,
 } from "./loader.js";
-import ConvectionDetail from "./pages/ConvectionDetail.jsx";
-import NotFound from "./pages/NotFound.jsx";
-import ConvectionCreate from "./pages/ConvectionCreate.jsx";
+
+import ConvectionDetailPage from "./pages/ConvectionDetailPage.jsx";
+import NotFoundPage from "./pages/NotFoundPage.jsx";
+import ProductManagementPage from "./pages/ProductManagementPage.jsx";
+import ConvectionCreatePage from "./pages/ConvectionCreatePage.jsx";
+import SalesPage from "./pages/SalesPage.jsx";
+import SalesCreatePage from "./pages/SalesCreatePage.jsx";
 
 function App() {
   const router = createBrowserRouter(
     createRoutesFromElements(
       <>
         <Route path="/" element={<AdminLayout />}>
-          {/*<Route path="/" element={<RootLayout />}>*/}
 
-          {/*<Route index element={<GuestLayout/>}>*/}
-          {/*  <Route index element={<Home />} />*/}
-          {/*</Route>*/}
+          <Route index element={<AdminHome />} loader={dashboardLoader} />
+          <Route path="dashboard" id="dashboard" element={<AdminHome />} loader={dashboardLoader} />
 
-          <Route index element={<AdminHome />} />
-          <Route path="dashboard" id="dashboard" element={<AdminHome />} />
-
-          <Route path="inventory">
-            <Route index element={<Inventory />} loader={inventoryLoader} />
-            <Route
-              path=":id"
-              element={<InventoryDetail />}
-              loader={convectionDetailLoader}
+          {/* Inventory Routes */}
+          <Route>
+            <Route 
+              path="product" 
+              element={<ProductManagementPage />}
+              loader={() => productsLoader({ params: { includeVariants: true } })} 
             />
-            <Route path="create" element={<InventoryCreate />} />
+            <Route path="sales">
+              <Route index element={<SalesPage />} />
+              <Route
+                path="create"
+                element={<SalesCreatePage />}
+              />
+            </Route>
           </Route>
 
-          <Route
-            path="convection"
-          >
+          {/* Convection Routes */}
+          <Route path="convection">
             <Route
               index
-              element={<Convection />}
-              loader={convectionLoader}
+              element={<ConvectionPage />}
+              loader={convectionsLoader}
             />
             <Route
               path=":id"
-              element={<ConvectionDetail />}
-              loader={convectionDetailLoader}
+              element={<ConvectionDetailPage />}
+              loader={convectionLoader}
             />
-            <Route path="create" element={<ConvectionCreate />} />
+            <Route 
+              path="create" 
+              element={<ConvectionCreatePage />}
+              loader={masterDataLoader}
+            />
           </Route>
-          <Route path="report" element={<Report />} />
 
-          {/*<Route path="admin" element={<AdminLayout/>}>*/}
-          {/*  <Route path="dashboard" element={<AdminHome />} />*/}
-          {/*</Route>*/}
+          {/* Report Routes */}
+          <Route 
+            path="report" 
+            element={<Report />} 
+            loader={salesReportLoader}
+          />
         </Route>
-        <Route path="*" element={<NotFound />} />
+
+        <Route path="*" element={<NotFoundPage />} />
       </>
     )
   );
 
   return (
     <RouterProvider router={router} />
-    // <div className="w-screen">
-    //   <h1 className="text-center">App Convection Management</h1>
-    // </div>
   );
 }
 

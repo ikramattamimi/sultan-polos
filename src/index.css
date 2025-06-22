@@ -1,13 +1,14 @@
+/* Base styles and reusable classes for Tailwind v4 */
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@layer base {
-  body {
-    @apply bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white;
-  }
 
   h1 {
     @apply text-4xl font-bold;
+  }
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-white;
   }
 
   a.active {
@@ -57,6 +58,10 @@
     }
   }
 
+  .dropdown-menu {
+    @apply my-1 p-2 rounded-md w-full inline-block
+  }
+
   .logo {
     @apply p-2 text-2xl font-bold;
   }
@@ -96,4 +101,336 @@
       focus:ring-gray-400 focus:ring-2
       ;
   }
+}
+/* Base styles and reusable classes for Tailwind v4 */
+@import "tailwindcss";
+
+/* Custom reusable component classes */
+@utility card-base {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border: 1px solid rgb(229 231 235);
+}
+
+@utility card-padding {
+  padding: 1rem;
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
+}
+
+@utility card-header {
+  border-bottom: 1px solid rgb(229 231 235);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Button variants */
+@utility btn-base {
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  transition: colors 0.2s;
+  outline: none;
+  &:focus {
+    ring: 2px;
+    ring-offset: 2px;
+  }
+}
+
+@utility btn-primary {
+  background-color: rgb(37 99 235);
+  color: white;
+  &:hover {
+    background-color: rgb(29 78 216);
+  }
+  &:focus {
+    ring-color: rgb(59 130 246);
+  }
+}
+
+@utility btn-secondary {
+  background-color: rgb(229 231 235);
+  color: rgb(31 41 55);
+  &:hover {
+    background-color: rgb(209 213 219);
+  }
+  &:focus {
+    ring-color: rgb(107 114 128);
+  }
+}
+
+@utility btn-success {
+  background-color: rgb(22 163 74);
+  color: white;
+  &:hover {
+    background-color: rgb(21 128 61);
+  }
+  &:focus {
+    ring-color: rgb(34 197 94);
+  }
+}
+
+@utility btn-danger {
+  background-color: rgb(220 38 38);
+  color: white;
+  &:hover {
+    background-color: rgb(185 28 28);
+  }
+  &:focus {
+    ring-color: rgb(239 68 68);
+  }
+}
+
+@utility btn-warning {
+  background-color: rgb(202 138 4);
+  color: white;
+  &:hover {
+    background-color: rgb(161 98 7);
+  }
+  &:focus {
+    ring-color: rgb(234 179 8);
+  }
+}
+
+@utility btn-sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+@utility btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Form elements */
+@utility form-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  outline: none;
+  &:focus {
+    ring: 2px;
+    ring-color: rgb(59 130 246);
+    border-color: rgb(59 130 246);
+  }
+}
+
+@utility form-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  background-color: white;
+  cursor: pointer;
+  outline: none;
+  &:focus {
+    ring: 2px;
+    ring-color: rgb(59 130 246);
+    border-color: rgb(59 130 246);
+  }
+}
+
+@utility form-textarea {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgb(209 213 219);
+  border-radius: 0.375rem;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  resize: vertical;
+  min-height: 100px;
+  outline: none;
+  &:focus {
+    ring: 2px;
+    ring-color: rgb(59 130 246);
+    border-color: rgb(59 130 246);
+  }
+}
+
+@utility form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(55 65 81);
+  margin-bottom: 0.25rem;
+}
+
+@utility form-error {
+  color: rgb(220 38 38);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+@utility form-group {
+  margin-bottom: 1rem;
+}
+
+/* Table styles */
+@utility table-container {
+  overflow-x: auto;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  ring: 1px;
+  ring-color: rgb(0 0 0 / 0.05);
+  border-radius: 0.5rem;
+}
+
+@utility table-base {
+  min-width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+@utility table-header {
+  background-color: rgb(249 250 251);
+}
+
+@utility table-header-cell {
+  padding: 0.75rem 1.5rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(107 114 128);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@utility table-body {
+  background-color: white;
+}
+
+@utility table-row {
+  transition: colors 0.15s;
+  &:hover {
+    background-color: rgb(249 250 251);
+  }
+}
+
+@utility table-cell {
+  padding: 1rem 1.5rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: rgb(17 24 39);
+}
+
+/* Badge/Status styles */
+@utility badge-base {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+@utility badge-success {
+  background-color: rgb(220 252 231);
+  color: rgb(22 101 52);
+}
+
+@utility badge-warning {
+  background-color: rgb(254 249 195);
+  color: rgb(133 77 14);
+}
+
+@utility badge-danger {
+  background-color: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+@utility badge-info {
+  background-color: rgb(219 234 254);
+  color: rgb(30 64 175);
+}
+
+@utility badge-gray {
+  background-color: rgb(243 244 246);
+  color: rgb(31 41 55);
+}
+
+/* Modal styles */
+@utility modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgb(107 114 128 / 0.75);
+  transition: opacity 0.2s;
+  z-index: 40;
+}
+
+@utility modal-container {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  overflow-y: auto;
+}
+
+@utility modal-content {
+  display: flex;
+  min-height: 100%;
+  align-items: end;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+  @media (min-width: 640px) {
+    align-items: center;
+    padding: 0;
+  }
+}
+
+@utility modal-panel {
+  position: relative;
+  transform: translateY(0);
+  overflow: hidden;
+  border-radius: 0.5rem;
+  background-color: white;
+  text-align: left;
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  transition: all 0.2s;
+  @media (min-width: 640px) {
+    width: 100%;
+    max-width: 32rem;
+  }
+}
+
+/* Utility classes */
+@utility text-currency {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  text-align: right;
+}
+
+@utility flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@utility flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@utility section-padding {
+  padding: 1.5rem 1rem;
+  @media (min-width: 640px) {
+    padding: 1.5rem;
+  }
+  @media (min-width: 1024px) {
+    padding: 1.5rem 2rem;
+  }
+}
+
+@utility page-header {
+  border-bottom: 1px solid rgb(229 231 235);
+  padding-bottom: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+@utility page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: rgb(17 24 39);
 }

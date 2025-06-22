@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import ConvectionForm from "../components/ConvectionForm.jsx";
+import ConvectionForm from "../components/convections/ConvectionForm.jsx";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import { FaArrowLeft } from "react-icons/fa6";
 
-const InventoryCreate = () => {
+const ConvectionCreatePage = () => {
   const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -121,4 +121,4 @@ const InventoryCreate = () => {
   );
 };
 
-export default InventoryCreate;
+export default ConvectionCreatePage;

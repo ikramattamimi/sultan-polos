@@ -1,10 +1,10 @@
 import {useLoaderData, useNavigate} from "react-router-dom";
-import CardConvection from "../components/CardConvection.jsx";
+import CardConvection from "../components/convections/CardConvection.jsx";
 import { FaPlus } from "react-icons/fa6";
 
-const Convection = () => {
+const ConvectionPage = () => {
 
-  const inventoryData = useLoaderData();
+  const { convections } = useLoaderData();
   const navigate = useNavigate();
 
   return (
@@ -22,8 +22,8 @@ const Convection = () => {
 
       <div className="me-10 flex gap-5 flex-wrap">
 
-        {inventoryData.map((item) => (
-          <CardConvection key={item.id} inventory={item} />
+        {convections.map((item) => (
+          <CardConvection key={item.id} convection={item} />
         ))}
 
       </div>
@@ -31,4 +31,4 @@ const Convection = () => {
   );
 };
 
-export default Convection;
+export default ConvectionPage;

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from "react-router-dom";
-import {formatPrice} from "../common.js";
+import {formatPrice} from "../../common.js";
 
 const CardConvection = ({convection : {id, name, category, purchase_price, stock}}) => {
   return (

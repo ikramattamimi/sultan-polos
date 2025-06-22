@@ -1,9 +1,10 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Input from "../Input.jsx";
+import masterDataService from "../../services/masterDataService.js";
 
 const ConvectionForm = ({ 
-  inventory, 
-  onInventoryChange, 
+  convection, 
+  onConvectionChange, 
   onSubmit, 
   onCancel, 
   onDelete,
@@ -11,10 +12,23 @@ const ConvectionForm = ({
   isDeleting = false,
   mode = "edit" // "edit", "create"
 }) => {
+
+  console.log(convection);
   
   const handleInputChange = (field, value) => {
-    onInventoryChange({ ...inventory, [field]: value });
+    onConvectionChange({ ...convection, [field]: value });
   };
+
+  const [colors, setColors] = useState([])
+
+  const getColors = async () => {
+    const data = await masterDataService.colors.getAll();
+    setColors(data || []);
+  }
+
+  useEffect(() => {
+    getColors();
+  }, [])
 
   return (
     <div className="mt-10 pe-10 w-full">
@@ -22,28 +36,28 @@ const ConvectionForm = ({
         <Input
           required
           placeholder="Nama Bahan"
-          value={inventory.name || ""}
+          value={convection.name || ""}
           onChange={(e) => handleInputChange("name", e.target.value)}
         />
 
-        <Input
-          required
-          placeholder="Kategori Bahan"
-          value={inventory.category || ""}
-          onChange={(e) => handleInputChange("category", e.target.value)}
-        />
+        {/*<Input*/}
+        {/*  required*/}
+        {/*  placeholder="Kategori Bahan"*/}
+        {/*  value={convection.category || ""}*/}
+        {/*  onChange={(e) => handleInputChange("category", e.target.value)}*/}
+        {/*/>*/}
 
-        <Input
-          required
-          placeholder="Tipe Bahan"
-          value={inventory.type || ""}
-          onChange={(e) => handleInputChange("type", e.target.value)}
-        />
+        {/*<Input*/}
+        {/*  required*/}
+        {/*  placeholder="Tipe Bahan"*/}
+        {/*  value={convection.type || ""}*/}
+        {/*  onChange={(e) => handleInputChange("type", e.target.value)}*/}
+        {/*/>*/}
 
         <Input
           required
           placeholder="Harga"
-          value={inventory.purchase_price || ""}
+          value={convection.purchase_price || ""}
           onChange={(e) => handleInputChange("purchase_price", e.target.value)}
           type="number"
         />
@@ -51,7 +65,7 @@ const ConvectionForm = ({
         <Input
           required
           placeholder="Stock"
-          value={inventory.stock || ""}
+          value={convection.stock || ""}
           onChange={(e) => handleInputChange("stock", e.target.value)}
           type="number"
         />
@@ -59,7 +73,7 @@ const ConvectionForm = ({
         <Input
           required
           placeholder="Buffer Stock"
-          value={inventory.buffer_stock || ""}
+          value={convection.buffer_stock || ""}
           onChange={(e) => handleInputChange("buffer_stock", e.target.value)}
           type="number"
         />
@@ -67,16 +81,30 @@ const ConvectionForm = ({
         <Input
           required
           placeholder="Unit"
-          value={inventory.unit || ""}
+          value={convection.unit || ""}
           onChange={(e) => handleInputChange("unit", e.target.value)}
         />
 
-        <Input
-          required
-          placeholder="Warna"
-          value={inventory.color || ""}
-          onChange={(e) => handleInputChange("color", e.target.value)}
-        />
+        <div className="my-4 flex flex-wrap items-center">
+
+          <label className='text-sm font-medium mb-2 inline-block w-full md:w-1/3 xl:w-1/6'>Warna</label>
+
+          <select
+            value={convection.color_id}
+            onChange={(e) => handleInputChange("color_id", e.target.value)}
+            // disabled={loading}
+            className="w-full md:w-2/3 xl:w-5/6 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+          >
+            <option value="">
+              Pilih Warna
+            </option>
+            {colors.map(color => (
+              <option key={color.id} value={color.id}>
+                {color.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="flex gap-3 justify-between mt-6">

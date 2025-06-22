@@ -3,6 +3,7 @@ import ConvectionForm from "../components/convections/ConvectionForm.jsx";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import { FaArrowLeft } from "react-icons/fa6";
+import convectionService from "../services/convectionService.js";
 
 const ConvectionDetailPage = () => {
   const navigate = useNavigate();
@@ -10,59 +11,58 @@ const ConvectionDetailPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { name, type, purchase_price, stock, buffer_stock, unit, color, id, category } = useLoaderData();
+  const { name, type, purchase_price, stock, buffer_stock, unit, color_id, id, category } = useLoaderData();
 
-  const [inventory, setInventory] = useState({
+  const [convection, setConvection] = useState({
     id,
     name,
     type,
     purchase_price,
     stock,
-    color,
+    color_id,
     buffer_stock,
     unit,
     category,
   });
 
-  const updateInventory = async () => {
+  console.log("convection", convection);
+
+  const updateConvection = async () => {
     setIsLoading(true);
     try {
-      await supabase
-        .from("inventories")
-        .update(inventory)
-        .eq("id", inventory.id);
+      await convectionService.update(convection.id, convection);
       
       alert("Convection berhasil diupdate");
     } catch (error) {
       console.error(error);
-      alert("Gagal mengupdate inventory");
+      alert("Gagal mengupdate convection");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const deleteInventory = async () => {
-    if (!window.confirm("Apakah anda yakin ingin menghapus inventory ini?")) return;
+  const deleteConvection = async () => {
+    if (!window.confirm("Apakah anda yakin ingin menghapus convection ini?")) return;
 
     setIsDeleting(true);
     try {
       await supabase
         .from("inventories")
         .delete()
-        .eq("id", inventory.id);
+        .eq("id", convection.id);
       
       alert("Convection berhasil dihapus");
-      navigate("/inventory");
+      navigate("/convection");
     } catch (error) {
       console.error(error);
-      alert("Gagal menghapus inventory");
+      alert("Gagal menghapus convection");
     } finally {
       setIsDeleting(false);
     }
   };
 
   const handleCancel = () => {
-    navigate('/inventory');
+    navigate('/convection');
   };
 
   return (
@@ -78,11 +78,11 @@ const ConvectionDetailPage = () => {
       </div>
 
       <ConvectionForm
-        inventory={inventory}
-        onInventoryChange={setInventory}
-        onSubmit={updateInventory}
+        convection={convection}
+        onConvectionChange={setConvection}
+        onSubmit={updateConvection}
         onCancel={handleCancel}
-        onDelete={deleteInventory}
+        onDelete={deleteConvection}
         isLoading={isLoading}
         isDeleting={isDeleting}
         mode="edit"

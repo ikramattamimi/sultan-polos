@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, X, Package, RefreshCw } from 'lucide-react';
+import React, {useEffect, useState} from 'react';
+import {X} from 'lucide-react';
 
 // Components
-import { ProductCard, AddProductModal, EditProductModal } from '../components/products';
-import { EmptyState } from '../components/common';
+import {AddProductModal, EditProductModal, ProductCard, ProductManagementHeader} from '../components/products';
+import {EmptyState} from '../components/common';
 
 // Services
 import productService from '../services/productService';
-import { productVariantService } from '../services/productVariantService';
+import {productVariantService} from '../services/productVariantService';
 
 // Main Component
 const ProductManagementPage = () => {
@@ -29,6 +29,7 @@ const ProductManagementPage = () => {
     try {
       setLoading(true);
       setError(null);
+
       const productsData = await productService.getAll(true); // Include variants
       setProducts(productsData || []);
     } catch (err) {
@@ -53,7 +54,7 @@ const ProductManagementPage = () => {
   const handleAddProduct = async (productData) => {
     try {
       setLoading(true);
-      
+
       // Create product in Supabase
       const newProduct = await productService.create({
         name: productData.name,
@@ -65,10 +66,10 @@ const ProductManagementPage = () => {
 
       // Refresh products list to get updated data
       await fetchProducts();
-      
+
       // Show success message (you can add toast notification here)
       console.log('Product added successfully:', newProduct);
-      
+
     } catch (err) {
       console.error('Error adding product:', err);
       setError('Gagal menambahkan produk. Silakan coba lagi.');
@@ -95,10 +96,10 @@ const ProductManagementPage = () => {
 
       // Refresh products list to get updated data
       await fetchProducts();
-      
+
       // Show success message (you can add toast notification here)
       console.log('Variant added successfully:', newVariant);
-      
+
     } catch (err) {
       console.error('Error adding variant:', err);
       setError('Gagal menambahkan varian. Silakan coba lagi.');
@@ -110,18 +111,18 @@ const ProductManagementPage = () => {
   const handleUpdateProduct = async (id, productData) => {
     try {
       setLoading(true);
-      
+
       console.log('Product data:', productData);
 
       // Update product in Supabase
       await productService.update(id, productData);
-      
+
       // Refresh products list to get updated data
       await fetchProducts();
-      
+
       // Show success message (you can add toast notification here)
       console.log('Product updated successfully');
-      
+
     } catch (err) {
       console.error('Error updating product:', err);
       setError('Gagal memperbarui produk. Silakan coba lagi.');
@@ -151,13 +152,13 @@ const ProductManagementPage = () => {
     try {
       setLoading(true);
       await productService.delete(id);
-      
+
       // Remove product from local state
       setProducts(products.filter(p => p.id !== id));
-      
+
       // Show success message
       console.log('Product deleted successfully');
-      
+
     } catch (err) {
       console.error('Error deleting product:', err);
       setError('Gagal menghapus produk. Silakan coba lagi.');
@@ -174,7 +175,7 @@ const ProductManagementPage = () => {
     try {
       setLoading(true);
       await productVariantService.delete(variantId);
-      
+
       // Update local state
       setProducts(products.map(product => {
         if (product.id === productId) {
@@ -187,7 +188,7 @@ const ProductManagementPage = () => {
       }));
 
       console.log('Variant deleted successfully');
-      
+
     } catch (err) {
       console.error('Error deleting variant:', err);
       setError('Gagal menghapus varian. Silakan coba lagi.');
@@ -199,19 +200,19 @@ const ProductManagementPage = () => {
   const handleUpdateStock = async (variantId, newStock) => {
     try {
       await productVariantService.updateStock(variantId, newStock);
-      
+
       // Update local state
       setProducts(products.map(product => ({
         ...product,
-        product_variants: (product.product_variants || []).map(variant => 
-          variant.id === variantId 
+        product_variants: (product.product_variants || []).map(variant =>
+          variant.id === variantId
             ? { ...variant, stock: newStock }
             : variant
         )
       })));
 
       console.log('Stock updated successfully');
-      
+
     } catch (err) {
       console.error('Error updating stock:', err);
       setError('Gagal mengupdate stok. Silakan coba lagi.');
@@ -231,7 +232,7 @@ const ProductManagementPage = () => {
 
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600">Memuat data produk...</p>
@@ -241,48 +242,25 @@ const ProductManagementPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <Package className="w-8 h-8 text-blue-600" />
-                Manajemen Produk
-              </h1>
-              <p className="text-gray-600 mt-2">Kelola produk dan varian dengan mudah</p>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={handleRefresh}
-                disabled={refreshing}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-3 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-                Refresh
-              </button>
-              <button
-                onClick={() => setShowAddProduct(true)}
-                disabled={loading}
-                className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-6 py-3 rounded-lg flex items-center gap-2 transition-colors"
-              >
-                <Plus className="w-5 h-5" />
-                Tambah Produk
-              </button>
-            </div>
-          </div>
-        </div>
+        <ProductManagementHeader
+          onClickRefresh={handleRefresh}
+          disabledRefresh={refreshing}
+          onClickAdd={() => setShowAddProduct(true)}
+          disabledAdd={loading}
+        />
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+          <div
+            className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
             <span>{error}</span>
             <button
               onClick={clearError}
               className="text-red-500 hover:text-red-700"
             >
-              <X className="w-5 h-5" />
+              <X className="w-5 h-5"/>
             </button>
           </div>
         )}
@@ -293,7 +271,7 @@ const ProductManagementPage = () => {
           onClose={() => setShowAddProduct(false)}
           onAdd={handleAddProduct}
         />
-        
+
         <EditProductModal
           show={showEditProduct}
           onClose={() => setShowEditProduct(false)}
@@ -321,7 +299,7 @@ const ProductManagementPage = () => {
             ))}
           </div>
         ) : (
-          <EmptyState onAddProduct={() => setShowAddProduct(true)} />
+          <EmptyState onAddProduct={() => setShowAddProduct(true)}/>
         )}
 
         {/* Loading overlay for actions */}

@@ -27,9 +27,7 @@ export const convectionService = {
       .from('convections')
       .select(`
         *,
-        categories(id, name),
-        colors(id, name, hex_code),
-        types(id, name)
+        colors(id, name, hex_code)
       `)
       .eq('id', id)
       .single()
@@ -45,9 +43,7 @@ export const convectionService = {
       .insert([convectionData])
       .select(`
         *,
-        categories(id, name),
-        colors(id, name, hex_code),
-        types(id, name)
+        colors(id, name, hex_code)
       `)
       .single()
     
@@ -63,9 +59,7 @@ export const convectionService = {
       .eq('id', id)
       .select(`
         *,
-        categories(id, name),
-        colors(id, name, hex_code),
-        types(id, name)
+        colors(id, name, hex_code)
       `)
       .single()
     
@@ -79,9 +73,7 @@ export const convectionService = {
       .from('convections')
       .select(`
         *,
-        categories(id, name),
-        colors(id, name, hex_code),
-        types(id, name)
+        colors(id, name, hex_code)
       `)
       .lt('stock', supabase.raw('buffer_stock'))
       .order('stock', { ascending: true })

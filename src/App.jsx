@@ -32,7 +32,7 @@ function App() {
       <>
         <Route path="/" element={<AdminLayout />}>
 
-          <Route index element={<AdminHome />} loader={dashboardLoader} />
+          <Route index element={<AdminHome />} />
           <Route path="dashboard" id="dashboard" element={<AdminHome />} loader={dashboardLoader} />
 
           {/* Inventory Routes */}

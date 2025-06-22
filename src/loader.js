@@ -174,7 +174,7 @@ export const convectionLoader = async ({ params }) => {
     }
 
     const convection = await convectionService.getById(id)
-    return { convection }
+    return convection
   } catch (error) {
     if (error.code === 'PGRST116') {
       throw new Response("Convection not found", { status: 404 })

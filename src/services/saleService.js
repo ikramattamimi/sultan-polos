@@ -202,6 +202,8 @@ export const saleService = {
       throw new Error(`Gagal menghapus sale: ${error.message}`)
     }
   },
+
+
 }
 
 export default saleService;

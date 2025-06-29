@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {X} from 'lucide-react';
+import {X, Search, Filter} from 'lucide-react';
 
 // Components
-import {AddProductModal, EditProductModal, ProductCard, ProductManagementHeader} from '../components/products';
+import {ProductModal, EditProductModal, ProductCard, ProductManagementHeader} from '../components/products';
 import {EmptyState} from '../components/common';
 
 // Services
@@ -19,6 +19,59 @@ const ProductManagementPage = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showEditProduct, setShowEditProduct] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // State untuk tabs dan search
+  const [activeTab, setActiveTab] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchFilter, setShowSearchFilter] = useState(false);
+
+  // Function untuk mengelompokkan produk berdasarkan tipe
+  const groupProductsByType = (products) => {
+    const grouped = products.reduce((acc, product) => {
+      const typeName = product.types?.name || 'Tanpa Tipe';
+      if (!acc[typeName]) {
+        acc[typeName] = [];
+      }
+      acc[typeName].push(product);
+      return acc;
+    }, {});
+    return grouped;
+  };
+
+  // Function untuk filter produk berdasarkan search query
+  const filterProductsBySearch = (products, query) => {
+    if (!query.trim()) return products;
+
+    const lowercaseQuery = query.toLowerCase();
+    return products.filter(product =>
+      product.name.toLowerCase().includes(lowercaseQuery) ||
+      product.description?.toLowerCase().includes(lowercaseQuery) ||
+      product.categories?.name.toLowerCase().includes(lowercaseQuery) ||
+      product.types?.name.toLowerCase().includes(lowercaseQuery)
+    );
+  };
+
+  // Function untuk mendapatkan produk berdasarkan tab aktif dan search
+  const getFilteredProducts = () => {
+    let filtered = products;
+
+    // Filter berdasarkan search query terlebih dahulu
+    filtered = filterProductsBySearch(filtered, searchQuery);
+
+    // Kemudian filter berdasarkan tab
+    if (activeTab === 'all') {
+      return filtered;
+    }
+
+    const grouped = groupProductsByType(filtered);
+    return grouped[activeTab] || [];
+  };
+
+  // Function untuk mendapatkan grouped products berdasarkan search
+  const getSearchedGroupedProducts = () => {
+    const searchFiltered = filterProductsBySearch(products, searchQuery);
+    return groupProductsByType(searchFiltered);
+  };
 
   // Fetch products on component mount
   useEffect(() => {
@@ -230,6 +283,11 @@ const ProductManagementPage = () => {
     setError(null);
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+    setActiveTab('all');
+  };
+
   if (loading && products.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-800 flex items-center justify-center">
@@ -240,6 +298,11 @@ const ProductManagementPage = () => {
       </div>
     );
   }
+
+  // Get grouped products dan filtered products berdasarkan search
+  const searchedGroupedProducts = getSearchedGroupedProducts();
+  const filteredProducts = getFilteredProducts();
+  const totalSearchResults = filterProductsBySearch(products, searchQuery).length;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
@@ -265,38 +328,213 @@ const ProductManagementPage = () => {
           </div>
         )}
 
+        {/* Search Bar */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 p-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Cari produk berdasarkan nama, deskripsi, kategori, atau tipe..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+              {searchQuery && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowSearchFilter(!showSearchFilter)}
+              className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <Filter className="w-5 h-5 text-gray-400" />
+              <span className="text-gray-600">Filter</span>
+            </button>
+          </div>
+
+          {/* Search Results Info */}
+          {searchQuery && (
+            <div className="mt-3 flex items-center justify-between text-sm">
+              <span className="text-gray-600">
+                Menampilkan {totalSearchResults} hasil untuk "{searchQuery}"
+              </span>
+              {totalSearchResults > 0 && (
+                <button
+                  onClick={clearSearch}
+                  className="text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Bersihkan pencarian
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Add Product Modal */}
-        <AddProductModal
+        <ProductModal
           show={showAddProduct}
           onClose={() => setShowAddProduct(false)}
           onAdd={handleAddProduct}
+          mode="add"
         />
 
-        <EditProductModal
+        <ProductModal
           show={showEditProduct}
           onClose={() => setShowEditProduct(false)}
           onUpdate={handleUpdateProduct}
           productData={selectedProduct}
+          mode="edit"
         />
 
-        {/* Products List */}
+        {/* Products List dengan Tabs */}
         {products.length > 0 ? (
-          <div className="space-y-6">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onDelete={handleDeleteProduct}
-                onToggleVariants={toggleVariants}
-                showVariants={showVariants[product.id]}
-                onAddVariant={handleAddVariant}
-                onDeleteVariant={handleDeleteVariant}
-                onUpdateStock={handleUpdateStock}
-                onUpdateProduct={handleUpdateProduct}
-                onEditProduct={handleEditProduct}
-                loading={loading}
-              />
-            ))}
+          <div>
+            {/* Tabs Navigation */}
+            <div className="bg-white rounded-lg shadow-sm mb-6 p-1">
+              <div className="flex gap-1 overflow-x-auto">
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`flex-shrink-0 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 relative ${
+                    activeTab === 'all'
+                      ? 'bg-blue-500 text-white shadow-lg transform scale-105'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <span className="flex items-center gap-3">
+                    Semua Produk
+                    <span className={`inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold shadow-md border-2 ${
+                      activeTab === 'all'
+                        ? 'bg-white text-blue-600 border-blue-200 shadow-blue-200/50'
+                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 shadow-blue-500/30'
+                    }`}>
+                      {totalSearchResults}
+                    </span>
+                  </span>
+                </button>
+
+                {Object.entries(searchedGroupedProducts).map(([typeName, typeProducts]) => (
+                  <button
+                    key={typeName}
+                    onClick={() => setActiveTab(typeName)}
+                    className={`flex-shrink-0 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 relative ${
+                      activeTab === typeName
+                        ? 'bg-blue-500 text-white shadow-lg transform scale-105'
+                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      {typeName}
+                      <span className={`inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold shadow-md border-2 ${
+                        activeTab === typeName
+                          ? 'bg-white text-blue-600 border-blue-200 shadow-blue-200/50'
+                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 shadow-blue-500/30'
+                      }`}>
+                        {typeProducts.length}
+                      </span>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Tab Content */}
+            <div className="transition-all duration-300">
+              {/* Header untuk tab aktif dengan search info */}
+              {(activeTab !== 'all' || searchQuery) && (
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6 border border-blue-100">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-800">
+                        {activeTab === 'all'
+                          ? `Hasil Pencarian "${searchQuery}"`
+                          : `Produk Tipe ${activeTab}${searchQuery ? ` - "${searchQuery}"` : ''}`
+                        }
+                      </h2>
+                      <p className="text-gray-600 mt-1">
+                        Menampilkan {filteredProducts.length} produk
+                        {activeTab !== 'all' ? ` dari tipe ${activeTab}` : ''}
+                        {searchQuery ? ` yang cocok dengan pencarian` : ''}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg border-2 border-blue-400">
+                        {filteredProducts.length} produk
+                      </div>
+                      {searchQuery && (
+                        <button
+                          onClick={clearSearch}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
+                        >
+                          <X className="w-4 h-4" />
+                          Bersihkan
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Products Display */}
+              {filteredProducts.length > 0 ? (
+                <div className="space-y-6">
+                  {filteredProducts.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      onDelete={handleDeleteProduct}
+                      onToggleVariants={toggleVariants}
+                      showVariants={showVariants[product.id]}
+                      onAddVariant={handleAddVariant}
+                      onDeleteVariant={handleDeleteVariant}
+                      onUpdateStock={handleUpdateStock}
+                      onUpdateProduct={handleUpdateProduct}
+                      onEditProduct={handleEditProduct}
+                      loading={loading}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 bg-white rounded-lg shadow-sm">
+                  <div className="text-gray-400 mb-4">
+                    <Search className="w-16 h-16 mx-auto mb-2" />
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    {searchQuery
+                      ? `Tidak ada produk yang cocok dengan "${searchQuery}"`
+                      : `Tidak ada produk tipe ${activeTab}`
+                    }
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchQuery
+                      ? 'Coba gunakan kata kunci yang berbeda atau bersihkan pencarian'
+                      : `Belum ada produk yang terdaftar untuk tipe ${activeTab}`
+                    }
+                  </p>
+                  <div className="flex justify-center gap-3">
+                    {searchQuery && (
+                      <button
+                        onClick={clearSearch}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
+                      >
+                        Bersihkan Pencarian
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowAddProduct(true)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                      Tambah Produk Baru
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <EmptyState onAddProduct={() => setShowAddProduct(true)}/>

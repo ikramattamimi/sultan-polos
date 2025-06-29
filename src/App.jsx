@@ -25,6 +25,7 @@ import ProductManagementPage from "./pages/ProductManagementPage.jsx";
 import ConvectionCreatePage from "./pages/ConvectionCreatePage.jsx";
 import SalesPage from "./pages/SalesPage.jsx";
 import SalesCreatePage from "./pages/SalesCreatePage.jsx";
+import FormComponentsDemo from "./pages/FormComponentsDemo.jsx";
 
 function App() {
   const router = createBrowserRouter(
@@ -76,6 +77,11 @@ function App() {
             element={<Report />} 
             loader={salesReportLoader}
           />
+
+          {/* Components */}
+          <Route path="components">
+            <Route path="forms" element={<FormComponentsDemo />} />
+          </Route>
         </Route>
 
         <Route path="*" element={<NotFoundPage />} />

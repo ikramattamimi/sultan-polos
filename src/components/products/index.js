@@ -1,6 +1,7 @@
-export { default as AddProductModal } from './AddProductModal.jsx'
+export { default as ProductModal } from './ProductModal.jsx'
 export { default as EditProductModal } from './EditProductModal.jsx'
 export { default as AddVariantModal } from './AddVariantModal.jsx'
+export { default as VariantForm } from './VariantForm.jsx'
 export { default as ProductCard } from './ProductCard.jsx'
 export { default as VariantSection } from './VariantSection.jsx'
 export { default as VariantList } from './VariantList.jsx'

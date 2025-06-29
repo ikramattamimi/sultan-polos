@@ -1,6 +1,6 @@
 import React from 'react';
-import { Plus, Edit2, Trash2, Save, X, Package } from 'lucide-react';
-import AddVariantForm from './AddVarriantForm.jsx';
+import {X, Package} from 'lucide-react';
+import {VariantForm} from './index.js';
 
 // Modal Component untuk Add Variant
 const AddVariantModal = ({ isOpen, onClose, productId, onVariantAdded }) => {
@@ -45,7 +45,7 @@ const AddVariantModal = ({ isOpen, onClose, productId, onVariantAdded }) => {
 
         {/* Modal Body */}
         <div className="px-6 py-4">
-          <AddVariantForm 
+          <VariantForm
             productId={productId} 
             onAdd={handleVariantAdd}
           />

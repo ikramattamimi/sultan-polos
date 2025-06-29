@@ -26,6 +26,14 @@ const Sidebar = () => {
         </li>
         <li><NavLink to="/convection">Convection</NavLink></li>
         <li><NavLink to="/report">Report</NavLink></li>
+        <DropdownMenu
+          title="Components Docs"
+          routes={['components']}
+        >
+          <ul>
+            <li><NavLink to="components/forms">Forms</NavLink></li>
+          </ul>
+        </DropdownMenu>
       </ul>
 
       <div className="fixed bottom-5 left-5">

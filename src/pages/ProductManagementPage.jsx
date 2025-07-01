@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from 'react';
-import {X, Search, Filter} from 'lucide-react';
+import {Search, X} from 'lucide-react';
 
 // Components
-import {ProductModal, EditProductModal, ProductCard, ProductManagementHeader} from '../components/products';
+import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch} from '../components/products';
 import {EmptyState} from '../components/common';
 
 // Services
@@ -27,7 +27,7 @@ const ProductManagementPage = () => {
 
   // Function untuk mengelompokkan produk berdasarkan tipe
   const groupProductsByType = (products) => {
-    const grouped = products.reduce((acc, product) => {
+    return products.reduce((acc, product) => {
       const typeName = product.types?.name || 'Tanpa Tipe';
       if (!acc[typeName]) {
         acc[typeName] = [];
@@ -35,7 +35,6 @@ const ProductManagementPage = () => {
       acc[typeName].push(product);
       return acc;
     }, {});
-    return grouped;
   };
 
   // Function untuk filter produk berdasarkan search query
@@ -283,7 +282,11 @@ const ProductManagementPage = () => {
     setError(null);
   };
 
-  const clearSearch = () => {
+  const handleSearchChange = (query) => {
+    setSearchQuery(query);
+  };
+
+  const handleClearSearch = () => {
     setSearchQuery('');
     setActiveTab('all');
   };
@@ -328,53 +331,16 @@ const ProductManagementPage = () => {
           </div>
         )}
 
-        {/* Search Bar */}
-        <div className="bg-white rounded-lg shadow-sm mb-6 p-4">
-          <div className="flex items-center gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Cari produk berdasarkan nama, deskripsi, kategori, atau tipe..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              />
-              {searchQuery && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
-            </div>
-            <button
-              onClick={() => setShowSearchFilter(!showSearchFilter)}
-              className="flex items-center gap-2 px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <Filter className="w-5 h-5 text-gray-400" />
-              <span className="text-gray-600">Filter</span>
-            </button>
-          </div>
-
-          {/* Search Results Info */}
-          {searchQuery && (
-            <div className="mt-3 flex items-center justify-between text-sm">
-              <span className="text-gray-600">
-                Menampilkan {totalSearchResults} hasil untuk "{searchQuery}"
-              </span>
-              {totalSearchResults > 0 && (
-                <button
-                  onClick={clearSearch}
-                  className="text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  Bersihkan pencarian
-                </button>
-              )}
-            </div>
-          )}
-        </div>
+        {/* Product Search Component */}
+        <ProductSearch
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onClearSearch={handleClearSearch}
+          totalResults={totalSearchResults}
+          showFilter={true}
+          onToggleFilter={() => setShowSearchFilter(!showSearchFilter)}
+          className="mb-6"
+        />
 
         {/* Add Product Modal */}
         <ProductModal
@@ -468,7 +434,7 @@ const ProductManagementPage = () => {
                       </div>
                       {searchQuery && (
                         <button
-                          onClick={clearSearch}
+                          onClick={handleClearSearch}
                           className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
                         >
                           <X className="w-4 h-4" />
@@ -519,7 +485,7 @@ const ProductManagementPage = () => {
                   <div className="flex justify-center gap-3">
                     {searchQuery && (
                       <button
-                        onClick={clearSearch}
+                        onClick={handleClearSearch}
                         className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg transition-colors"
                       >
                         Bersihkan Pencarian

@@ -1,10 +1,10 @@
 import { supabase } from "../supabaseClient"
-import productService from "./productService"
+import ProductService from "./ProductService.js"
 
-export const cottonCombodService = {
+export const CottonCombedService = {
   // Ambil semua produk Cotton Combod 30s
   async getAllCottonCombod30s() {
-    return await productService.getByTypeName('Cotton Combod 30s')
+    return await ProductService.getByTypeName('Cotton Combod 30s')
   },
 
   // Ambil product variants Cotton Combod 30s dengan stock info
@@ -84,4 +84,4 @@ export const cottonCombodService = {
   }
 }
 
-export default cottonCombodService;
+export default CottonCombedService;

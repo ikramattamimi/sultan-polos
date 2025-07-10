@@ -4,7 +4,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const productVariantService = {
+export const ProductVariantService = {
   // Get all variants for a product
   async getByProductId(productId) {
     const { data, error } = await supabase
@@ -122,4 +122,4 @@ export const productVariantService = {
   }
 }
 
-export default productVariantService;
+export default ProductVariantService;

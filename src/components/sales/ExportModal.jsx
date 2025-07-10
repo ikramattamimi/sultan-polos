@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import utilityService from "../../services/UtilityServices.js";
+import UtilityService from "../../services/UtilityServices.js";
 import {Download, X} from "lucide-react";
 import {jsPDF} from 'jspdf';
 import {autoTable} from 'jspdf-autotable';
@@ -208,12 +208,12 @@ const ExportModal = ({ sales, onClose }) => {
             <tr>
               <td class="summary-label">Periode:</td>
               <td>${dateRange.startDate && dateRange.endDate ?
-      `${utilityService.formatDate(dateRange.startDate)} - ${utilityService.formatDate(dateRange.endDate)}` :
+      `${UtilityService.formatDate(dateRange.startDate)} - ${UtilityService.formatDate(dateRange.endDate)}` :
       'Semua Data'}</td>
             </tr>
             <tr>
               <td class="summary-label">Tanggal Export:</td>
-              <td>${utilityService.formatDate(new Date().toISOString())}</td>
+              <td>${UtilityService.formatDate(new Date().toISOString())}</td>
             </tr>
             <tr><td colspan="2"></td></tr>
             <tr>
@@ -255,7 +255,7 @@ const ExportModal = ({ sales, onClose }) => {
                 <tr class="${rowClass}">
                   <td style="text-align: center; mso-number-format: '0';">${index + 1}</td>
                   <td style="mso-number-format: '@';">${sale.order_number || ''}</td>
-                  <td style="mso-number-format: '@';">${utilityService.formatDate(sale.sale_date)}</td>
+                  <td style="mso-number-format: '@';">${UtilityService.formatDate(sale.sale_date)}</td>
                   <td style="mso-number-format: '@';">${sale.customer || 'Customer Umum'}</td>
                   <td style="text-align: right; mso-number-format: '#,##0';">${sale.total_price || 0}</td>
                   <td style="text-align: center; mso-number-format: '@';">Selesai</td>
@@ -412,11 +412,11 @@ const ExportModal = ({ sales, onClose }) => {
               item.product_variants?.products?.categories?.name || '',
               item.product_variants?.sizes?.name || '',
               item.quantity || 0,
-              utilityService.formatCurrency(item.unit_price || 0),
+              UtilityService.formatCurrency(item.unit_price || 0),
               item.is_printed ? 'Ya' : 'Tidak',
               item.is_printed && item.print_types ? item.print_types.name : '',
-              utilityService.formatCurrency(printPrice),
-              utilityService.formatCurrency(totalItemPrice)
+              UtilityService.formatCurrency(printPrice),
+              UtilityService.formatCurrency(totalItemPrice)
             ]);
           });
         }
@@ -452,12 +452,12 @@ const ExportModal = ({ sales, onClose }) => {
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(...colors.text);
       const periodText = dateRange.startDate && dateRange.endDate ?
-        `Periode: ${utilityService.formatDate(dateRange.startDate)} - ${utilityService.formatDate(dateRange.endDate)}` :
+        `Periode: ${UtilityService.formatDate(dateRange.startDate)} - ${UtilityService.formatDate(dateRange.endDate)}` :
         'Periode: Semua Data';
       doc.text(periodText, 20, currentY);
       currentY += 6;
 
-      doc.text(`Tanggal Export: ${utilityService.formatDate(new Date().toISOString())}`, 20, currentY);
+      doc.text(`Tanggal Export: ${UtilityService.formatDate(new Date().toISOString())}`, 20, currentY);
       currentY += 15;
 
       // === RINGKASAN TABLE ===
@@ -466,8 +466,8 @@ const ExportModal = ({ sales, onClose }) => {
         head: [['', 'RINGKASAN']],
         body: [
           ['Total Transaksi', data.length.toString()],
-          ['Total Revenue', utilityService.formatCurrency(totalRevenue)],
-          ['Rata-rata per Transaksi', utilityService.formatCurrency(Math.round(avgTransaction))]
+          ['Total Revenue', UtilityService.formatCurrency(totalRevenue)],
+          ['Rata-rata per Transaksi', UtilityService.formatCurrency(Math.round(avgTransaction))]
         ],
         headStyles: {
           fillColor: colors.header,
@@ -493,9 +493,9 @@ const ExportModal = ({ sales, onClose }) => {
       const salesData = data.map((sale, index) => [
         index + 1,
         sale.order_number || '',
-        utilityService.formatDate(sale.sale_date),
+        UtilityService.formatDate(sale.sale_date),
         sale.customer || 'Customer Umum',
-        utilityService.formatCurrency(sale.total_price || 0),
+        UtilityService.formatCurrency(sale.total_price || 0),
         'Selesai',
         sale.sale_items?.length || 0
       ]);

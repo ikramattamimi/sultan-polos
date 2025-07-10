@@ -2,7 +2,7 @@
 // ===========================================
 // UTILITY FUNCTIONS
 // ===========================================
-export const utilityService = {
+export const UtilityService = {
   // Generate order number
   generateOrderNumber() {
     const now = new Date()
@@ -89,4 +89,4 @@ export const utilityService = {
   }
 }
 
-export default utilityService
+export default UtilityService

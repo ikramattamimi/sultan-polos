@@ -3,7 +3,7 @@ import ConvectionForm from "../components/convections/ConvectionForm.jsx";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { supabase } from "../supabaseClient.js";
 import { FaArrowLeft } from "react-icons/fa6";
-import convectionService from "../services/convectionService.js";
+import {ConvectionService} from "../services/ConvectionService.js";
 
 const ConvectionDetailPage = () => {
   const navigate = useNavigate();
@@ -30,7 +30,7 @@ const ConvectionDetailPage = () => {
   const updateConvection = async () => {
     setIsLoading(true);
     try {
-      await convectionService.update(convection.id, convection);
+      await ConvectionService.update(convection.id, convection);
       
       alert("Convection berhasil diupdate");
     } catch (error) {

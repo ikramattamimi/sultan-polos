@@ -5,7 +5,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const productService = {
+export const ProductService = {
   // Get all products with category info
   async getAll(includeVariants = false) {
     let query = supabase
@@ -218,4 +218,4 @@ export const productService = {
   }
 }
 
-export default productService;
+export default ProductService;

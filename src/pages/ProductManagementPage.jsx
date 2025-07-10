@@ -6,8 +6,8 @@ import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch} from 
 import {EmptyState} from '../components/common';
 
 // Services
-import productService from '../services/productService';
-import {productVariantService} from '../services/productVariantService';
+import ProductService from '../services/ProductService.js';
+import {ProductVariantService} from '../services/ProductVariantService.js';
 
 // Main Component
 const ProductManagementPage = () => {
@@ -82,7 +82,7 @@ const ProductManagementPage = () => {
       setLoading(true);
       setError(null);
 
-      const productsData = await productService.getAll(true); // Include variants
+      const productsData = await ProductService.getAll(true); // Include variants
       setProducts(productsData || []);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -108,7 +108,7 @@ const ProductManagementPage = () => {
       setLoading(true);
 
       // Create product in Supabase
-      const newProduct = await productService.create({
+      const newProduct = await ProductService.create({
         name: productData.name,
         category_id: productData.category, // assuming category is the ID
         type_id: productData.type, // assuming type is the ID
@@ -135,7 +135,7 @@ const ProductManagementPage = () => {
       setLoading(true);
       console.log('Variant data:', variantData);
       // Create variant in Supabase
-      const newVariant = await productVariantService.create({
+      const newVariant = await ProductVariantService.create({
         product_id: productId,
         selling_price: variantData.selling_price,
         stock: variantData.stock,
@@ -167,7 +167,7 @@ const ProductManagementPage = () => {
       console.log('Product data:', productData);
 
       // Update product in Supabase
-      await productService.update(id, productData);
+      await ProductService.update(id, productData);
 
       // Refresh products list to get updated data
       await fetchProducts();
@@ -203,7 +203,7 @@ const ProductManagementPage = () => {
 
     try {
       setLoading(true);
-      await productService.delete(id);
+      await ProductService.delete(id);
 
       // Remove product from local state
       setProducts(products.filter(p => p.id !== id));
@@ -226,7 +226,7 @@ const ProductManagementPage = () => {
 
     try {
       setLoading(true);
-      await productVariantService.delete(variantId);
+      await ProductVariantService.delete(variantId);
 
       // Update local state
       setProducts(products.map(product => {
@@ -251,7 +251,7 @@ const ProductManagementPage = () => {
 
   const handleUpdateStock = async (variantId, newStock) => {
     try {
-      await productVariantService.updateStock(variantId, newStock);
+      await ProductVariantService.updateStock(variantId, newStock);
 
       // Update local state
       setProducts(products.map(product => ({

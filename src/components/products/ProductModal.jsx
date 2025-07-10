@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Save, X } from 'lucide-react';
-import masterDataService from '../../services/masterDataService.js';
+import MasterDataService from '../../services/MasterDataService.js';
 import { Input, Select, NumberInput, TextArea } from '../ui/forms';
-import { utilityService } from '../../services/utilityServices.js';
+import { UtilityService } from '../../services/UtilityServices.js';
 
 // Unified Product Modal - handles both Add and Edit
 const ProductModal = ({
@@ -64,8 +64,8 @@ const ProductModal = ({
 
     try {
       const [categoriesData, typesData] = await Promise.all([
-        masterDataService.categories.getAll(),
-        masterDataService.types.getAll()
+        MasterDataService.categories.getAll(),
+        MasterDataService.types.getAll()
       ]);
 
       setCategories(categoriesData || []);
@@ -190,8 +190,8 @@ const ProductModal = ({
           <Input
             type="text"
             placeholder="Harga Dasar"
-            value={utilityService.formatNumber(product.basePrice)}
-            onChange={(e) => utilityService.handlePriceInputChange(e, (value) => setProduct({...product, basePrice: value}))}
+            value={UtilityService.formatNumber(product.basePrice)}
+            onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setProduct({...product, basePrice: value}))}
             disabled={loading}
             label="Harga Dasar"
           />

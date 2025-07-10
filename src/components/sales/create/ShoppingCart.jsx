@@ -1,5 +1,5 @@
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
-import utilityService from "../../../services/utilityServices.js";
+import UtilityService from "../../../services/UtilityServices.js";
 
 // ShoppingCartComponent
 const ShoppingCartComponent = ({ 
@@ -57,15 +57,15 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
         <p className="text-sm text-gray-600">{item.variant_details}</p>
         <p className="text-xs text-gray-500">
             <span>Stok: {item.variant.stock}</span>
-            <span> | Base: {utilityService.formatCurrency(item.unit_price)}</span>
+            <span> | Base: {UtilityService.formatCurrency(item.unit_price)}</span>
 
             {item.is_printed && (
-                <span> | Print ({item.print_type.name}): {utilityService.formatCurrency(item.print_price)}</span>
+                <span> | Print ({item.print_type.name}): {UtilityService.formatCurrency(item.print_price)}</span>
             )}
         </p>
       <div className="text-sm text-blue-600">
-        <p>Base: {utilityService.formatCurrency(item.unit_price + item.print_price)}</p>
-        <p>Aktual: {utilityService.formatCurrency(item.actual_price)}</p>
+        <p>Base: {UtilityService.formatCurrency(item.unit_price + item.print_price)}</p>
+        <p>Aktual: {UtilityService.formatCurrency(item.actual_price)}</p>
       </div>
       </div>
       <button
@@ -86,7 +86,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
         disabled={submitting}
       />
       <span className="font-semibold text-green-600">
-        {utilityService.formatCurrency(item.total_actual)}
+        {UtilityService.formatCurrency(item.total_actual)}
       </span>
     </div>
   </div>
@@ -121,7 +121,7 @@ const CartSummary = ({ totalPrice, onSubmitOrder, submitting, hasItems }) => (
       <div className="flex justify-between items-center text-xl font-bold">
         <span>Total:</span>
         <span className="text-green-600">
-          {utilityService.formatCurrency(totalPrice)}
+          {UtilityService.formatCurrency(totalPrice)}
         </span>
       </div>
     </div>

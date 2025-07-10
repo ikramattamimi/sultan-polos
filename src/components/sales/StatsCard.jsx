@@ -2,7 +2,7 @@
 // StatsCard Component
 import {Filter} from "lucide-react";
 import React from "react";
-import utilityService from "../../services/UtilityServices";
+import UtilityService from "../../services/UtilityServices.js";
 
 const StatsCard = ({ title, value, icon: Icon, color, format }) => {
   const colorClasses = {
@@ -14,7 +14,7 @@ const StatsCard = ({ title, value, icon: Icon, color, format }) => {
 
   const formatValue = (val) => {
     if (format === "currency") {
-      return utilityService.formatCurrency(val);
+      return UtilityService.formatCurrency(val);
     }
     return val.toLocaleString("id-ID");
   };

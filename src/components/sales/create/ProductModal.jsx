@@ -1,5 +1,5 @@
 import { X } from "lucide-react";
-import utilityService from "../../../services/utilityServices.js";
+import UtilityService from "../../../services/UtilityServices.js";
 import VariantSelector from "./VariantSelector.jsx";
 
 // ProductModal Component
@@ -44,7 +44,7 @@ const ProductModal = ({
                   <h4 className="font-medium">{product.name}</h4>
                   <p className="text-sm text-gray-600">{product.categories?.name}</p>
                   <p className="text-lg font-semibold text-green-600">
-                    {utilityService.formatCurrency(product.base_price || 0)}
+                    {UtilityService.formatCurrency(product.base_price || 0)}
                   </p>
                 </div>
               ))}

@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Palette, Ruler, Package, Printer, Plus, ShoppingCart, Minus } from 'lucide-react';
-import utilityService from '../../../services/utilityServices.js';
+import UtilityService from '../../../services/UtilityServices.js';
 
 const VariantSelector = ({ 
   product, 
@@ -194,7 +194,7 @@ const ProductInfo = ({ product }) => (
       <span>{product.types?.name}</span>
     </div>
     <p className="text-lg font-bold text-green-600 mt-2">
-      Harga Dasar: {utilityService.formatCurrency(product.base_price || 0)}
+      Harga Dasar: {UtilityService.formatCurrency(product.base_price || 0)}
     </p>
     {product.description && (
       <p className="text-sm text-gray-600 mt-2">{product.description}</p>
@@ -271,7 +271,7 @@ const VariantCard = ({ variant, isSelected, onSelect }) => (
       </span>
     </div>
     <div className="text-sm font-semibold text-green-600">
-      {utilityService.formatCurrency(variant.selling_price || 0)}
+      {UtilityService.formatCurrency(variant.selling_price || 0)}
     </div>
   </button>
 );
@@ -299,7 +299,7 @@ const SelectedVariantDetails = ({ variant }) => (
       <div>
         <span className="text-blue-700 font-medium">Harga:</span>
         <span className="ml-2 text-blue-900 font-semibold">
-          {utilityService.formatCurrency(variant.selling_price || 0)}
+          {UtilityService.formatCurrency(variant.selling_price || 0)}
         </span>
       </div>
       {variant.convections && (
@@ -419,7 +419,7 @@ const PrintTypeOption = ({ printType, isSelected, onSelect }) => (
           <p className="text-sm text-gray-600 mt-1">{printType.description}</p>
         )}
       <span className="font-semibold text-purple-600">
-        +{utilityService.formatCurrency(printType.price)}
+        +{UtilityService.formatCurrency(printType.price)}
       </span>
       </div>
     </div>
@@ -440,7 +440,7 @@ const PriceSummary = ({ variant, quantity, isPrinted, printType, totalPrice }) =
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span>Harga satuan:</span>
-          <span>{utilityService.formatCurrency(unitPrice)}</span>
+          <span>{UtilityService.formatCurrency(unitPrice)}</span>
         </div>
         
         <div className="flex justify-between">
@@ -450,18 +450,18 @@ const PriceSummary = ({ variant, quantity, isPrinted, printType, totalPrice }) =
         
         <div className="flex justify-between">
           <span>Subtotal produk:</span>
-          <span>{utilityService.formatCurrency(subtotal)}</span>
+          <span>{UtilityService.formatCurrency(subtotal)}</span>
         </div>
         
         {isPrinted && printType && (
           <>
             <div className="flex justify-between text-purple-600">
               <span>Print ({printType.name}):</span>
-              <span>+{utilityService.formatCurrency(printPrice)} x {quantity}</span>
+              <span>+{UtilityService.formatCurrency(printPrice)} x {quantity}</span>
             </div>
             <div className="flex justify-between text-purple-600">
               <span>Total print:</span>
-              <span>{utilityService.formatCurrency(printTotal)}</span>
+              <span>{UtilityService.formatCurrency(printTotal)}</span>
             </div>
           </>
         )}
@@ -470,7 +470,7 @@ const PriceSummary = ({ variant, quantity, isPrinted, printType, totalPrice }) =
           <div className="flex justify-between font-bold text-lg">
             <span>Total:</span>
             <span className="text-green-600">
-              {utilityService.formatCurrency(totalPrice)}
+              {UtilityService.formatCurrency(totalPrice)}
             </span>
           </div>
         </div>
@@ -497,7 +497,7 @@ const ActualPriceSummary = ({ variant, quantity, isPrinted, printType, totalActu
 
         <div className="flex justify-between">
           <span>Harga satuan (termasuk sablon):</span>
-          <span>{utilityService.formatCurrency(actualPrice)}</span>
+          <span>{UtilityService.formatCurrency(actualPrice)}</span>
         </div>
         
         <div className="flex justify-between">
@@ -507,18 +507,18 @@ const ActualPriceSummary = ({ variant, quantity, isPrinted, printType, totalActu
         
         <div className="flex justify-between">
           <span>Subtotal produk:</span>
-          <span>{utilityService.formatCurrency(subtotal)}</span>
+          <span>{UtilityService.formatCurrency(subtotal)}</span>
         </div>
         
         {isPrinted && printType && (
           <>
             <div className="flex justify-between text-purple-600">
               <span>Print ({printType.name}):</span>
-              <span>+{utilityService.formatCurrency(printPrice)} x {quantity}</span>
+              <span>+{UtilityService.formatCurrency(printPrice)} x {quantity}</span>
             </div>
             <div className="flex justify-between text-purple-600">
               <span>Total print:</span>
-              <span>{utilityService.formatCurrency(printTotal)}</span>
+              <span>{UtilityService.formatCurrency(printTotal)}</span>
             </div>
           </>
         )}
@@ -527,7 +527,7 @@ const ActualPriceSummary = ({ variant, quantity, isPrinted, printType, totalActu
           <div className="flex justify-between font-bold text-lg">
             <span>Total Aktual:</span>
             <span className="text-green-600">
-              {utilityService.formatCurrency(totalActualPrice)}
+              {UtilityService.formatCurrency(totalActualPrice)}
             </span>
           </div>
         </div>

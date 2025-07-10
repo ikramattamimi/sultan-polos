@@ -15,7 +15,7 @@ import {
   CheckCircle,
   AlertTriangle
 } from 'lucide-react';
-import utilityService from '../../services/UtilityServices';
+import UtilityService from '../../services/UtilityServices.js';
 
 // ===========================================
 // SALE DETAIL MODAL
@@ -93,10 +93,10 @@ const SaleInfo = ({ sale }) => (
         <div>
           <p className="text-sm font-medium text-gray-600">Tanggal Penjualan</p>
           <p className="text-lg font-semibold text-gray-900">
-            {utilityService.formatDate(sale.sale_date)}
+            {UtilityService.formatDate(sale.sale_date)}
           </p>
           <p className="text-sm text-gray-500">
-            {utilityService.formatTime(sale.sale_date)}
+            {UtilityService.formatTime(sale.sale_date)}
           </p>
         </div>
       </div>
@@ -116,7 +116,7 @@ const SaleInfo = ({ sale }) => (
         <div>
           <p className="text-sm font-medium text-gray-600">Total Pembayaran</p>
           <p className="text-xl font-bold text-green-600">
-            {utilityService.formatCurrency(sale.total_price)}
+            {UtilityService.formatCurrency(sale.total_price)}
           </p>
         </div>
       </div>
@@ -204,7 +204,7 @@ const SaleItemRow = ({ item }) => (
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-right">
       <span className="text-sm text-gray-900">
-        {utilityService.formatCurrency(item.unit_price)}
+        {UtilityService.formatCurrency(item.unit_price)}
       </span>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-center">
@@ -227,7 +227,7 @@ const SaleItemRow = ({ item }) => (
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-right">
       <span className="text-sm font-semibold text-green-600">
-        {utilityService.formatCurrency(item.actual_price)}
+        {UtilityService.formatCurrency(item.actual_price)}
       </span>
     </td>
   </tr>
@@ -250,20 +250,20 @@ const SaleSummary = ({ sale }) => {
       <div className="space-y-3">
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Subtotal Produk:</span>
-          <span className="text-gray-900">{utilityService.formatCurrency(subtotal)}</span>
+          <span className="text-gray-900">{UtilityService.formatCurrency(subtotal)}</span>
         </div>
         
         {printTotal > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-gray-600">Total Print:</span>
-            <span className="text-gray-900">{utilityService.formatCurrency(printTotal)}</span>
+            <span className="text-gray-900">{UtilityService.formatCurrency(printTotal)}</span>
           </div>
         )}
         
         <div className="border-t pt-3">
           <div className="flex justify-between text-lg font-bold">
             <span className="text-gray-900">Total Pembayaran:</span>
-            <span className="text-green-600">{utilityService.formatCurrency(sale.total_price)}</span>
+            <span className="text-green-600">{UtilityService.formatCurrency(sale.total_price)}</span>
           </div>
         </div>
       </div>

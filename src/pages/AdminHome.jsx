@@ -39,9 +39,9 @@ import {
 import { LineChart, Line, AreaChart, Area, BarChart, Bar, PieChart as RechartsPieChart, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 // Services
-import { saleService } from '../services/saleService';
-import { productService } from '../services/ProductService';
-import utilityService from '../services/UtilityServices';
+import { SaleService } from '../services/SaleService.js';
+import { ProductService } from '../services/ProductService.js';
+import UtilityService from '../services/UtilityServices.js';
 
 // Components
 import {LoadingSpinner, ErrorAlert} from '../components/common';
@@ -104,9 +104,9 @@ const DashboardPage = () => {
         salesStatsData,
         chartData
       ] = await Promise.all([
-        saleService.getAll(),
-        productService.getAll(true),
-        saleService.getSalesStats(startDate.toISOString(), endDate.toISOString()),
+        SaleService.getAll(),
+        ProductService.getAll(true),
+        SaleService.getSalesStats(startDate.toISOString(), endDate.toISOString()),
         generateChartData(startDate, endDate)
       ]);
 
@@ -405,7 +405,7 @@ const StatsCard = ({ title, value, format, icon: Icon, color, growth, subtitle }
 
   const formatValue = (val) => {
     if (format === 'currency') {
-      return utilityService.formatCurrency(val);
+      return UtilityService.formatCurrency(val);
     }
     return val.toLocaleString('id-ID');
   };
@@ -467,7 +467,7 @@ const SalesChart = ({ data, title, period }) => (
           />
           <YAxis stroke="#666" fontSize={12} />
           <Tooltip
-            labelFormatter={(value) => utilityService.formatDate(value)}
+            labelFormatter={(value) => UtilityService.formatDate(value)}
             formatter={(value, name) => [
               name === 'sales' ? `${value} penjualan` : `${value} order`,
               name === 'sales' ? 'Penjualan' : 'Order'
@@ -524,12 +524,12 @@ const RevenueChart = ({ data, title, period }) => (
           <YAxis
             stroke="#666"
             fontSize={12}
-            tickFormatter={(value) => utilityService.formatCurrency(value).replace('Rp ', 'Rp')}
+            tickFormatter={(value) => UtilityService.formatCurrency(value).replace('Rp ', 'Rp')}
           />
           <Tooltip
-            labelFormatter={(value) => utilityService.formatDate(value)}
+            labelFormatter={(value) => UtilityService.formatDate(value)}
             formatter={(value, name) => [
-              utilityService.formatCurrency(value),
+              UtilityService.formatCurrency(value),
               name === 'revenue' ? 'Pendapatan' : 'Profit'
             ]}
             contentStyle={{
@@ -566,7 +566,7 @@ const TopProductsCard = ({ products }) => (
           </div>
           <div className="text-right">
             <p className="font-semibold text-green-600">
-              {utilityService.formatCurrency(product.revenue)}
+              {UtilityService.formatCurrency(product.revenue)}
             </p>
             <div className={`text-xs flex items-center ${
               product.growth > 0 ? 'text-green-600' : 'text-red-600'
@@ -606,7 +606,7 @@ const RecentSalesCard = ({ sales }) => (
           </div>
           <div className="text-right">
             <p className="font-semibold text-green-600">
-              {utilityService.formatCurrency(sale.total_price)}
+              {UtilityService.formatCurrency(sale.total_price)}
             </p>
             <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
               Selesai

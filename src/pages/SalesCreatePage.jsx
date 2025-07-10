@@ -3,9 +3,9 @@
 // ===========================================
 
 import React, { useState, useEffect } from 'react';
-import { productService } from '../services/ProductService';
-import { saleService } from '../services/SaleService';
-import masterDataService from '../services/MasterDataService';
+import { ProductService } from '../services/ProductService.js';
+import { SaleService } from '../services/SaleService.js';
+import MasterDataService from '../services/MasterDataService.js';
 
 // Import komponen modular
 import ErrorAlert from '../components/common/ErrorAlert.jsx';
@@ -40,8 +40,8 @@ const SalesCreatePage = () => {
       setError(null);
 
       const [productsData, printTypesData] = await Promise.all([
-        productService.getAll(true),
-        masterDataService.printTypes.getAll(),
+        ProductService.getAll(true),
+        MasterDataService.printTypes.getAll(),
       ]);
 
       setProducts(productsData || []);
@@ -154,9 +154,9 @@ const SalesCreatePage = () => {
       }));
 
       // Buat penjualan
-      const sale = await saleService.create(saleData, saleItems);
+      const sale = await SaleService.create(saleData, saleItems);
       // // Buat item penjualan
-      // await saleService.createSaleItems(saleItems);
+      // await SaleService.createSaleItems(saleItems);
 
       loadData()
       alert('Order berhasil dibuat!');

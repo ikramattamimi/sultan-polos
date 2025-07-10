@@ -5,7 +5,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const categoryService = {
+export const CategoryService = {
   // Get all categories
   async getAll() {
     const { data, error } = await supabase
@@ -66,4 +66,4 @@ export const categoryService = {
   }
 }
 
-export default categoryService
+export default CategoryService

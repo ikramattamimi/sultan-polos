@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 
-import { saleService } from "../services/saleService";
+import { SaleService } from "../services/SaleService.js";
 
 import { LoadingSpinner, ErrorAlert, ConfirmationModal } from "../components/common";
 import { SalesDetailModal, ExportModal, SalesPageHeader, SalesStatsCards } from "../components/sales";
@@ -62,7 +62,7 @@ const SalesPage = () => {
       }
       setError(null);
 
-      const salesData = await saleService.getAll();
+      const salesData = await SaleService.getAll();
       setSales(salesData || []);
       calculateStats(salesData || []);
     } catch (err) {
@@ -143,7 +143,7 @@ const SalesPage = () => {
   // Handle view detail
   const handleViewDetail = async (sale) => {
     try {
-      const detailData = await saleService.getById(sale.id);
+      const detailData = await SaleService.getById(sale.id);
       setSelectedSale(detailData);
       setShowDetailModal(true);
     } catch (err) {
@@ -161,7 +161,7 @@ const SalesPage = () => {
   // Confirm delete
   const confirmDelete = async () => {
     try {
-      await saleService.delete(saleToDelete.id);
+      await SaleService.delete(saleToDelete.id);
       setSales(sales.filter((sale) => sale.id !== saleToDelete.id));
       setShowDeleteModal(false);
       setSaleToDelete(null);

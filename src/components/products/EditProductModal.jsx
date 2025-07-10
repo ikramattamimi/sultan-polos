@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, Save, X } from 'lucide-react';
-import masterDataService from '../../services/masterDataService.js';
+import MasterDataService from '../../services/MasterDataService.js';
 
 // Component untuk Modal Edit Produk
 const EditProductModal = ({ show, onClose, onUpdate, productData }) => {
@@ -42,8 +42,8 @@ const EditProductModal = ({ show, onClose, onUpdate, productData }) => {
     try {
       // Fetch categories and types in parallel
       const [categoriesData, typesData] = await Promise.all([
-        masterDataService.categories.getAll(),
-        masterDataService.types.getAll()
+        MasterDataService.categories.getAll(),
+        MasterDataService.types.getAll()
       ]);
       
       setCategories(categoriesData || []);

@@ -1,21 +1,16 @@
 // loader.js
 
-import { productService } from "./services/ProductService.js"
-import { productVariantService } from "./services/ProductVariantService.js"
-import { convectionService } from "./services/ConvectionService.js"
-import { saleService } from "./services/SaleService.js"
-import { categoryService } from "./services/CategoryService.js"
-import { masterDataService } from "./services/MasterDataService.js"
-
+import { ProductService, CategoryService, MasterDataService, ConvectionService, ProductVariantService, SaleService, CottonCombedService } from './services/index.js'
 // ===========================================
 // EXISTING LOADER (keeping your original)
 // ===========================================
 export const productsLoader = async ({ params }) => {
   try {
     const includeVariants = params?.includeVariants || false
-    const products = await productService.getAll(includeVariants)
+    const products = await ProductService.getAll(includeVariants)
     return { products }
   } catch (error) {
+    console.error("Error in productsLoader:", error);
     throw new Response("Failed to load products", { status: 500 })
   }
 }
@@ -35,11 +30,11 @@ export const dashboardLoader = async () => {
       lowStockConvections,
       totalProducts
     ] = await Promise.all([
-      saleService.getAll(10, 0),
-      saleService.getSalesSummary(thirtyDaysAgo, today),
-      productVariantService.getLowStock(10),
-      convectionService.getLowStock(),
-      productService.getAll(false)
+      SaleService.getAll(10, 0),
+      SaleService.getSalesSummary(thirtyDaysAgo, today),
+      ProductVariantService.getLowStock(10),
+      ConvectionService.getLowStock(),
+      ProductService.getAll(false)
     ])
 
     return {
@@ -50,6 +45,7 @@ export const dashboardLoader = async () => {
       totalProducts: totalProducts.length
     }
   } catch (error) {
+    console.error("Error in dashboardLoader:", error);
     throw new Response("Failed to load dashboard data", { status: 500 })
   }
 }
@@ -66,13 +62,13 @@ export const productLoader = async ({ params }) => {
     }
 
     const [product, categories, masterData] = await Promise.all([
-      productService.getById(id, true),
-      categoryService.getAll(),
+      ProductService.getById(id, true),
+      CategoryService.getAll(),
       Promise.all([
-        masterDataService.colors.getAll(),
-        masterDataService.sizes.getAll(),
-        masterDataService.types.getAll(),
-        masterDataService.printTypes.getAll()
+        MasterDataService.colors.getAll(),
+        MasterDataService.sizes.getAll(),
+        MasterDataService.types.getAll(),
+        MasterDataService.printTypes.getAll()
       ])
     ])
 
@@ -97,17 +93,17 @@ export const productFormLoader = async ({ params }) => {
     const { id } = params
     
     const [categories, colors, sizes, types, convections] = await Promise.all([
-      categoryService.getAll(),
-      masterDataService.colors.getAll(),
-      masterDataService.sizes.getAll(),
-      masterDataService.types.getAll(),
-      convectionService.getAll()
+      CategoryService.getAll(),
+      MasterDataService.colors.getAll(),
+      MasterDataService.sizes.getAll(),
+      MasterDataService.types.getAll(),
+      ConvectionService.getAll()
     ])
 
     let product = null
     
     if (id && id !== 'new') {
-      product = await productService.getById(id, true)
+      product = await ProductService.getById(id, true)
     }
 
     return {
@@ -129,9 +125,10 @@ export const productFormLoader = async ({ params }) => {
 // Loader untuk router
 export const cottonCombodLoader = async () => {
   try {
-    const products = await cottonCombodService.getAllCottonCombod30s()
+    const products = await CottonCombedService.getAllCottonCombod30s()
     return { products, typeName: 'Cotton Combod 30s' }
   } catch (error) {
+    console.error("Error in cottonCombodLoader:", error);
     throw new Response("Failed to load Cotton Combod 30s products", { status: 500 })
   }
 }
@@ -145,9 +142,10 @@ export const productsByTypeLoader = async ({ params }) => {
       throw new Response("Type name is required", { status: 400 })
     }
 
-    const products = await productService.getByTypeName(typeName)
+    const products = await ProductService.getByTypeName(typeName)
     return { products, typeName }
   } catch (error) {
+    console.error("Error in productsByTypeLoader:", error);
     throw new Response(`Failed to load products for type: ${params.typeName}`, { status: 500 })
   }
 }
@@ -158,9 +156,10 @@ export const productsByTypeLoader = async ({ params }) => {
 // ===========================================
 export const convectionsLoader = async () => {
   try {
-    const convections = await convectionService.getAll()
+    const convections = await ConvectionService.getAll()
     return { convections }
   } catch (error) {
+    console.error("Error in convectionsLoader:", error);
     throw new Response("Failed to load convections", { status: 500 })
   }
 }
@@ -173,7 +172,7 @@ export const convectionLoader = async ({ params }) => {
       throw new Response("Convection ID is required", { status: 400 })
     }
 
-    const convection = await convectionService.getById(id)
+    const convection = await ConvectionService.getById(id)
     return convection
   } catch (error) {
     if (error.code === 'PGRST116') {
@@ -199,8 +198,8 @@ export const salesReportLoader = async ({ request }) => {
     const actualEndDate = endDate || defaultEndDate
 
     const [sales, summary] = await Promise.all([
-      saleService.getByDateRange(actualStartDate, actualEndDate),
-      saleService.getSalesSummary(actualStartDate, actualEndDate)
+      SaleService.getByDateRange(actualStartDate, actualEndDate),
+      SaleService.getSalesSummary(actualStartDate, actualEndDate)
     ])
 
     return { 
@@ -209,6 +208,7 @@ export const salesReportLoader = async ({ request }) => {
       dateRange: { startDate: actualStartDate, endDate: actualEndDate }
     }
   } catch (error) {
+    console.error("Error in salesReportLoader:", error);
     throw new Response("Failed to load sales report", { status: 500 })
   }
 }
@@ -219,11 +219,11 @@ export const salesReportLoader = async ({ request }) => {
 export const masterDataLoader = async () => {
   try {
     const [colors, sizes, types, printTypes, categories] = await Promise.all([
-      masterDataService.colors.getAll(),
-      masterDataService.sizes.getAll(),
-      masterDataService.types.getAll(),
-      masterDataService.printTypes.getAll(),
-      categoryService.getAll()
+      MasterDataService.colors.getAll(),
+      MasterDataService.sizes.getAll(),
+      MasterDataService.types.getAll(),
+      MasterDataService.printTypes.getAll(),
+      CategoryService.getAll()
     ])
 
     return { 
@@ -234,6 +234,7 @@ export const masterDataLoader = async () => {
       categories
     }
   } catch (error) {
+    console.error("Error in masterDataLoader:", error);
     throw new Response("Failed to load master data", { status: 500 })
   }
 }

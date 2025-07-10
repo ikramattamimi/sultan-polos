@@ -1,5 +1,5 @@
 import { Package, Plus, Search } from "lucide-react";
-import utilityService from "../../../services/utilityServices.js";
+import UtilityService from "../../../services/UtilityServices.js";
 
 // ProductSelector Component
 const ProductSelector = ({ 
@@ -91,7 +91,7 @@ const ProductCard = ({ product, onClick, disabled }) => (
         </p>
       </div>
       <span className="text-lg font-semibold text-green-600">
-        {utilityService.formatCurrency(product.base_price || 0)}
+        {UtilityService.formatCurrency(product.base_price || 0)}
       </span>
     </div>
   </div>

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Save } from 'lucide-react';
-import masterDataService from '../../services/masterDataService.js';
+import MasterDataService from '../../services/MasterDataService.js';
 import { Input, Select, NumberInput } from '../ui/forms';
-import { utilityService } from '../../services/utilityServices.js';
+import { UtilityService } from '../../services/UtilityServices.js';
 
 // Component untuk Form Tambah/Edit Varian (Updated)
 const VariantForm = ({
@@ -109,9 +109,9 @@ const VariantForm = ({
     try {
       // Fetch colors, sizes, and convections in parallel
       const [colorsData, sizesData, convectionsData] = await Promise.all([
-        masterDataService.colors.getAll(),
-        masterDataService.sizes.getAll(),
-        masterDataService.convections.getAll()
+        MasterDataService.colors.getAll(),
+        MasterDataService.sizes.getAll(),
+        MasterDataService.convections.getAll()
       ]);
 
       setColors(colorsData || []);
@@ -368,8 +368,8 @@ const VariantForm = ({
                 <Input
                   type="text"
                   placeholder="Harga Beli"
-                  value={utilityService.formatNumber(customConvection.purchase_price)}
-                  onChange={(e) => utilityService.handlePriceInputChange(e, (value) => setCustomConvection({...customConvection, purchase_price: value}))}
+                  value={UtilityService.formatNumber(customConvection.purchase_price)}
+                  onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setCustomConvection({...customConvection, purchase_price: value}))}
                   disabled={loading}
                   required={true}
                   label="Harga Beli"
@@ -414,8 +414,8 @@ const VariantForm = ({
           <Input
             type="text"
             placeholder="Harga Jual"
-            value={utilityService.formatNumber(formData.selling_price)}
-            onChange={(e) => utilityService.handlePriceInputChange(e, (value) => setFormData({...formData, selling_price: value}))}
+            value={UtilityService.formatNumber(formData.selling_price)}
+            onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setFormData({...formData, selling_price: value}))}
             disabled={loading}
             label="Harga Jual"
             required={true}

@@ -4,7 +4,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const typeService = {
+export const TypeService = {
   // Get all types
   async getAll() {
     const { data, error } = await supabase
@@ -77,4 +77,4 @@ export const typeService = {
   }
 }
 
-export default typeService
+export default TypeService

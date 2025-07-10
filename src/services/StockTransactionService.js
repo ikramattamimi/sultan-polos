@@ -5,7 +5,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const stockTransactionService = {
+export const StockTransactionService = {
   // Record product stock transaction
   async recordProductTransaction(variantId, quantity, transactionType) {
     const { data, error } = await supabase
@@ -81,4 +81,4 @@ export const stockTransactionService = {
   }
 }
 
-export default stockTransactionService
+export default StockTransactionService

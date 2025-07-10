@@ -5,7 +5,7 @@
 import { supabase } from "../supabaseClient"
 
 // ===========================================
-export const masterDataService = {
+export const MasterDataService = {
   // Colors
   colors: {
     async getAll() {
@@ -246,4 +246,4 @@ export const masterDataService = {
   }
 }
 
-export default masterDataService;
+export default MasterDataService;

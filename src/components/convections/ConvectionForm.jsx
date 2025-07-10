@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import Input from "../Input.jsx";
-import masterDataService from "../../services/masterDataService.js";
+import MasterDataService from "../../services/MasterDataService.js";
 
 const ConvectionForm = ({ 
   convection, 
@@ -22,7 +22,7 @@ const ConvectionForm = ({
   const [colors, setColors] = useState([])
 
   const getColors = async () => {
-    const data = await masterDataService.colors.getAll();
+    const data = await MasterDataService.colors.getAll();
     setColors(data || []);
   }
 

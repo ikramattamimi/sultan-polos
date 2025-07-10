@@ -1,6 +1,6 @@
 
 // SalesTableRow Component
-import utilityService from "../../../services/utilityServices.js";
+import UtilityService from "../../../services/UtilityServices.js";
 import {Eye, Trash2} from "lucide-react";
 import React from "react";
 
@@ -11,10 +11,10 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale }) => (
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm text-gray-900">
-                {utilityService.formatDate(sale.sale_date)}
+                {UtilityService.formatDate(sale.sale_date)}
             </div>
             <div className="text-sm text-gray-500">
-                {utilityService.formatTime(sale.sale_date)}
+                {UtilityService.formatTime(sale.sale_date)}
             </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
@@ -24,7 +24,7 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale }) => (
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm font-semibold text-green-600">
-                {utilityService.formatCurrency(sale.total_price)}
+                {UtilityService.formatCurrency(sale.total_price)}
             </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">

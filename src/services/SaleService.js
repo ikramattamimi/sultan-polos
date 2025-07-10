@@ -3,7 +3,7 @@
 // ===========================================
 import {supabase} from "../supabaseClient"
 
-export const saleService = {
+export const SaleService = {
   // Get all sales
   async getAll(limit = 50, offset = 0) {
     const { data, error } = await supabase
@@ -201,4 +201,4 @@ export const saleService = {
 
 }
 
-export default saleService;
+export default SaleService;

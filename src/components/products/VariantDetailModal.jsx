@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Package, Palette, Ruler, Factory, DollarSign, Package2, Info, Tag, Edit2 } from 'lucide-react';
 import VariantForm from './VariantForm.jsx';
-import masterDataService from '../../services/masterDataService.js';
+import MasterDataService from '../../services/MasterDataService.js';
 
 // Modal Component untuk Detail Variant
 const VariantDetailModal = ({ isOpen, onClose, variant, onUpdate }) => {
@@ -22,9 +22,9 @@ const VariantDetailModal = ({ isOpen, onClose, variant, onUpdate }) => {
   const fetchMasterData = async () => {
     try {
       const [colorsData, sizesData, convectionsData] = await Promise.all([
-        masterDataService.colors.getAll(),
-        masterDataService.sizes.getAll(),
-        masterDataService.convections.getAll()
+        MasterDataService.colors.getAll(),
+        MasterDataService.sizes.getAll(),
+        MasterDataService.convections.getAll()
       ]);
 
       setColors(colorsData || []);

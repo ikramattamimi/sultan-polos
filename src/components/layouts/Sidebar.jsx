@@ -14,9 +14,9 @@ const Sidebar = () => {
       <ul>
         <li><NavLink to="/">Dashboard</NavLink></li>
         <li>
-          <DropdownMenu 
+          <DropdownMenu
             title="Inventory"
-            routes={['/inventory']}
+            routes={['/product', '/sales']}
           >
             <ul>
               <li><NavLink to="product">Product</NavLink></li>
@@ -25,6 +25,17 @@ const Sidebar = () => {
           </DropdownMenu>
         </li>
         <li><NavLink to="/convection">Convection</NavLink></li>
+        <li>
+          <DropdownMenu
+            title="Finance"
+            routes={['/income-statement', '/expenses']}
+          >
+            <ul>
+              <li><NavLink to="income-statement">Laporan Laba Rugi</NavLink></li>
+              <li><NavLink to="expenses">Kelola Expenses</NavLink></li>
+            </ul>
+          </DropdownMenu>
+        </li>
         <li><NavLink to="/report">Report</NavLink></li>
         <DropdownMenu
           title="Components Docs"

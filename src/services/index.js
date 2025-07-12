@@ -8,3 +8,4 @@ export { default as MasterDataService } from './MasterDataService.js';
 export { default as ProductVariantService } from './ProductVariantService.js';
 export { default as stockTransactionService } from './StockTransactionService.js';
 export {default as ConvectionService} from "./ConvectionService.js";
+export {default as IncomeStatementService} from "./IncomeStatementService.js";

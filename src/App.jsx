@@ -9,6 +9,8 @@ import AdminLayout from "./layouts/AdminLayout.jsx";
 import AdminHome from "./pages/AdminHome.jsx";
 import ConvectionPage from "./pages/ConvectionPage.jsx";
 import Report from "./pages/Report.jsx";
+import IncomeStatementPage from "./pages/IncomeStatementPage.jsx";
+import ExpensesPage from "./pages/ExpensesPage.jsx";
 
 import {
   productsLoader,
@@ -38,10 +40,10 @@ function App() {
 
           {/* Inventory Routes */}
           <Route>
-            <Route 
-              path="product" 
+            <Route
+              path="product"
               element={<ProductManagementPage />}
-              loader={() => productsLoader({ params: { includeVariants: true } })} 
+              loader={() => productsLoader({ params: { includeVariants: true } })}
             />
             <Route path="sales">
               <Route index element={<SalesPage />} />
@@ -64,17 +66,26 @@ function App() {
               element={<ConvectionDetailPage />}
               loader={convectionLoader}
             />
-            <Route 
-              path="create" 
+            <Route
+              path="create"
               element={<ConvectionCreatePage />}
               loader={masterDataLoader}
             />
           </Route>
 
+          {/* Finance Routes */}
+          <Route path="income-statement">
+            <Route index element={<IncomeStatementPage />} />
+          </Route>
+
+          <Route path="expenses">
+            <Route index element={<ExpensesPage />} />
+          </Route>
+
           {/* Report Routes */}
-          <Route 
-            path="report" 
-            element={<Report />} 
+          <Route
+            path="report"
+            element={<Report />}
             loader={salesReportLoader}
           />
 

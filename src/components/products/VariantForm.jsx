@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Save } from 'lucide-react';
 import MasterDataService from '../../services/MasterDataService.js';
-import { Input, Select, NumberInput } from '../ui/forms';
+import {Input, Select, NumberInput, FormGroup, FormLabel} from '../ui/forms';
 import { UtilityService } from '../../services/UtilityServices.js';
+import {ProductVariantService} from "../../services/index.js";
 
 // Component untuk Form Tambah/Edit Varian (Updated)
 const VariantForm = ({
@@ -18,7 +19,8 @@ const VariantForm = ({
     convection_id: '',
     selling_price: '',
     stock: '',
-    convection_qty: ''
+    convection_qty: '',
+    partner: ''
   });
 
   const [convectionMode, setConvectionMode] = useState('existing'); // 'existing' or 'custom'
@@ -37,6 +39,11 @@ const VariantForm = ({
   const [convections, setConvections] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [partners, setPartners] = useState([]);
+  const [showCustomPartner, setShowCustomPartner] = useState(true);
+  const [customPartnerValue, setCustomPartnerValue] = useState('');
+
 
   const isEditMode = mode === 'edit' && variant;
 
@@ -61,8 +68,15 @@ const VariantForm = ({
       convection_id: variant.convection_id?.toString() || '',
       selling_price: variant.selling_price?.toString() || '',
       stock: variant.stock?.toString() || '',
-      convection_qty: variant.convection_quantity?.toString() || ''
+      convection_qty: variant.convection_quantity?.toString() || '',
+      partner: variant.partner || ''
     });
+
+    // Check if variant partner is new
+    if (variant.partner && !partners.includes(variant.partner)) {
+      setShowCustomPartner(true);
+      setCustomPartnerValue(variant.partner);
+    }
 
     // Check if variant has custom convection
     if (variant.convection_json) {
@@ -88,7 +102,8 @@ const VariantForm = ({
       convection_id: '',
       selling_price: '',
       stock: '',
-      convection_qty: ''
+      convection_qty: '',
+      partner: ''
     });
     setCustomConvection({
       material_name: '',
@@ -100,6 +115,8 @@ const VariantForm = ({
       quantity: ''
     });
     setConvectionMode('existing');
+    setShowCustomPartner(false);
+    setCustomPartnerValue('');
   };
 
   const fetchFormData = async () => {
@@ -108,21 +125,47 @@ const VariantForm = ({
 
     try {
       // Fetch colors, sizes, and convections in parallel
-      const [colorsData, sizesData, convectionsData] = await Promise.all([
+      const [
+        colorsData,
+        sizesData,
+        convectionsData,
+        partnersData
+      ] = await Promise.all([
         MasterDataService.colors.getAll(),
         MasterDataService.sizes.getAll(),
-        MasterDataService.convections.getAll()
+        MasterDataService.convections.getAll(),
+        ProductVariantService.getUniquePartners()
       ]);
 
       setColors(colorsData || []);
       setSizes(sizesData || []);
       setConvections(convectionsData || []);
+      setPartners(partnersData || []);
     } catch (err) {
       console.error('Error fetching form data:', err);
       setError('Gagal memuat data form. Silakan coba lagi.');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePartnerChange = (e) => {
+    const value = e.target.value;
+
+    if (value === 'others') {
+      setShowCustomPartner(true);
+      setFormData(prev => ({ ...prev, partner: '' }));
+    } else {
+      setShowCustomPartner(false);
+      setCustomPartnerValue('');
+      setFormData(prev => ({ ...prev, partner: value }));
+    }
+  };
+
+  const handleCustomPartnerChange = (e) => {
+    const value = e.target.value;
+    setCustomPartnerValue(value);
+    setFormData(prev => ({ ...prev, partner: value }));
   };
 
   const handleConvectionModeChange = (mode) => {
@@ -158,7 +201,8 @@ const VariantForm = ({
           stock: parseInt(formData.stock),
           convection_quantity: parseInt(formData.convection_qty) || 0,
           // Add display name for UI
-          name: `${selectedColor?.name} - ${selectedSize?.name}`
+          name: `${selectedColor?.name} - ${selectedSize?.name}`,
+          partner: formData.partner || null
         };
 
         if (convectionMode === 'existing') {
@@ -407,6 +451,41 @@ const VariantForm = ({
               Jumlah konveksi yang akan digunakan untuk varian ini
             </p>
           </div>
+        )}
+
+        {/* Partner Selection */}
+        <FormGroup>
+          <FormLabel htmlFor="partner">Partner (Opsional)</FormLabel>
+          <Select
+            id="partner"
+            name="partner"
+            value={showCustomPartner ? 'others' : formData.partner}
+            onChange={handlePartnerChange}
+            placeholder="Pilih Partner"
+          >
+            <option value="">-- Pilih Partner --</option>
+            {partners.map((partner) => (
+              <option key={partner} value={partner}>
+                {partner}
+              </option>
+            ))}
+            <option value="others">Others (Tambah Baru)</option>
+          </Select>
+        </FormGroup>
+
+        {/* Custom Partner Input */}
+        {showCustomPartner && (
+          <FormGroup>
+            <FormLabel htmlFor="customPartner">Partner Baru</FormLabel>
+            <Input
+              id="customPartner"
+              name="customPartner"
+              type="text"
+              value={customPartnerValue}
+              onChange={handleCustomPartnerChange}
+              placeholder="Masukkan nama partner baru"
+            />
+          </FormGroup>
         )}
 
         {/* Price and Stock Row */}

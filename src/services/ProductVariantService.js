@@ -1,9 +1,5 @@
-// ===========================================
-// PRODUCT VARIANTS METHODS
-
 import { supabase } from "../supabaseClient"
 
-// ===========================================
 export const ProductVariantService = {
   // Get all variants for a product
   async getByProductId(productId) {
@@ -23,6 +19,22 @@ export const ProductVariantService = {
     if (error) throw error
     return data
   },
+
+  // Get unique partners from product_variants
+  async getUniquePartners() {
+    const { data, error } = await supabase
+    .from('product_variants')
+    .select('partner')
+    .not('partner', 'is', null)
+    .not('partner', 'eq', '')
+
+    if (error) throw error
+
+    // Extract unique partners
+    const uniquePartners = [...new Set(data.map(item => item.partner))].filter(Boolean)
+    return uniquePartners.sort()
+  },
+
 
   // Get variant by ID
   async getById(id) {

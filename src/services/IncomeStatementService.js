@@ -174,8 +174,8 @@ export const IncomeStatementService = {
       const { data: expenses, error: expensesError } = await supabase
       .from('expenses')
       .select('id, name, cost')
-      .gte('created_at', startDate)
-      .lte('created_at', endDate + 'T23:59:59.999Z')
+      // .gte('created_at', startDate)
+      // .lte('created_at', endDate + 'T23:59:59.999Z')
       .or('status.eq.active,status.is.null');
 
       if (expensesError) throw expensesError;

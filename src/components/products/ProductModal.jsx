@@ -27,8 +27,13 @@ const ProductModal = ({
   const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
   const isEditMode = mode === 'edit' && productData;
+
+  const getSelectedCategory = (id) => {
+    return categories.find(cat => cat.id.toString() === id.toString())
+  }
 
   // Reset or populate form data when modal opens or productData changes
   useEffect(() => {
@@ -161,31 +166,39 @@ const ProductModal = ({
         <div className="space-y-4">
           <Input
             type="text"
-            placeholder="Nama Produk"
+            placeholder="Kaos Anak"
             value={product.name}
             onChange={(e) => setProduct({...product, name: e.target.value})}
             disabled={loading}
+            label="Nama Produk"
           />
 
           <Select
             value={product.category}
-            onChange={(e) => setProduct({...product, category: e.target.value})}
+            onChange={(e) => {
+              setProduct({...product, category: e.target.value})
+              setSelectedCategory(() => getSelectedCategory(e.target.value))
+            }}
             disabled={loading}
             options={categories}
             valueKey="id"
             labelKey="name"
             placeholder="Pilih Kategori"
+            label="Kategori Bahan"
           />
 
-          <Select
-            value={product.type}
-            onChange={(e) => setProduct({...product, type: e.target.value})}
-            disabled={loading}
-            options={types}
-            valueKey="id"
-            labelKey="name"
-            placeholder="Pilih Tipe"
-          />
+          { selectedCategory && selectedCategory.is_type_needed &&
+            <Select
+              value={product.type}
+              onChange={(e) => setProduct({...product, type: e.target.value})}
+              disabled={loading}
+              options={types}
+              valueKey="id"
+              labelKey="name"
+              placeholder="Pilih Tipe"
+              label="Tipe Bahan"
+            />
+          }
 
           <Input
             type="text"
@@ -197,11 +210,12 @@ const ProductModal = ({
           />
 
           <TextArea
-            placeholder="Deskripsi Produk"
+            placeholder="Pakaian tebal"
             value={product.description}
             onChange={(e) => setProduct({...product, description: e.target.value})}
             rows="3"
             disabled={loading}
+            label="Deskripsi Produk"
           />
 
           <div className="flex gap-3">

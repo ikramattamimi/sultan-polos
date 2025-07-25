@@ -30,6 +30,53 @@ const SalesPage = () => {
     endDate: "",
   });
   const [statusFilter, setStatusFilter] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all");
+
+  // Handler untuk custom filter agar timeFilter otomatis ke 'all'
+  const handleSetDateRange = (updater) => {
+    setTimeFilter('all');
+    setDateRange(updater);
+  };
+  const handleSetStatusFilter = (val) => {
+    // setTimeFilter('all');
+    setStatusFilter(val);
+  };
+
+  // Set custom date range otomatis saat timeFilter berubah
+  useEffect(() => {
+    if (timeFilter === 'all') {
+      // Jangan ubah dateRange
+      return;
+    }
+    const now = new Date();
+    let start = '', end = '';
+    if (timeFilter === 'today') {
+      const s = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const e = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      start = s.toISOString().slice(0, 10);
+      end = e.toISOString().slice(0, 10);
+    } else if (timeFilter === 'this_week') {
+      const day = now.getDay() || 7;
+      const s = new Date(now);
+      s.setDate(now.getDate() - day + 1);
+      s.setHours(0, 0, 0, 0);
+      const e = new Date(s);
+      e.setDate(s.getDate() + 6);
+      start = s.toISOString().slice(0, 10);
+      end = e.toISOString().slice(0, 10);
+    } else if (timeFilter === 'this_month') {
+      const s = new Date(now.getFullYear(), now.getMonth(), 1);
+      const e = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      start = s.toISOString().slice(0, 10);
+      end = e.toISOString().slice(0, 10);
+    } else if (timeFilter === 'last_3_months') {
+      const s = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+      const e = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      start = s.toISOString().slice(0, 10);
+      end = e.toISOString().slice(0, 10);
+    }
+    setDateRange({ startDate: start, endDate: end });
+  }, [timeFilter]);
 
   // State modals
   const [selectedSale, setSelectedSale] = useState(null);
@@ -50,7 +97,7 @@ const SalesPage = () => {
   // Apply filters saat ada perubahan
   useEffect(() => {
     applyFilters();
-  }, [sales, searchQuery, dateRange, statusFilter]);
+  }, [sales, searchQuery, dateRange, statusFilter, timeFilter]);
 
   // Load data penjualan
   const loadSales = async (showRefreshLoader = false) => {
@@ -104,6 +151,34 @@ const SalesPage = () => {
   const applyFilters = () => {
     let filtered = [...sales];
 
+    // Filter berdasarkan timeFilter
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      let start, end;
+      if (timeFilter === 'today') {
+        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      } else if (timeFilter === 'this_week') {
+        const day = now.getDay() || 7;
+        start = new Date(now);
+        start.setDate(now.getDate() - day + 1);
+        start.setHours(0, 0, 0, 0);
+        end = new Date(now);
+        end.setDate(start.getDate() + 6);
+        end.setHours(23, 59, 59, 999);
+      } else if (timeFilter === 'this_month') {
+        start = new Date(now.getFullYear(), now.getMonth(), 1);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      } else if (timeFilter === 'last_3_months') {
+        start = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+      }
+      filtered = filtered.filter((sale) => {
+        const saleDate = new Date(sale.sale_date);
+        return saleDate >= start && saleDate <= end;
+      });
+    }
+
     // Filter berdasarkan pencarian
     if (searchQuery) {
       filtered = filtered.filter(
@@ -115,7 +190,7 @@ const SalesPage = () => {
       );
     }
 
-    // Filter berdasarkan tanggal
+    // Filter berdasarkan tanggal manual
     if (dateRange.startDate) {
       filtered = filtered.filter((sale) => {
         const saleDate = new Date(sale.sale_date);
@@ -131,6 +206,11 @@ const SalesPage = () => {
         endDate.setHours(23, 59, 59, 999); // Set ke akhir hari
         return saleDate <= endDate;
       });
+    }
+
+    // Filter berdasarkan status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter((sale) => sale.status === statusFilter);
     }
 
     // Sort berdasarkan tanggal terbaru
@@ -182,6 +262,7 @@ const SalesPage = () => {
     setSearchQuery("");
     setDateRange({ startDate: "", endDate: "" });
     setStatusFilter("all");
+    setTimeFilter("all");
   };
 
   // Pagination
@@ -216,9 +297,11 @@ const SalesPage = () => {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           dateRange={dateRange}
-          setDateRange={setDateRange}
+          setDateRange={handleSetDateRange}
           statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
+          setStatusFilter={handleSetStatusFilter}
+          timeFilter={timeFilter}
+          setTimeFilter={setTimeFilter}
           onReset={resetFilters}
         />
 

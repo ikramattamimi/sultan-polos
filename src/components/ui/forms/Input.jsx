@@ -120,7 +120,7 @@ const Input = ({
   // Icon positioning
   const getIconPosition = (position) => {
     const basePosition = 'absolute top-1/2 transform -translate-y-1/2 text-gray-400';
-    const sizePosition = size === 'sm' ? '2.5' : size === 'md' ? '3' : '3.5';
+    const sizePosition = size === 'sm' ? '1.5' : size === 'md' ? '2' : '2.5';
 
     if (position === 'left') {
       return `${basePosition} left-${sizePosition}`;

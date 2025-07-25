@@ -82,7 +82,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
                 </ul>
               </DropdownMenu>
             </li>
-            <li className="my-2">
+            {/* <li className="my-2">
               <NavLink to="/report" className="flex items-center gap-2">
                 <FileBarChart2 size={20} />
                 Report
@@ -103,7 +103,7 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
                   <li><NavLink to="components/forms">Forms</NavLink></li>
                 </ul>
               </DropdownMenu>
-            </li>
+            </li> */}
           </ul>
           <div className="absolute left-5 bottom-5 transition-all">
             <DarkMode />

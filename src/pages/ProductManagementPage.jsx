@@ -338,7 +338,6 @@ const ProductManagementPage = () => {
           onSearchChange={handleSearchChange}
           onClearSearch={handleClearSearch}
           totalResults={totalSearchResults}
-          showFilter={true}
           onToggleFilter={() => setShowSearchFilter(!showSearchFilter)}
           className="mb-6"
         />

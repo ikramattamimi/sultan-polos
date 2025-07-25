@@ -37,7 +37,7 @@ const VariantList = ({ productId, variants, onDelete, onAdd }) => {
           return (
             <div key={mitraName} className="mb-8">
               <div className="mb-4 flex items-center gap-2">
-                <span className="text-lg font-bold text-blue-700">Mitra: {mitraName}</span>
+                <span className="text-lg font-bold">{mitraName}</span>
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{mitraVariants.length} varian</span>
               </div>
               <div className="space-y-4">
@@ -150,11 +150,11 @@ const VariantCard = ({ variant, onSelect, onDelete }) => (
         </div>
       )}
       {/* Tampilkan Mitra jika ada di varian */}
-      {(variant.partner) && (
+      {/* {(variant.partner) && (
         <div className="text-sm text-gray-700 mt-1">
           <span className="font-semibold">Mitra:</span> {variant.partner}
         </div>
-      )}
+      )} */}
     </div>
 
     {/* Delete Button */}
@@ -163,7 +163,7 @@ const VariantCard = ({ variant, onSelect, onDelete }) => (
         e.stopPropagation();
         onDelete();
       }}
-      className="absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      className="absolute top-15 right-4 bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
       title="Hapus varian"
     >
       <Trash2 className="w-4 h-4" />

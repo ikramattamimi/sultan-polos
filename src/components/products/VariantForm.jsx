@@ -44,6 +44,9 @@ const VariantForm = ({
   const [showCustomPartner, setShowCustomPartner] = useState(true);
   const [customPartnerValue, setCustomPartnerValue] = useState('');
 
+  // State for max convection quantity
+  const [maxConvectionQty, setMaxConvectionQty] = useState(null);
+
 
   const isEditMode = mode === 'edit' && variant;
 
@@ -174,7 +177,18 @@ const VariantForm = ({
   const handleConvectionModeChange = (mode) => {
     setConvectionMode(mode);
     setFormData(prev => ({ ...prev, convection_id: '' }));
+    setMaxConvectionQty(null);
   };
+
+  // Update maxConvectionQty when convection_id changes (only for existing mode)
+  useEffect(() => {
+    if (convectionMode === 'existing' && formData.convection_id) {
+      const selectedConvection = convections.find(c => c.id === parseInt(formData.convection_id));
+      setMaxConvectionQty(selectedConvection && typeof selectedConvection.stock === 'number' ? selectedConvection.stock : null);
+    } else {
+      setMaxConvectionQty(null);
+    }
+  }, [formData.convection_id, convectionMode, convections]);
 
   const handleSubmit = async () => {
     const isExistingValid = convectionMode === 'existing' && formData.convection_id;
@@ -445,42 +459,53 @@ const VariantForm = ({
             <NumberInput
               placeholder="0"
               value={formData.convection_qty}
-              onChange={(e) => setFormData({...formData, convection_qty: e.target.value})}
+              onChange={(e) => {
+                let val = e.target.value;
+                // Batasi ke maxConvectionQty jika ada
+                if (maxConvectionQty !== null && val) {
+                  val = Math.min(Number(val), maxConvectionQty).toString();
+                }
+                setFormData({...formData, convection_qty: val});
+              }}
               disabled={loading}
               min="0"
+              max={maxConvectionQty !== null ? maxConvectionQty : undefined}
               label="Jumlah Konveksi"
             />
             <p className="text-xs text-gray-500 mt-1">
               Jumlah konveksi yang akan digunakan untuk varian ini
+              {maxConvectionQty !== null && (
+                <span className="ml-2 text-blue-600">(Maksimal: {maxConvectionQty})</span>
+              )}
             </p>
           </div>
         )}
 
-        {/* Partner Selection */}
+        {/* Mitra Selection */}
         <FormGroup>
-          <FormLabel htmlFor="partner">Partner (Opsional)</FormLabel>
+          <FormLabel htmlFor="partner">Mitra (Opsional)</FormLabel>
           <Select
             id="partner"
             name="partner"
             value={showCustomPartner ? 'others' : formData.partner}
             onChange={handlePartnerChange}
-            placeholder="Pilih Partner"
+            placeholder="Pilih Mitra"
             options={partners}
           >
           </Select>
         </FormGroup>
 
-        {/* Custom Partner Input */}
+        {/* Custom Mitra Input */}
         {showCustomPartner && (
           <FormGroup>
-            <FormLabel htmlFor="customPartner">Partner Baru</FormLabel>
+            <FormLabel htmlFor="customPartner">Mitra Baru</FormLabel>
             <Input
               id="customPartner"
               name="customPartner"
               type="text"
               value={customPartnerValue}
               onChange={handleCustomPartnerChange}
-              placeholder="Masukkan nama partner baru"
+              placeholder="Masukkan nama mitra baru"
             />
           </FormGroup>
         )}

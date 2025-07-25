@@ -23,6 +23,11 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale }) => (
             </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">
+                {sale.partner || "-"}
+            </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm font-semibold text-green-600">
                 {UtilityService.formatCurrency(sale.total_price)}
             </div>

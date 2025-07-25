@@ -31,6 +31,7 @@ const SalesPage = () => {
   });
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
+  const [partnerFilter, setPartnerFilter] = useState("");
 
   // Handler untuk custom filter agar timeFilter otomatis ke 'all'
   const handleSetDateRange = (updater) => {
@@ -97,7 +98,7 @@ const SalesPage = () => {
   // Apply filters saat ada perubahan
   useEffect(() => {
     applyFilters();
-  }, [sales, searchQuery, dateRange, statusFilter, timeFilter]);
+  }, [sales, searchQuery, dateRange, statusFilter, timeFilter, partnerFilter]);
 
   // Load data penjualan
   const loadSales = async (showRefreshLoader = false) => {
@@ -213,6 +214,11 @@ const SalesPage = () => {
       filtered = filtered.filter((sale) => sale.status === statusFilter);
     }
 
+    // Filter berdasarkan partner
+    if (partnerFilter) {
+      filtered = filtered.filter((sale) => sale.partner === partnerFilter);
+    }
+
     // Sort berdasarkan tanggal terbaru
     filtered.sort((a, b) => new Date(b.sale_date) - new Date(a.sale_date));
 
@@ -302,7 +308,10 @@ const SalesPage = () => {
           setStatusFilter={handleSetStatusFilter}
           timeFilter={timeFilter}
           setTimeFilter={setTimeFilter}
+          partnerFilter={partnerFilter}
+          setPartnerFilter={setPartnerFilter}
           onReset={resetFilters}
+          partnerOptions={Array.from(new Set(sales.map(s => s.partner).filter(Boolean)))}
         />
 
         {/* Sales Table */}

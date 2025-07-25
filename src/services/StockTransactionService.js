@@ -45,7 +45,6 @@ export const StockTransactionService = {
       .select(`
         *,
         product_variants(
-          sku,
           products(name),
           sizes(name),
           colors(name)

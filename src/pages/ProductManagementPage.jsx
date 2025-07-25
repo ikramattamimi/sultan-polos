@@ -113,7 +113,7 @@ const ProductManagementPage = () => {
         category_id: productData.category, // assuming category is the ID
         type_id: productData.type, // assuming type is the ID
         base_price: productData.basePrice,
-        description: productData.description
+        description: productData.description,
       });
 
       // Refresh products list to get updated data
@@ -143,7 +143,8 @@ const ProductManagementPage = () => {
         color_id: variantData.color_id,
         convection_id: variantData.convection_id,
         convection_quantity: variantData.convection_quantity,
-        convection_json: variantData.convection_json
+        convection_json: variantData.convection_json,
+        partner: variantData.partner,
       });
 
       // Refresh products list to get updated data

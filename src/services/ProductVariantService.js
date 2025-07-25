@@ -14,7 +14,7 @@ export const ProductVariantService = {
         images(*)
       `)
       .eq('product_id', productId)
-      .order('sku', { ascending: true })
+      .order('name', { ascending: true })
     
     if (error) throw error
     return data

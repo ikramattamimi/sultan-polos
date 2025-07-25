@@ -17,6 +17,8 @@ const SalesFilter = ({
   setDateRange,
   statusFilter,
   setStatusFilter,
+  partnerFilter = '',
+  setPartnerFilter = () => {},
   timeFilter = 'all',
   setTimeFilter = () => {},
   onReset,
@@ -51,7 +53,24 @@ const SalesFilter = ({
 
     {/* Bagian 2: Filter custom */}
     <div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {/* Mitra Filter */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Mitra
+          </label>
+          <select
+            value={partnerFilter}
+            onChange={e => setPartnerFilter(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Semua Mitra</option>
+            {/* Partner options akan diisi dari props, update di SalesPage */}
+            {Array.isArray(SalesFilter.partnerOptions) && SalesFilter.partnerOptions.map((p) => (
+              <option key={p} value={p}>{p}</option>
+            ))}
+          </select>
+        </div>
         {/* Start Date */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">

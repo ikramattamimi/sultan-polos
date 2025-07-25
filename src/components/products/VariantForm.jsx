@@ -137,6 +137,9 @@ const VariantForm = ({
         ProductVariantService.getUniquePartners()
       ]);
 
+      console.log('partnersData', partnersData);
+      partnersData.push('others');
+
       setColors(colorsData || []);
       setSizes(sizesData || []);
       setConvections(convectionsData || []);
@@ -462,14 +465,8 @@ const VariantForm = ({
             value={showCustomPartner ? 'others' : formData.partner}
             onChange={handlePartnerChange}
             placeholder="Pilih Partner"
+            options={partners}
           >
-            <option value="">-- Pilih Partner --</option>
-            {partners.map((partner) => (
-              <option key={partner} value={partner}>
-                {partner}
-              </option>
-            ))}
-            <option value="others">Others (Tambah Baru)</option>
           </Select>
         </FormGroup>
 

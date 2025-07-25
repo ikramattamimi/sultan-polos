@@ -134,20 +134,344 @@ const IncomeStatementPage = () => {
     try {
       const exportData = await IncomeStatementService.exportIncomeStatement(id);
 
-      // Create downloadable file
-      const dataStr = JSON.stringify(exportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+      // Export to Excel using HTML method
+      exportToExcel(exportData);
 
-      const exportFileDefaultName = `laporan-laba-rugi-${exportData.summary.periode}.json`;
-
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
     } catch (err) {
       console.error('Error exporting statement:', err);
       alert('Gagal export laporan.');
     }
+  };
+
+  const exportToExcel = (exportData) => {
+    try {
+      // Create Excel content using HTML table approach
+      const excelContent = createExcelHTMLContent(exportData);
+
+      // Generate filename
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      const filename = `laporan-laba-rugi-${timestamp}.xls`;
+
+      // Create and download file
+      downloadExcelFile(excelContent, filename);
+
+      // Success notification
+      alert(`File Excel berhasil di-export: ${filename}`);
+
+    } catch (error) {
+      console.error('Error exporting to Excel:', error);
+      alert('Gagal export ke Excel: ' + error.message);
+    }
+  };
+
+  const createExcelHTMLContent = (exportData) => {
+    const { summary, expense_details, revenue_breakdown, HPP_breakdown } = exportData;
+    
+    return `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" 
+            xmlns:x="urn:schemas-microsoft-com:office:excel" 
+            xmlns="http://www.w3.org/TR/REC-html40" lang="">
+        <head>
+          <meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8">
+          <!--[if gte mso 9]>
+          <xml>
+            <x:ExcelWorkbook>
+              <x:ExcelWorksheets>
+                <x:ExcelWorksheet>
+                  <x:Name>Laporan Laba Rugi</x:Name>
+                  <x:WorksheetOptions>
+                    <x:DisplayGridlines/>
+                  </x:WorksheetOptions>
+                </x:ExcelWorksheet>
+              </x:ExcelWorksheets>
+            </x:ExcelWorkbook>
+          </xml>
+          <![endif]-->
+          <style>
+            .header { 
+              background-color: #366092; 
+              color: white; 
+              font-weight: bold; 
+              text-align: center;
+              padding: 8px;
+            }
+            .subheader {
+              background-color: #4472C4;
+              color: white;
+              font-weight: bold;
+              padding: 6px;
+            }
+            .summary-label {
+              background-color: #E7E6E6;
+              font-weight: bold;
+              padding: 6px;
+            }
+            .profit {
+              background-color: #D5F5D5;
+              color: #006600;
+              font-weight: bold;
+            }
+            .loss {
+              background-color: #FFE6E6;
+              color: #CC0000;
+              font-weight: bold;
+            }
+            .even-row { 
+              background-color: #F2F2F2; 
+            }
+            .odd-row { 
+              background-color: #FFFFFF; 
+            }
+            .currency { 
+              text-align: right;
+              mso-number-format: "#,##0";
+            }
+            .number { 
+              text-align: center;
+              mso-number-format: "0";
+            }
+            .center { text-align: center; }
+            .border { border: 1px solid #B7B7B7; }
+            td { 
+              padding: 4px; 
+              border: 1px solid #B7B7B7;
+              mso-number-format: "@";
+            }
+          </style>
+        </head>
+        <body>
+          <!-- Header Laporan -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="2" class="header">LAPORAN LABA RUGI</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Periode:</td>
+              <td>${summary.periode}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Tanggal Export:</td>
+              <td>${new Date().toLocaleDateString('id-ID')}</td>
+            </tr>
+            ${summary.catatan ? `
+            <tr>
+              <td class="summary-label">Catatan:</td>
+              <td>${summary.catatan}</td>
+            </tr>
+            ` : ''}
+          </table>
+
+          <br><br>
+
+          <!-- Ringkasan Keuangan -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="2" class="header">RINGKASAN KEUANGAN</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Total Revenue:</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">${summary.total_revenue}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Cost of Goods Sold (HPP):</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">(${summary.total_cogs})</td>
+            </tr>
+            <tr style="border-top: 2px solid #000;">
+              <td class="summary-label">Gross Profit:</td>
+              <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.gross_profit}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Operating Expenses:</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">(${summary.total_expenses})</td>
+            </tr>
+            <tr style="border-top: 2px solid #000;">
+              <td class="summary-label">Net Profit:</td>
+              <td class="${summary.net_profit >= 0 ? 'profit' : 'loss'}" style="text-align: right; mso-number-format: '#,##0';">${summary.net_profit}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Profit Margin:</td>
+              <td class="${summary.net_profit >= 0 ? 'profit' : 'loss'}" style="text-align: right;">${summary.profit_margin}</td>
+            </tr>
+          </table>
+
+          <br><br>
+
+          <!-- Detail Expenses -->
+          ${expense_details && expense_details.length > 0 ? `
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="4" class="header">DETAIL EXPENSES</td>
+            </tr>
+            <tr class="subheader">
+              <td class="center">No</td>
+              <td class="center">Nama Expense</td>
+              <td class="center">Biaya</td>
+              <td class="center">% dari Total</td>
+            </tr>
+            ${expense_details.map((expense, index) => {
+              const rowClass = (index + 1) % 2 === 0 ? 'even-row' : 'odd-row';
+              const percentage = summary.total_expenses > 0 ? ((expense.biaya / summary.total_expenses) * 100).toFixed(1) : 0;
+              return `
+                <tr class="${rowClass}">
+                  <td style="text-align: center; mso-number-format: '0';">${index + 1}</td>
+                  <td style="mso-number-format: '@';">${expense.nama_expense}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${expense.biaya}</td>
+                  <td style="text-align: center; mso-number-format: '0.0';">${percentage}%</td>
+                </tr>
+              `;
+            }).join('')}
+            <tr style="border-top: 2px solid #000; font-weight: bold;">
+              <td colspan="2" class="summary-label">Total Expenses:</td>
+              <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.total_expenses}</td>
+              <td style="text-align: center;">100.0%</td>
+            </tr>
+          </table>
+          ` : ''}
+
+          ${revenue_breakdown && revenue_breakdown.length > 0 ? `
+          <br><br>
+
+          <!-- Detail Revenue -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="5" class="header">DETAIL REVENUE</td>
+            </tr>
+            <tr class="subheader">
+              <td class="center">No</td>
+              <td class="center">Order Number</td>
+              <td class="center">Customer</td>
+              <td class="center">Tanggal</td>
+              <td class="center">Total Harga</td>
+            </tr>
+            ${revenue_breakdown.map((sale, index) => {
+              const rowClass = (index + 1) % 2 === 0 ? 'even-row' : 'odd-row';
+              return `
+                <tr class="${rowClass}">
+                  <td style="text-align: center; mso-number-format: '0';">${index + 1}</td>
+                  <td style="mso-number-format: '@';">${sale.order_number || ''}</td>
+                  <td style="mso-number-format: '@';">${sale.customer || 'Customer Umum'}</td>
+                  <td style="mso-number-format: '@';">${new Date(sale.tanggal).toLocaleDateString('id-ID')}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${sale.total_harga}</td>
+                </tr>
+              `;
+            }).join('')}
+            <tr style="border-top: 2px solid #000; font-weight: bold;">
+              <td colspan="4" class="summary-label">Total Revenue:</td>
+              <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.total_revenue}</td>
+            </tr>
+          </table>
+          ` : ''}
+
+          ${HPP_breakdown && HPP_breakdown.length > 0 ? `
+          <br><br>
+
+          <!-- Detail HPP -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="9" class="header">DETAIL HPP (COST OF GOODS SOLD)</td>
+            </tr>
+            <tr class="subheader">
+              <td class="center">No</td>
+              <td class="center">Order</td>
+              <td class="center">Tanggal</td>
+              <td class="center">Produk</td>
+              <td class="center">Ukuran</td>
+              <td class="center">Warna</td>
+              <td class="center">Qty</td>
+              <td class="center">Harga Pokok</td>
+              <td class="center">Total HPP</td>
+            </tr>
+            ${HPP_breakdown.map((item, index) => {
+              const rowClass = (index + 1) % 2 === 0 ? 'even-row' : 'odd-row';
+              return `
+                <tr class="${rowClass}">
+                  <td style="text-align: center; mso-number-format: '0';">${index + 1}</td>
+                  <td style="mso-number-format: '@';">${item.order_number || ''}</td>
+                  <td style="mso-number-format: '@';">${new Date(item.tanggal).toLocaleDateString('id-ID')}</td>
+                  <td style="mso-number-format: '@';">${item.produk || ''}</td>
+                  <td style="mso-number-format: '@';">${item.ukuran || ''}</td>
+                  <td style="mso-number-format: '@';">${item.warna || ''}</td>
+                  <td style="text-align: center; mso-number-format: '0';">${item.quantity}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${item.harga_pokok}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${item.total_cogs}</td>
+                </tr>
+              `;
+            }).join('')}
+            <tr style="border-top: 2px solid #000; font-weight: bold;">
+              <td colspan="8" class="summary-label">Total HPP:</td>
+              <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.total_cogs}</td>
+            </tr>
+          </table>
+          ` : ''}
+
+          <br><br>
+
+          <!-- Summary Calculation -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="2" class="header">PERHITUNGAN LABA RUGI</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Revenue</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">${summary.total_revenue}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">- Cost of Goods Sold</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">(${summary.total_cogs})</td>
+            </tr>
+            <tr style="border-bottom: 1px solid #000;">
+              <td class="summary-label">= Gross Profit</td>
+              <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.gross_profit}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">- Operating Expenses</td>
+              <td style="text-align: right; mso-number-format: '#,##0';">(${summary.total_expenses})</td>
+            </tr>
+            <tr style="border-top: 2px solid #000;">
+              <td class="summary-label">= Net Profit/Loss</td>
+              <td class="${summary.net_profit >= 0 ? 'profit' : 'loss'}" style="text-align: right; mso-number-format: '#,##0';">${summary.net_profit}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Profit Margin</td>
+              <td class="${summary.net_profit >= 0 ? 'profit' : 'loss'}" style="text-align: right;">${summary.profit_margin}</td>
+            </tr>
+          </table>
+
+          <br><br>
+
+          <!-- Footer Info -->
+          <table style="border-collapse: collapse; width: 100%;">
+            <tr>
+              <td colspan="2" style="text-align: center; font-size: 10px; color: #666;">
+                Generated by Income Statement Management System - ${new Date().toLocaleDateString('id-ID')}
+              </td>
+            </tr>
+          </table>
+        </body>
+      </html>
+    `;
+  };
+
+  const downloadExcelFile = (content, filename) => {
+    // Create blob with Excel content
+    const blob = new Blob([content], {
+      type: 'application/vnd.ms-excel;charset=utf-8'
+    });
+
+    // Create download link
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // Clean up
+    URL.revokeObjectURL(url);
   };
 
   // ===========================================

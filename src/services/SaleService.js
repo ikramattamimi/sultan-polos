@@ -4,6 +4,19 @@
 import {supabase} from "../supabaseClient"
 
 export const SaleService = {
+// Get unique customer names from sales.customer
+  async getCustomerNames() {
+    const { data, error } = await supabase
+      .from('sales')
+      .select('customer')
+      .neq('customer', null);
+    if (error) throw error;
+    // Ambil hanya nama unik, urutkan by nama
+    const names = Array.from(new Set((data || []).map(row => row.customer?.trim()).filter(Boolean)));
+    names.sort((a, b) => a.localeCompare(b, 'id'));
+    return names;
+  },
+
   // Get all sales
   async getAll(limit = 50, offset = 0) {
     const { data, error } = await supabase
@@ -56,7 +69,7 @@ export const SaleService = {
   },
 
   // Create new sale with items
-  async create(saleData, saleItems) {
+  async createSaleAndItems(saleData, saleItems) {
     const { data: sale, error: saleError } = await supabase
       .from('sales')
       .insert([saleData])

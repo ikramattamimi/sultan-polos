@@ -3,6 +3,7 @@
 // ===========================================
 
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ProductService } from '../services/ProductService.js';
 import { SaleService } from '../services/SaleService.js';
 import MasterDataService from '../services/MasterDataService.js';
@@ -14,8 +15,9 @@ import CreateSalesHeader from '../components/sales/create/CreateSalesHeader.jsx'
 import ProductSelector from '../components/sales/create/ProductSelector.jsx';
 import ShoppingCartComponent from '../components/sales/create/ShoppingCart.jsx';
 import ProductModal from '../components/sales/create/ProductModal.jsx';
-
 const SalesCreatePage = () => {
+  const navigate = useNavigate();
+  
   // State data
   const [products, setProducts] = useState([]);
   const [printTypes, setPrintTypes] = useState([]);
@@ -124,6 +126,11 @@ const SalesCreatePage = () => {
 
   // Handle submit order
   const handleSubmitOrder = async () => {
+
+    // if (!customer || customer.trim() === "") {
+    //   alert('Silakan pilih atau isi nama customer terlebih dahulu.');
+    //   return;
+    // }
     if (cartItems.length === 0) {
       alert('Silakan tambahkan item ke keranjang sebelum submit.');
       return;
@@ -154,16 +161,17 @@ const SalesCreatePage = () => {
       }));
 
       // Buat penjualan
-      const sale = await SaleService.create(saleData, saleItems);
-      // // Buat item penjualan
-      // await SaleService.createSaleItems(saleItems);
-
+      await SaleService.createSaleAndItems(saleData, saleItems);
+      
       loadData()
       alert('Order berhasil dibuat!');
-      
+
       // Reset form
       setCartItems([]);
       generateOrderNumber();
+            
+      // Route to sales list
+      navigate('/sales'); // Uncomment if using react-router for navigation
       
     } catch (err) {
       console.error('Error creating order:', err);

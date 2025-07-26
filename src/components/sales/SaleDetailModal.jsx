@@ -159,6 +159,9 @@ const SaleItems = ({ items }) => (
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Varian
             </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Mitra
+            </th>
             <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
               Qty
             </th>
@@ -195,8 +198,13 @@ const SaleItemRow = ({ item }) => (
       <div className="text-sm text-gray-900">
         {item.product_variants?.sizes?.name || 'N/A'} - {item.product_variants?.colors?.name || 'N/A'}
       </div>
-      <div className="text-xs text-gray-500">
+      {/* <div className="text-xs text-gray-500">
         SKU: {item.product_variants?.id || 'N/A'}
+      </div> */}
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap">
+      <div className="text-sm text-gray-900">
+        {item.product_variants?.partner || '-'}
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-center">

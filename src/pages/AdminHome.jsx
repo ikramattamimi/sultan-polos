@@ -255,19 +255,16 @@ const DashboardPage = () => {
           setDateFilter={setDateFilter}
         />
 
-        {/* Stats Cards */}
+        {/* Stats Cards
         <StatsCards stats={dashboardData.stats} />
 
-        {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Sales Chart */}
           <SalesChart
             data={dashboardData.salesChart}
             title="Penjualan Harian"
             period={dateFilter}
           />
 
-          {/* Revenue Chart */}
           <RevenueChart
             data={dashboardData.revenueChart}
             title="Pendapatan Harian"
@@ -275,20 +272,13 @@ const DashboardPage = () => {
           />
         </div>
 
-        {/* Data Tables Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Top Products */}
           <TopProductsCard products={dashboardData.topProducts} />
-
-          {/* Recent Sales */}
           <RecentSalesCard sales={dashboardData.recentSales} />
-
-          {/* Stock Alerts */}
           <StockAlertsCard alerts={dashboardData.stockAlerts} />
         </div>
 
-        {/* Additional Insights */}
-        <InsightsSection data={dashboardData} />
+        <InsightsSection data={dashboardData} /> */}
       </div>
     </div>
   );

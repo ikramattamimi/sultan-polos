@@ -12,6 +12,19 @@ const ExportModal = ({ sales, onClose }) => {
   });
   const [exporting, setExporting] = useState(false);
   const [filteredCount, setFilteredCount] = useState(sales.length);
+  const [mitraFilter, setMitraFilter] = useState('');
+
+  // Get unique mitra list from sales
+  // Get unique mitra list from all sale_items' product_variants.partner
+  const mitraList = Array.from(
+    new Set(
+      sales.flatMap(sale =>
+        (sale.sale_items || []).map(
+          item => item.product_variants?.partner || 'Tanpa Mitra'
+        )
+      )
+    )
+  );
 
   // Update filtered count whenever date range changes
   useEffect(() => {
@@ -19,7 +32,7 @@ const ExportModal = ({ sales, onClose }) => {
 
     // Filter berdasarkan tanggal jika ada
     if (dateRange.startDate || dateRange.endDate) {
-      filtered = sales.filter(sale => {
+      filtered = filtered.filter(sale => {
         const saleDate = new Date(sale.sale_date);
 
         if (dateRange.startDate) {
@@ -37,18 +50,28 @@ const ExportModal = ({ sales, onClose }) => {
       });
     }
 
+    // Filter berdasarkan mitra jika ada
+    if (mitraFilter) {
+      filtered = filtered.filter(sale =>
+        (sale.sale_items || []).some(
+          item => (item.product_variants?.partner || 'Tanpa Mitra') === mitraFilter
+        )
+      );
+    }
+
     setFilteredCount(filtered.length);
-  }, [dateRange, sales]);
+  }, [dateRange, sales, mitraFilter]);
 
   const handleExport = async () => {
     try {
       setExporting(true);
 
+
       let filteredSales = [...sales];
 
       // Filter berdasarkan tanggal jika ada
       if (dateRange.startDate || dateRange.endDate) {
-        filteredSales = sales.filter(sale => {
+        filteredSales = filteredSales.filter(sale => {
           const saleDate = new Date(sale.sale_date);
 
           if (dateRange.startDate) {
@@ -64,6 +87,15 @@ const ExportModal = ({ sales, onClose }) => {
 
           return true;
         });
+      }
+
+      // Filter berdasarkan mitra jika ada
+      if (mitraFilter) {
+        filteredSales = filteredSales.filter(sale =>
+          (sale.sale_items || []).some(
+            item => (item.product_variants?.partner || 'Tanpa Mitra') === mitraFilter
+          )
+        );
       }
 
       if (exportFormat === 'excel') {
@@ -100,6 +132,7 @@ const ExportModal = ({ sales, onClose }) => {
             itemsData.push({
               no: itemNo++,
               orderNumber: sale.order_number || '',
+              mitra: sale.partner || 'Tanpa Mitra',
               productName: item.product_variants?.products?.name || '',
               category: item.product_variants?.products?.categories?.name || '',
               size: item.product_variants?.sizes?.name || '',
@@ -271,11 +304,12 @@ const ExportModal = ({ sales, onClose }) => {
             <!-- Detail Item -->
             <table style="border-collapse: collapse; width: 100%;">
               <tr>
-                <td colspan="11" class="header">DETAIL ITEM</td>
+                <td colspan="12" class="header">DETAIL ITEM</td>
               </tr>
               <tr class="subheader">
                 <td class="center">No</td>
                 <td class="center">Order</td>
+                <td class="center">Mitra</td>
                 <td class="center">Produk</td>
                 <td class="center">Kategori</td>
                 <td class="center">Ukuran</td>
@@ -292,6 +326,7 @@ const ExportModal = ({ sales, onClose }) => {
                   <tr class="${rowClass}">
                     <td style="text-align: center; mso-number-format: '0';">${item.no}</td>
                     <td style="mso-number-format: '@';">${item.orderNumber}</td>
+                    <td style="mso-number-format: '@';">${item.mitra}</td>
                     <td style="mso-number-format: '@';">${item.productName}</td>
                     <td style="mso-number-format: '@';">${item.category}</td>
                     <td style="mso-number-format: '@';">${item.size}</td>
@@ -638,6 +673,22 @@ const ExportModal = ({ sales, onClose }) => {
           </div>
 
           <div className="space-y-4">
+            {/* Mitra Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter Mitra (Opsional)
+              </label>
+              <select
+                value={mitraFilter}
+                onChange={e => setMitraFilter(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Semua Mitra</option>
+                {mitraList.map(mitra => (
+                  <option key={mitra} value={mitra}>{mitra}</option>
+                ))}
+              </select>
+            </div>
             {/* Format Export */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

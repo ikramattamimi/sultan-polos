@@ -27,15 +27,23 @@ const VariantSelector = ({
     setSelectedPrintType(null);
   }, [product]);
 
-  // Grup varian berdasarkan warna untuk tampilan yang lebih baik
-  const groupedVariants = variants.reduce((acc, variant) => {
-    const colorName = variant.colors?.name || 'Tanpa Warna';
-    if (!acc[colorName]) {
-      acc[colorName] = [];
-    }
-    acc[colorName].push(variant);
+  // Grup varian berdasarkan mitra, lalu warna
+  const groupedByMitra = variants.reduce((acc, variant) => {
+    const mitraName = variant.partner || 'Tanpa Mitra';
+    if (!acc[mitraName]) acc[mitraName] = [];
+    acc[mitraName].push(variant);
     return acc;
   }, {});
+
+  // Untuk setiap mitra, group by color
+  const getColorGroups = (mitraVariants) => {
+    return mitraVariants.reduce((acc, variant) => {
+      const colorName = variant.colors?.name || 'Tanpa Warna';
+      if (!acc[colorName]) acc[colorName] = [];
+      acc[colorName].push(variant);
+      return acc;
+    }, {});
+  };
 
   const handleAddToCart = () => {
     if (!selectedVariant) {
@@ -82,8 +90,9 @@ const VariantSelector = ({
       <ProductInfo product={product} />
 
       {/* Variant Selection */}
-      <VariantSelection 
-        groupedVariants={groupedVariants}
+      <MitraVariantSelection 
+        groupedByMitra={groupedByMitra}
+        getColorGroups={getColorGroups}
         selectedVariant={selectedVariant}
         onSelectVariant={setSelectedVariant}
       />
@@ -202,24 +211,37 @@ const ProductInfo = ({ product }) => (
   </div>
 );
 
-// VariantSelection Component
-const VariantSelection = ({ groupedVariants, selectedVariant, onSelectVariant }) => (
+
+// MitraVariantSelection Component
+const MitraVariantSelection = ({ groupedByMitra, getColorGroups, selectedVariant, onSelectVariant }) => (
   <div>
     <h5 className="text-md font-semibold text-gray-900 mb-3 flex items-center">
       <Palette className="mr-2 h-4 w-4" />
       Pilih Varian
     </h5>
-    
-    <div className="space-y-4">
-      {Object.entries(groupedVariants).map(([colorName, colorVariants]) => (
-        <ColorVariantGroup
-          key={colorName}
-          colorName={colorName}
-          variants={colorVariants}
-          selectedVariant={selectedVariant}
-          onSelectVariant={onSelectVariant}
-        />
-      ))}
+    <div className="space-y-8">
+      {Object.entries(groupedByMitra).map(([mitraName, mitraVariants]) => {
+        const colorGroups = getColorGroups(mitraVariants);
+        return (
+          <div key={mitraName} className="mb-8">
+            <div className="mb-4 flex items-center gap-2">
+              <span className="text-base font-bold text-blue-700">{mitraName}</span>
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">{mitraVariants.length} varian</span>
+            </div>
+            <div className="space-y-4">
+              {Object.entries(colorGroups).map(([colorName, colorVariants]) => (
+                <ColorVariantGroup
+                  key={colorName}
+                  colorName={colorName}
+                  variants={colorVariants}
+                  selectedVariant={selectedVariant}
+                  onSelectVariant={onSelectVariant}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   </div>
 );

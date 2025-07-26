@@ -120,7 +120,7 @@ const ProductManagementPage = () => {
       await fetchProducts();
 
       // Show success message (you can add toast notification here)
-      console.log('Product added successfully:', newProduct);
+      alert('Produk berhasil ditambahkan!');
 
     } catch (err) {
       console.error('Error adding product:', err);
@@ -133,7 +133,6 @@ const ProductManagementPage = () => {
   const handleAddVariant = async (productId, variantData) => {
     try {
       setLoading(true);
-      console.log('Variant data:', variantData);
       // Create variant in Supabase
       const newVariant = await ProductVariantService.create({
         product_id: productId,
@@ -151,7 +150,7 @@ const ProductManagementPage = () => {
       await fetchProducts();
 
       // Show success message (you can add toast notification here)
-      console.log('Variant added successfully:', newVariant);
+      alert('Varian berhasil ditambahkan!');
 
     } catch (err) {
       console.error('Error adding variant:', err);
@@ -165,8 +164,6 @@ const ProductManagementPage = () => {
     try {
       setLoading(true);
 
-      console.log('Product data:', productData);
-
       // Update product in Supabase
       await ProductService.update(id, productData);
 
@@ -174,7 +171,7 @@ const ProductManagementPage = () => {
       await fetchProducts();
 
       // Show success message (you can add toast notification here)
-      console.log('Product updated successfully');
+      alert('Produk berhasil diperbarui!');
 
     } catch (err) {
       console.error('Error updating product:', err);
@@ -210,7 +207,7 @@ const ProductManagementPage = () => {
       setProducts(products.filter(p => p.id !== id));
 
       // Show success message
-      console.log('Product deleted successfully');
+      alert('Produk berhasil dihapus!');
 
     } catch (err) {
       console.error('Error deleting product:', err);
@@ -240,7 +237,7 @@ const ProductManagementPage = () => {
         return product;
       }));
 
-      console.log('Variant deleted successfully');
+      alert('Varian berhasil dihapus!');
 
     } catch (err) {
       console.error('Error deleting variant:', err);
@@ -264,7 +261,7 @@ const ProductManagementPage = () => {
         )
       })));
 
-      console.log('Stock updated successfully');
+      alert('Stok berhasil diperbarui!');
 
     } catch (err) {
       console.error('Error updating stock:', err);

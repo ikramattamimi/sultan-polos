@@ -148,8 +148,6 @@ const SalesCreatePage = () => {
         sale_date: new Date().toISOString()
       };
 
-      console.log('cartItems', cartItems)
-
       // Siapkan item penjualan
       const saleItems = cartItems.map(item => ({
         variant_id: item.variant_id,

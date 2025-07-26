@@ -140,7 +140,6 @@ const VariantForm = ({
         ProductVariantService.getUniquePartners()
       ]);
 
-      console.log('partnersData', partnersData);
       partnersData.push('others');
 
       setColors(colorsData || []);

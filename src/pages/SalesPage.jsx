@@ -32,6 +32,7 @@ const SalesPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [timeFilter, setTimeFilter] = useState("all");
   const [partnerFilter, setPartnerFilter] = useState("");
+  const [partners, setPartners] = useState([]);
 
   // Handler untuk custom filter agar timeFilter otomatis ke 'all'
   const handleSetDateRange = (updater) => {
@@ -112,6 +113,16 @@ const SalesPage = () => {
 
       const salesData = await SaleService.getAll();
       setSales(salesData || []);
+      const partnersData = Array.from(
+        new Set(
+          salesData.flatMap(sale =>
+            (sale.sale_items || []).map(
+              item => item.product_variants?.partner || 'Tanpa Mitra'
+            )
+          )
+        )
+      );
+      setPartners(partnersData || []);
       calculateStats(salesData || []);
     } catch (err) {
       console.error("Error loading sales:", err);
@@ -138,7 +149,6 @@ const SalesPage = () => {
         .filter((customer) => customer !== null && customer !== "")
     );
 
-    console.log('customer', customers)
     setSalesStats({
       totalSales: totalOrders,
       totalRevenue,
@@ -216,7 +226,11 @@ const SalesPage = () => {
 
     // Filter berdasarkan partner
     if (partnerFilter) {
-      filtered = filtered.filter((sale) => sale.partner === partnerFilter);
+      filtered = filtered.filter(sale =>
+        (sale.sale_items || []).some(
+          item => (item.product_variants?.partner || 'Tanpa Mitra') === partnerFilter
+        )
+      );
     }
 
     // Sort berdasarkan tanggal terbaru
@@ -269,6 +283,7 @@ const SalesPage = () => {
     setDateRange({ startDate: "", endDate: "" });
     setStatusFilter("all");
     setTimeFilter("all");
+    setPartnerFilter("");
   };
 
   // Pagination
@@ -309,9 +324,9 @@ const SalesPage = () => {
           timeFilter={timeFilter}
           setTimeFilter={setTimeFilter}
           partnerFilter={partnerFilter}
+          partners={partners}
           setPartnerFilter={setPartnerFilter}
           onReset={resetFilters}
-          partnerOptions={Array.from(new Set(sales.map(s => s.partner).filter(Boolean)))}
         />
 
         {/* Sales Table */}

@@ -18,6 +18,7 @@ const SalesFilter = ({
   statusFilter,
   setStatusFilter,
   partnerFilter = '',
+  partners = [],
   setPartnerFilter = () => {},
   timeFilter = 'all',
   setTimeFilter = () => {},
@@ -66,7 +67,7 @@ const SalesFilter = ({
           >
             <option value="">Semua Mitra</option>
             {/* Partner options akan diisi dari props, update di SalesPage */}
-            {Array.isArray(SalesFilter.partnerOptions) && SalesFilter.partnerOptions.map((p) => (
+            {(partners || []).map((p) => (
               <option key={p} value={p}>{p}</option>
             ))}
           </select>

@@ -3,7 +3,6 @@ import { supabase } from "./supabaseClient.js";
 export const inventoryLoader = async () => {
   try {
     const { data, error } = await supabase.from("products").select();
-    console.log('get inventory', data)
     if (error) {
       throw error;
     }

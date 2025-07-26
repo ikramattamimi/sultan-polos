@@ -610,7 +610,6 @@ const HPPDetailsTab = ({ calculationDetails, loadingDetails }) => {
 
 // Expenses Details Tab Component
 const ExpensesDetailsTab = ({ statement }) => {
-  console.log('statement', statement);
   const expenseDetails = statement.income_statement_expense_details || [];
   const totalExpenses = expenseDetails.reduce((sum, exp) => sum + (exp.expense_cost || 0), 0);
 

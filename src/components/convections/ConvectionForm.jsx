@@ -31,28 +31,14 @@ const ConvectionForm = ({
   }, [])
 
   return (
-    <div className="mt-10 pe-10 w-full">
-      <div className="space-y-4">
+    <div className="w-full">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
           required
           placeholder="Nama Bahan"
           value={convection.name || ""}
           onChange={(e) => handleInputChange("name", e.target.value)}
         />
-
-        {/*<Input*/}
-        {/*  required*/}
-        {/*  placeholder="Kategori Bahan"*/}
-        {/*  value={convection.category || ""}*/}
-        {/*  onChange={(e) => handleInputChange("category", e.target.value)}*/}
-        {/*/>*/}
-
-        {/*<Input*/}
-        {/*  required*/}
-        {/*  placeholder="Tipe Bahan"*/}
-        {/*  value={convection.type || ""}*/}
-        {/*  onChange={(e) => handleInputChange("type", e.target.value)}*/}
-        {/*/>*/}
 
         <Input
           required
@@ -85,15 +71,12 @@ const ConvectionForm = ({
           onChange={(e) => handleInputChange("unit", e.target.value)}
         />
 
-        <div className="my-4 flex flex-wrap items-center">
-
-          <label className='text-sm font-medium mb-2 inline-block w-full md:w-1/3 xl:w-1/6'>Warna</label>
-
+        <div className="flex flex-col">
+          <label className='text-sm font-medium text-gray-700 mb-2'>Warna</label>
           <select
             value={convection.color_id}
             onChange={(e) => handleInputChange("color_id", e.target.value)}
-            // disabled={loading}
-            className="w-full md:w-2/3 xl:w-5/6 p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed"
+            className="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
           >
             <option value="">
               Pilih Warna
@@ -107,38 +90,36 @@ const ConvectionForm = ({
         </div>
       </div>
 
-      <div className="flex gap-3 justify-between mt-6">
+      <div className="flex flex-col sm:flex-row gap-3 justify-between mt-8 pt-6 border-t border-gray-200">
         <button
-          className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors"
+          className="flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
           onClick={onCancel}
           type="button"
         >
-          <div className="flex items-center">
-            <span>Cancel</span>
-          </div>
+          Batal
         </button>
 
-        <div className="flex gap-3 justify-end">
+        <div className="flex gap-3">
           {mode === "edit" && onDelete && (
             <button
-              className="dark:bg-white text-white bg-red-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-red-500 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               onClick={onDelete}
               disabled={isDeleting}
               type="button"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? "Menghapus..." : "Hapus"}
             </button>
           )}
           
           <button
-            className="dark:bg-white text-white bg-blue-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-blue-500 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
             onClick={onSubmit}
             disabled={isLoading}
             type="button"
           >
             {isLoading 
-              ? (mode === "edit" ? "Updating..." : "Creating...") 
-              : (mode === "edit" ? "Update" : "Create")
+              ? (mode === "edit" ? "Mengupdate..." : "Membuat...") 
+              : (mode === "edit" ? "Update" : "Buat")
             }
           </button>
         </div>

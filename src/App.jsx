@@ -5,7 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import AdminLayout from "./layouts/AdminLayout.jsx";
+import AdminLayout from "./components/layouts/AdminLayout.jsx";
 import AdminHome from "./pages/AdminHome.jsx";
 import ConvectionPage from "./pages/ConvectionPage.jsx";
 import Report from "./pages/Report.jsx";

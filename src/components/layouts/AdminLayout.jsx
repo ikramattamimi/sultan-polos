@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/layouts/Sidebar.jsx";
+import Sidebar from "./Sidebar.jsx";
 
 const AdminLayout = () => {
   const [collapsed, setCollapsed] = useState(false);

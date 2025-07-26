@@ -1,55 +1,39 @@
 import React, { useState } from "react";
-import ConvectionForm from "../components/convections/ConvectionForm.jsx";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { supabase } from "../supabaseClient.js";
-import { FaArrowLeft } from "react-icons/fa6";
-import {ConvectionService} from "../services/ConvectionService.js";
+import { ArrowLeft, Package, Edit2, Trash2 } from "lucide-react";
+import { ConvectionService } from "../services/ConvectionService.js";
+import EditConvectionModal from "../components/convections/EditConvectionModal.jsx";
+import { ConfirmationModal } from "../components/common/index.js";
+import { formatPrice } from "../common.js";
 
 const ConvectionDetailPage = () => {
   const navigate = useNavigate();
   
-  const [isLoading, setIsLoading] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const { name, type, purchase_price, stock, buffer_stock, unit, color_id, id, category } = useLoaderData();
-
-  const [convection, setConvection] = useState({
-    id,
-    name,
-    type,
-    purchase_price,
-    stock,
-    color_id,
-    buffer_stock,
-    unit,
-    category,
-  });
+  const convectionData = useLoaderData();
+  const [convection, setConvection] = useState(convectionData);
 
   console.log("convection", convection);
 
-  const updateConvection = async () => {
-    setIsLoading(true);
+  const updateConvection = async (id, updatedData) => {
     try {
-      await ConvectionService.update(convection.id, convection);
-      
+      const updatedConvection = await ConvectionService.update(id, updatedData);
+      setConvection(updatedConvection);
       alert("Convection berhasil diupdate");
     } catch (error) {
       console.error(error);
       alert("Gagal mengupdate convection");
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
   };
 
   const deleteConvection = async () => {
-    if (!window.confirm("Apakah anda yakin ingin menghapus convection ini?")) return;
-
     setIsDeleting(true);
     try {
-      await supabase
-        .from("inventories")
-        .delete()
-        .eq("id", convection.id);
+      await ConvectionService.delete(convection.id);
       
       alert("Convection berhasil dihapus");
       navigate("/convection");
@@ -66,28 +50,164 @@ const ConvectionDetailPage = () => {
   };
 
   return (
-    <main className="w-full">
-      <div className="flex items-center mb-6">
-        <button
-          className="dark:bg-white text-white bg-gray-400 rounded-lg shadow-xl p-2 cursor-pointer hover:bg-gray-500 transition-colors mr-4"
-          onClick={handleCancel}
-        >
-          <FaArrowLeft />
-        </button>
-        <h1 className="text-2xl font-bold">Detail Convection</h1>
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <button
+                className="flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors mr-4"
+                onClick={handleCancel}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Kembali
+              </button>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <Package className="mr-3 text-blue-600" />
+                  Detail Convection
+                </h1>
+                <p className="text-gray-600 mt-1">
+                  Informasi lengkap convection
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Edit2 className="h-4 w-4 mr-2" />
+                Edit
+              </button>
+              <button
+                onClick={() => setShowDeleteModal(true)}
+                disabled={isDeleting}
+                className="flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {isDeleting ? "Menghapus..." : "Hapus"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Details Section */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nama Bahan
+              </label>
+              <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                {convection.name}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Harga Beli
+              </label>
+              <p className="text-lg font-semibold text-green-600 bg-gray-50 p-3 rounded-lg">
+                {formatPrice(convection.purchase_price)}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Stock
+              </label>
+              <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                {convection.stock}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Buffer Stock
+              </label>
+              <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                {convection.buffer_stock}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Unit
+              </label>
+              <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                {convection.unit}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Warna
+              </label>
+              <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                {convection.colors?.name || "Belum ditentukan"}
+              </p>
+            </div>
+
+            {convection.category && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kategori
+                </label>
+                <p className="text-lg font-semibold text-gray-900 bg-gray-50 p-3 rounded-lg">
+                  {convection.category}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Stock Status */}
+          <div className="mt-6 p-4 rounded-lg border-l-4 border-blue-500 bg-blue-50">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <Package className="h-5 w-5 text-blue-500" />
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-blue-800">
+                  Status Stock
+                </p>
+                <p className="text-sm text-blue-700">
+                  {convection.stock > convection.buffer_stock ? (
+                    `Stock mencukupi (${convection.stock} tersedia)`
+                  ) : convection.stock === convection.buffer_stock ? (
+                    `Stock berada di batas buffer (${convection.stock} tersedia)`
+                  ) : (
+                    `Stock rendah! Perlu restok segera (${convection.stock} tersedia, buffer: ${convection.buffer_stock})`
+                  )}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <ConvectionForm
-        convection={convection}
-        onConvectionChange={setConvection}
-        onSubmit={updateConvection}
-        onCancel={handleCancel}
-        onDelete={deleteConvection}
-        isLoading={isLoading}
-        isDeleting={isDeleting}
-        mode="edit"
+      {/* Modals */}
+      <EditConvectionModal
+        show={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onUpdate={updateConvection}
+        convectionData={convection}
       />
-    </main>
+
+      {showDeleteModal && (
+        <ConfirmationModal
+          title="Hapus Convection"
+          message={`Apakah Anda yakin ingin menghapus convection "${convection.name}"? Tindakan ini tidak dapat dibatalkan.`}
+          onConfirm={deleteConvection}
+          onCancel={() => setShowDeleteModal(false)}
+          confirmText="Hapus"
+          cancelText="Batal"
+          type="danger"
+        />
+      )}
+    </div>
   );
 };
 

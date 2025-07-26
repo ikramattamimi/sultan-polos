@@ -66,6 +66,17 @@ export const ConvectionService = {
     return data
   },
 
+  // Delete convection
+  async delete(id) {
+    const {error} = await supabase
+    .from('convections')
+    .delete()
+    .eq('id', id)
+
+    if (error) throw error
+    return true
+  },
+
   // Check low stock convections
   async getLowStock() {
     const {data, error} = await supabase

@@ -4,6 +4,7 @@
 // ===========================================
 
 import { supabase } from "../supabaseClient";
+import UtilityService from "./UtilityServices.js";
 
 export const IncomeStatementService = {
   // ===========================================
@@ -694,12 +695,12 @@ export const IncomeStatementService = {
   formatForUI(incomeStatement) {
     return {
       id: incomeStatement.id,
-      periode: `${incomeStatement.period_start_date} - ${incomeStatement.period_end_date}`,
-      total_revenue: this.formatCurrency(incomeStatement.total_revenue),
-      total_cogs: this.formatCurrency(incomeStatement.total_cogs),
-      gross_profit: this.formatCurrency(incomeStatement.gross_profit),
-      total_expenses: this.formatCurrency(incomeStatement.total_expenses),
-      net_profit: this.formatCurrency(incomeStatement.net_profit),
+      periode: `${UtilityService.formatDate(incomeStatement.period_start_date)} - ${UtilityService.formatDate(incomeStatement.period_end_date)}`,
+      total_revenue: UtilityService.formatCurrency(incomeStatement.total_revenue),
+      total_cogs: UtilityService.formatCurrency(incomeStatement.total_cogs),
+      gross_profit: UtilityService.formatCurrency(incomeStatement.gross_profit),
+      total_expenses: UtilityService.formatCurrency(incomeStatement.total_expenses),
+      net_profit: UtilityService.formatCurrency(incomeStatement.net_profit),
       profit_margin: `${incomeStatement.profit_margin_percentage}%`,
       profit_status: incomeStatement.net_profit >= 0 ? 'profit' : 'loss',
       notes: incomeStatement.notes,

@@ -165,40 +165,7 @@ export const SaleService = {
     if (fetchError) throw fetchError
     if (!saleWithItems) throw new Error('Sale tidak ditemukan')
 
-    // 1. Restore stock untuk setiap item yang dijual
-    for (const item of saleWithItems.sale_items) {
-      // Update stock produk (tambahkan kembali quantity yang dijual)
-      const { error: stockError } = await supabase
-      .from('product_variants')
-      .update({
-        stock: item.product_variants.stock + item.quantity
-      })
-      .eq('id', item.variant_id)
-
-      if (stockError) throw stockError
-
-      // Buat record transaksi stok untuk tracking
-      const { error: transactionError } = await supabase
-      .from('product_stock_transactions')
-      .insert({
-        variant_id: item.variant_id,
-        quantity: item.quantity, // Positif karena stock kembali
-        transaction_type: 'ADJUSTMENT',
-        notes: `Stock restored from deleted sale ${saleWithItems.order_number}`
-      })
-
-      if (transactionError) throw transactionError
-    }
-
-    // 2. Delete semua sale items
-    const { error: deleteItemsError } = await supabase
-    .from('sale_items')
-    .delete()
-    .eq('sale_id', saleId)
-
-    if (deleteItemsError) throw deleteItemsError
-
-    // 3. Delete sale record
+    // Delete sale record
     const { error: deleteSaleError } = await supabase
     .from('sales')
     .delete()
@@ -208,9 +175,20 @@ export const SaleService = {
 
     return {
       success: true,
-      message: `Sale ${saleWithItems.order_number} berhasil dihapus dan stock dikembalikan`
+      message: `Sale ${saleWithItems.order_number} berhasil dihapus`
     }
-  }
+  },
+
+  // Delete multiple sales and their items
+  async deleteMultiple(saleIds = []) {
+    if (!Array.isArray(saleIds) || saleIds.length === 0) return { success: false, message: "Tidak ada penjualan yang dipilih" };
+    const { error } = await supabase
+      .from('sales')
+      .delete()
+      .in('id', saleIds);
+    if (error) return { success: false, message: error.message };
+    return { success: true, message: `${saleIds.length} penjualan berhasil dihapus` };
+  },
 
 }
 

@@ -171,6 +171,7 @@ const ProductModal = ({
             onChange={(e) => setProduct({...product, name: e.target.value})}
             disabled={loading}
             label="Nama Produk"
+            required
           />
 
           <Select
@@ -184,7 +185,8 @@ const ProductModal = ({
             valueKey="id"
             labelKey="name"
             placeholder="Pilih Kategori"
-            label="Kategori Bahan"
+            label="Kategori"
+            required
           />
 
           { selectedCategory && selectedCategory.is_type_needed &&
@@ -197,6 +199,7 @@ const ProductModal = ({
               labelKey="name"
               placeholder="Pilih Tipe"
               label="Tipe Bahan"
+              required
             />
           }
 
@@ -207,6 +210,7 @@ const ProductModal = ({
             onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setProduct({...product, basePrice: value}))}
             disabled={loading}
             label="Harga Dasar"
+            required
           />
 
           <TextArea
@@ -216,12 +220,13 @@ const ProductModal = ({
             rows="3"
             disabled={loading}
             label="Deskripsi Produk"
+            required
           />
 
           <div className="flex gap-3">
             <button
               onClick={handleSubmit}
-              disabled={loading || !product.name || !product.category || !product.type || !product.basePrice}
+              disabled={loading || !product.name || !product.category || (selectedCategory.is_type_needed && !product.type) || !product.basePrice}
               className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
             >
               {loading ? (

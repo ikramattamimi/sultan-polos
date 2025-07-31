@@ -252,10 +252,30 @@ const SalesPage = () => {
     }
   };
 
+
   // Handle delete sale
   const handleDeleteSale = (sale) => {
     setSaleToDelete(sale);
     setShowDeleteModal(true);
+  };
+
+  // Handle bulk delete
+  const handleBulkDelete = async (selectedIds) => {
+    if (!selectedIds || selectedIds.length === 0) return;
+    if (!window.confirm(`Hapus ${selectedIds.length} penjualan terpilih?`)) return;
+    try {
+      const result = await SaleService.deleteMultiple(selectedIds);
+      setSales((prev) => prev.filter((sale) => !selectedIds.includes(sale.id)));
+      if (result.success) {
+        alert("Penjualan terpilih berhasil dihapus");
+      } else {
+        alert(result.message);
+        setError(result.message);
+      }
+    } catch (err) {
+      console.error("Error bulk deleting sales:", err);
+      setError("Gagal menghapus beberapa penjualan.");
+    }
   };
 
   // Confirm delete
@@ -338,6 +358,7 @@ const SalesPage = () => {
           totalPages={totalPages}
           onPageChange={setCurrentPage}
           totalItems={filteredSales.length}
+          onBulkDelete={handleBulkDelete}
         />
       </div>
 

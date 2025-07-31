@@ -4,8 +4,16 @@ import UtilityService from "../../../services/UtilityServices.js";
 import {Eye, Trash2} from "lucide-react";
 import React from "react";
 
-const SalesTableRow = ({ sale, onViewDetail, onDeleteSale }) => (
+const SalesTableRow = ({ sale, onViewDetail, onDeleteSale, isSelected, onSelectRow }) => (
     <tr className="hover:bg-gray-50">
+        <td className="px-2 py-3 text-center">
+            <input
+                type="checkbox"
+                checked={isSelected}
+                onChange={onSelectRow}
+                aria-label={`Select sale ${sale.id}`}
+            />
+        </td>
         <td className="px-6 py-4 whitespace-nowrap">
             <div className="font-medium text-gray-900">{sale.order_number}</div>
         </td>

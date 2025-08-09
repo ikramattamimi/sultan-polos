@@ -2,8 +2,8 @@ import React, {useEffect, useState} from 'react';
 import {Search, X} from 'lucide-react';
 
 // Components
-import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch} from '../components/products';
-import {EmptyState} from '../components/common';
+import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch} from '../components/products/index.js';
+import {EmptyState} from '../components/common/index.js';
 
 // Services
 import ProductService from '../services/ProductService.js';
@@ -108,12 +108,14 @@ const ProductManagementPage = () => {
       setLoading(true);
 
       // Create product in Supabase
-      const newProduct = await ProductService.create({
+      await ProductService.create({
         name: productData.name,
-        category_id: productData.category, // assuming category is the ID
-        type_id: productData.type, // assuming type is the ID
+        category_id: productData.category,
+        type_id: productData.type,
         base_price: productData.basePrice,
+        reference_price: productData.referencePrice,
         description: productData.description,
+        partner: productData.partner || null,
       });
 
       // Refresh products list to get updated data
@@ -134,7 +136,7 @@ const ProductManagementPage = () => {
     try {
       setLoading(true);
       // Create variant in Supabase
-      const newVariant = await ProductVariantService.create({
+      await ProductVariantService.create({
         product_id: productId,
         selling_price: variantData.selling_price,
         stock: variantData.stock,
@@ -307,7 +309,7 @@ const ProductManagementPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <ProductManagementHeader
           onClickRefresh={handleRefresh}
           disabledRefresh={refreshing}

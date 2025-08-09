@@ -145,9 +145,16 @@ const Input = ({
         {/* Left Icon */}
         {leftIcon && (
           <div className={`${getIconPosition('left')} pointer-events-none z-10 ${leftIconClassName}`}>
-            {React.cloneElement(leftIcon, {
-              className: `${iconSizeClasses[size]} ${leftIcon.props?.className || ''}`
-            })}
+            {typeof leftIcon === "string"
+              ? (
+                <span className={`${iconSizeClasses[size]} flex items-center justify-center`}>
+                  {leftIcon}
+                </span>
+              )
+              : React.cloneElement(leftIcon, {
+                  className: `${iconSizeClasses[size]} ${leftIcon.props?.className || ''}`
+                })
+            }
           </div>
         )}
 

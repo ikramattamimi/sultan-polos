@@ -1,4 +1,3 @@
-
 // ===========================================
 // STOCK TRANSACTION METHODS
 
@@ -6,36 +5,76 @@ import { supabase } from "../supabaseClient"
 
 // ===========================================
 export const StockTransactionService = {
-  // Record product stock transaction
+  // Record product stock transaction + update product_variants.stock (manual)
   async recordProductTransaction(variantId, quantity, transactionType) {
-    const { data, error } = await supabase
+    const { data: txn, error: txnError } = await supabase
       .from('product_stock_transactions')
       .insert([{
         variant_id: variantId,
-        quantity: quantity,
+        quantity,
         transaction_type: transactionType
       }])
       .select()
-      .single()
-    
-    if (error) throw error
-    return data
+      .single();
+
+    if (txnError) throw txnError;
+
+    // Manual stock update for product_variants
+    const { data: variant, error: getErr } = await supabase
+      .from('product_variants')
+      .select('stock')
+      .eq('id', variantId)
+      .single();
+    if (getErr) throw getErr;
+
+    const newStock = (variant?.stock || 0) + quantity;
+    if (newStock < 0) {
+      throw new Error(`Stok produk tidak boleh negatif (variant_id=${variantId})`);
+    }
+
+    const { error: updErr } = await supabase
+      .from('product_variants')
+      .update({ stock: newStock, updated_at: new Date().toISOString() })
+      .eq('id', variantId);
+
+    if (updErr) throw updErr;
+    return txn;
   },
 
-  // Record convection stock transaction
+  // Record convection stock transaction + update convections.stock (manual)
   async recordConvectionTransaction(convectionId, quantity, transactionType) {
-    const { data, error } = await supabase
+    const { data: txn, error: txnError } = await supabase
       .from('convection_stock_transactions')
       .insert([{
         convection_id: convectionId,
-        quantity: quantity,
+        quantity,
         transaction_type: transactionType
       }])
       .select()
-      .single()
-    
-    if (error) throw error
-    return data
+      .single();
+
+    if (txnError) throw txnError;
+
+    // Manual stock update for convections
+    const { data: conv, error: getErr } = await supabase
+      .from('convections')
+      .select('stock')
+      .eq('id', convectionId)
+      .single();
+    if (getErr) throw getErr;
+
+    const newStock = (conv?.stock || 0) + quantity;
+    if (newStock < 0) {
+      throw new Error(`Stock bahan mentah tidak boleh negatif (convection_id=${convectionId})`);
+    }
+
+    const { error: updErr } = await supabase
+      .from('convections')
+      .update({ stock: newStock, updated_at: new Date().toISOString() })
+      .eq('id', convectionId);
+
+    if (updErr) throw updErr;
+    return txn;
   },
 
   // Get product stock history

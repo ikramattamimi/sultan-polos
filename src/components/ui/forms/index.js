@@ -6,3 +6,4 @@ export { default as FormGroup } from './FormGroup.jsx';
 export { default as FormLabel } from './FormLabel.jsx';
 export { default as FieldError } from './FieldError.jsx';
 export { default as HelperText } from './HelperText.jsx';
+export { default as PriceInput } from './PriceInput.jsx';

@@ -118,7 +118,7 @@ const VariantCard = ({ variant, onSelect, onDelete }) => (
           }`}
           title={`Stok: ${variant.stock ?? 0}`}
         >
-          {variant.stock > 0 ? `Stok ${variant.stock}` : 'Habis'}
+          Stok: {variant.stock}
         </span>
       </div>
     </button>

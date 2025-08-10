@@ -15,12 +15,14 @@ import CreateSalesHeader from "../components/sales/create/CreateSalesHeader.jsx"
 import ProductSelector from "../components/sales/create/ProductSelector.jsx";
 import ShoppingCartComponent from "../components/sales/create/ShoppingCart.jsx";
 import ProductModal from "../components/sales/create/ProductModal.jsx";
+import OrderConfirmationModal from "../components/sales/create/OrderConfirmationModal.jsx";
 const SalesCreatePage = () => {
   const navigate = useNavigate();
 
   // State data
   const [products, setProducts] = useState([]);
   const [printTypes, setPrintTypes] = useState([]);
+  const [customers, setCustomers] = useState([]);
 
   // State loading
   const [loading, setLoading] = useState(true);
@@ -34,6 +36,7 @@ const SalesCreatePage = () => {
   const [cartItems, setCartItems] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [showProductModal, setShowProductModal] = useState(false);
+  const [showOrderModal, setShowOrderModal] = useState(false);
 
   // Load data awal
   const loadData = async () => {
@@ -60,6 +63,13 @@ const SalesCreatePage = () => {
 
   useEffect(() => {
     loadData();
+  }, []);
+
+  // Ambil daftar customer
+  useEffect(() => {
+    SaleService.getCustomerNames()
+      .then((data) => setCustomers(data || []))
+      .catch(() => setCustomers([]));
   }, []);
 
   // Generate nomor order unik
@@ -125,6 +135,21 @@ const SalesCreatePage = () => {
   // Hitung total harga
   const getTotalActualPrice = () => {
     return cartItems.reduce((total, item) => total + item.total_actual, 0);
+  };
+
+  // Handler untuk tombol "Buat Order Penjualan"
+  const handleRequestOrder = () => {
+    setShowOrderModal(true);
+  };
+
+  // Handler submit order dari modal
+  const handleConfirmOrder = async () => {
+    // if (!customer || customer.trim() === "") {
+    //   alert("Silakan isi nama customer terlebih dahulu.");
+    //   return;
+    // }
+    setShowOrderModal(false);
+    await handleSubmitOrder();
   };
 
   // Handle submit order
@@ -221,7 +246,7 @@ const SalesCreatePage = () => {
               cartItems={cartItems}
               onRemoveItem={removeFromCart}
               onUpdateQuantity={updateCartQuantity}
-              onSubmitOrder={handleSubmitOrder}
+              onRequestOrder={handleRequestOrder} // Ganti dari onSubmitOrder
               totalPrice={getTotalActualPrice()}
               submitting={submitting}
             />
@@ -244,6 +269,20 @@ const SalesCreatePage = () => {
           submitting={submitting}
         />
       )}
+
+      {/* Order Confirmation Modal */}
+      <OrderConfirmationModal
+        open={showOrderModal}
+        orderNumber={orderNumber}
+        setOrderNumber={setOrderNumber}
+        customer={customer}
+        setCustomer={setCustomer}
+        customers={customers}
+        submitting={submitting}
+        onConfirm={handleConfirmOrder}
+        onCancel={() => setShowOrderModal(false)}
+        totalPrice={getTotalActualPrice()}
+      />
     </div>
   );
 };

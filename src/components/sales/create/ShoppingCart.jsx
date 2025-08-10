@@ -9,7 +9,7 @@ const ShoppingCartComponent = ({
   cartItems,
   onRemoveItem,
   onUpdateQuantity,
-  onSubmitOrder,
+  onRequestOrder,
   totalPrice,
   submitting,
 }) => (
@@ -34,7 +34,7 @@ const ShoppingCartComponent = ({
 
         <CartSummary
           totalPrice={totalPrice}
-          onSubmitOrder={onSubmitOrder}
+          onRequestOrder={onRequestOrder}
           submitting={submitting}
           hasItems={cartItems.length > 0}
         />
@@ -105,7 +105,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
         <X className="h-4 w-4" />
       </button>
     </div>
-    <div className="flex justify-between items-center">
+    {/* <div className="flex justify-between items-center"> */}
           <QuantitySelection
             quantity={item.quantity}
             maxQuantity={item.variant.stock}
@@ -118,7 +118,7 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
             {UtilityService.formatCurrency(item.total_actual)}
           </p>
 
-        </div>
+        {/* </div> */}
   </div>
 );
 
@@ -150,7 +150,7 @@ const QuantitySelector = ({
 );
 
 // CartSummary Component
-const CartSummary = ({ totalPrice, onSubmitOrder, submitting, hasItems }) => (
+const CartSummary = ({ totalPrice, onRequestOrder, submitting, hasItems }) => (
   <>
     <div className="border-t pt-4">
       <div className="flex justify-between items-center text-xl font-bold">
@@ -162,7 +162,7 @@ const CartSummary = ({ totalPrice, onSubmitOrder, submitting, hasItems }) => (
     </div>
 
     <button
-      onClick={onSubmitOrder}
+      onClick={onRequestOrder}
       disabled={submitting || !hasItems}
       className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
     >

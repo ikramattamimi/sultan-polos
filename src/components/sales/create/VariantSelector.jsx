@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { Palette, Ruler, Package, Printer, Plus, ShoppingCart, Minus } from 'lucide-react';
 import UtilityService from '../../../services/UtilityServices.js';
-import { Input } from '../../ui/forms/index.js';
+import { Input, PriceInput } from '../../ui/forms/index.js';
 
 const VariantSelector = ({ 
   product, 
@@ -67,10 +67,10 @@ const VariantSelector = ({
       return;
     }
 
-    if (quantity > selectedVariant.stock) {
-      alert('Kuantitas melebihi stok yang tersedia');
-      return;
-    }
+    // if (quantity > selectedVariant.stock) {
+    //   alert('Kuantitas melebihi stok yang tersedia');
+    //   return;
+    // }
 
     if (isPrinted && !selectedPrintType) {
       alert('Silakan pilih jenis print');
@@ -140,11 +140,9 @@ const VariantSelector = ({
       <div className="grid grid-cols-2 gap-8">
 
         <div>
-          <h6 className="font-semibold text-gray-900 mb-3">Referensi Harga Satuan</h6>
           <div className="flex gap-3">
-            <Input
-              type="number"
-              className="w-25 shadow-none"
+            <PriceInput 
+              label="Referensi Harga Satuan"
               value={product.reference_price || 0}
               leftIcon="Rp"
               disabled
@@ -152,26 +150,12 @@ const VariantSelector = ({
           </div>
         </div>
         <div>
-          <h6 className="font-semibold text-gray-900 mb-3">Harga Satuan Aktual <span className="text-red-500">*</span></h6>
           <div className="flex gap-3">
-            <Input
-              type="number"
-              onChange={(event) => {
-                const input = event.target;
-                const position = input.selectionStart;
-                const originalLength = input.value.length;
-                const numericValue = input.value.replace(/[^\d]/g, "");
-                setActualPrice(numericValue);
-                const formatted = new Intl.NumberFormat("id-ID").format(numericValue);
-                input.value = formatted;
-                const newLength = formatted.length;
-                input.setSelectionRange(
-                  position + (newLength - originalLength),
-                  position + (newLength - originalLength)
-                );
-              }}
-              className="w-25 shadow-none"
-              leftIcon="Rp"
+            <PriceInput
+              label="Harga Satuan Aktual"
+              value={actualPrice}
+              onChange={setActualPrice}
+              required
             />
           </div>
         </div>
@@ -236,24 +220,24 @@ export const QuantitySelection = ({ quantity, maxQuantity, onQuantityChange, dis
   <div>
     {showLabel && <h6 className="font-semibold text-gray-900 mb-3">Kuantitas</h6>}
     <div className="flex items-center space-x-4">
-      
-      <Input
-        type="number"
-        min={1}
-        max={maxQuantity}
-        value={quantity}
-        onChange={(e) => {
-          const value = parseInt(e.target.value) || 1;
-          onQuantityChange(Math.min(maxQuantity, Math.max(1, value)));
-        }}
-        disabled={disabled}
-        className="w-full text-center py-1 px-2 border-1 border-gray-300 shadow-none"
-        leftIcon={<Minus className="h-4 w-4" />}
-        rightIcon={<Plus className="h-4 w-4" />}
-        onLeftIconClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-        onRightIconClick={() => onQuantityChange(Math.min(maxQuantity, quantity + 1))}
-      />
-      
+      <div className="w-36">
+        <Input
+          type="number"
+          // min={1}
+          max={maxQuantity}
+          value={quantity}
+          onChange={(e) => {
+            const value = parseInt(e.target.value);
+            onQuantityChange(value);
+          }}
+          disabled={disabled}
+          className="text-center py-1 px-2 border-1 border-gray-300 shadow-none"
+          leftIcon={<Minus className="h-4 w-4" />}
+          rightIcon={<Plus className="h-4 w-4" />}
+          onLeftIconClick={() => onQuantityChange(quantity - 1)}
+          onRightIconClick={() => onQuantityChange(quantity + 1)}
+        />
+      </div>
       <span className="text-sm text-gray-600">
         Stok: {maxQuantity}
       </span>

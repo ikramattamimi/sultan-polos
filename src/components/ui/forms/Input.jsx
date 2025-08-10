@@ -1,6 +1,7 @@
 import React from 'react';
 import {AlertCircle} from 'lucide-react';
 import {FieldError, HelperText} from "./index.js";
+import styles from './Input.module.css';
 
 const Input = ({
                  label,
@@ -70,7 +71,7 @@ const Input = ({
 
     // Border style - apply default jika tidak ada border class di className
     if (!hasClass(className, 'border') && !className.includes('border-')) {
-      classes.push('border-0');
+      classes.push('border-1');
     }
 
     // Border radius - apply default jika tidak ada rounded class di className
@@ -176,6 +177,7 @@ const Input = ({
             ${getConditionalDefaults()}
             ${errorClasses}
             ${className}
+            ${type === 'number' ? styles['hide-number-spin'] : ''}
           `.trim().replace(/\s+/g, ' ')}
           {...props}
         />

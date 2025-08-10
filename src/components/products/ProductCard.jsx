@@ -1,6 +1,7 @@
 import React from 'react';
 import { Edit2, Trash2 } from 'lucide-react';
 import { VariantSection } from './index';
+import { ColorCircle, SizeBadge } from '../common';
 
 // Component untuk Card Produk
 const ProductCard = ({
@@ -73,12 +74,7 @@ const ProductCard = ({
                     <span className="text-gray-500">Ukuran:</span>
                     <div className="flex flex-wrap gap-1">
                       {sizes.slice(0, 8).map((s) => (
-                        <span
-                          key={String(s)}
-                          className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-xs border border-gray-200"
-                        >
-                          {s}
-                        </span>
+                        <SizeBadge key={s} size={s} className="bg-gray-100 text-gray-800" />
                       ))}
                       {sizes.length > 8 && (
                         <span className="text-xs text-gray-500">+{sizes.length - 8}</span>
@@ -89,24 +85,9 @@ const ProductCard = ({
                 {colorList.length > 0 && (
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Warna:</span>
-                    <div className="flex flex-wrap gap-1">
+                    <div className="flex flex-wrap gap-2">
                       {colorList.slice(0, 8).map((c, idx) => (
-                        <span
-                          key={`${c.hex || c.name || idx}`}
-                          // className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 text-gray-800 text-xs border border-gray-200"
-                          title={c.name || c.hex || 'Warna'}
-                        >
-                          <svg width="20" height="20" viewBox="0 0 12 12" aria-hidden="true">
-                            <circle
-                              cx="6"
-                              cy="6"
-                              r="5"
-                              fill={c.hex || c.name || '#9CA3AF'}
-                              stroke="#E5E7EB"
-                              strokeWidth="1"
-                            />
-                          </svg>
-                        </span>
+                        <ColorCircle key={`${c.hex || c.name || idx}`} color={c.hex || c.name || '#9CA3AF'} title={c.name || c.hex || 'Warna'} />
                       ))}
                       {colorList.length > 8 && (
                         <span className="text-xs text-gray-500">+{colorList.length - 8}</span>

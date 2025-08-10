@@ -1,23 +1,28 @@
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import UtilityService from "../../../services/UtilityServices.js";
+import ColorCircle, { ColorBadge } from "../../common/ColorCircle.jsx";
+import SizeBadge from "../../common/SizeBadge.jsx";
+import { QuantitySelection } from "./VariantSelector.jsx";
 
 // ShoppingCartComponent
-const ShoppingCartComponent = ({ 
-  cartItems, 
-  onRemoveItem, 
-  onUpdateQuantity, 
-  onSubmitOrder, 
-  totalPrice, 
-  submitting 
+const ShoppingCartComponent = ({
+  cartItems,
+  onRemoveItem,
+  onUpdateQuantity,
+  onSubmitOrder,
+  totalPrice,
+  submitting,
 }) => (
   <div className="bg-white rounded-lg shadow-md p-6">
-    <h2 className="text-xl font-semibold text-gray-900 mb-4">Keranjang Belanja</h2>
-    
+    <h2 className="text-xl font-semibold text-gray-900 mb-4">
+      Keranjang Belanja
+    </h2>
+
     {cartItems.length === 0 ? (
       <EmptyCart />
     ) : (
       <div className="space-y-4">
-        {cartItems.map(item => (
+        {cartItems.map((item) => (
           <CartItem
             key={item.id}
             item={item}
@@ -26,7 +31,7 @@ const ShoppingCartComponent = ({
             submitting={submitting}
           />
         ))}
-        
+
         <CartSummary
           totalPrice={totalPrice}
           onSubmitOrder={onSubmitOrder}
@@ -37,7 +42,6 @@ const ShoppingCartComponent = ({
     )}
   </div>
 );
-
 
 // EmptyCart Component
 const EmptyCart = () => (
@@ -52,21 +56,46 @@ const EmptyCart = () => (
 const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
   <div className="border border-gray-200 rounded-lg p-4">
     <div className="flex justify-between items-start mb-2">
-      <div>
+      <div className="flex flex-col gap-2">
         <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-        <p className="text-sm text-gray-600">{item.variant_details}</p>
-        <p className="text-xs text-gray-500">
-            <span>Stok: {item.variant.stock}</span>
-            <span> | Base: {UtilityService.formatCurrency(item.unit_price)}</span>
+        <div className="flex gap-2 items-center text-xs">
+          <div>
+            <span className="text-gray-400 me-3">Ukuran:</span>
+            <SizeBadge size={item.variant_size} />
+          </div>
+          <div>
+            <span className="text-gray-400 me-3">Warna:</span>
+            <ColorBadge
+              color={item.variant_color_hex}
+              title={item.variant_color}
+            />
+          </div>
+          {item.print_type && (
+            <div>
+              <span className="text-gray-400 me-3">Sablon:</span>
+              <SizeBadge size={item.print_type.name} />
+            </div>
+          )}
+        </div>
+        {/* <p className="text-xs text-gray-500">
+          <span>Stok: {item.variant.stock}</span>
 
-            {item.is_printed && (
-                <span> | Print ({item.print_type.name}): {UtilityService.formatCurrency(item.print_price)}</span>
-            )}
+          {item.is_printed && (
+            <span>
+              {" "}
+              | Print ({item.print_type.name}):{" "}
+              {UtilityService.formatCurrency(item.print_price)}
+            </span>
+          )}
+        </p> */}
+
+        <p className="text-sm text-gray-500 line-through">
+          Base:
+          {UtilityService.formatCurrency(item.unit_price + item.print_price)}
         </p>
-      <div className="text-sm text-blue-600">
-        <p>Base: {UtilityService.formatCurrency(item.unit_price + item.print_price)}</p>
-        <p>Aktual: {UtilityService.formatCurrency(item.actual_price)}</p>
-      </div>
+        <p className="text-md text-gray-500">Aktual: {UtilityService.formatCurrency(item.actual_price)}</p>
+
+        
       </div>
       <button
         onClick={onRemove}
@@ -76,25 +105,31 @@ const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
         <X className="h-4 w-4" />
       </button>
     </div>
-    
     <div className="flex justify-between items-center">
-      <QuantitySelector
-        quantity={item.quantity}
-        maxStock={item.variant.stock}
-        onDecrease={() => onUpdateQuantity(item.quantity - 1)}
-        onIncrease={() => onUpdateQuantity(item.quantity + 1)}
-        disabled={submitting}
-      />
-      <span className="font-semibold text-green-600">
-        {UtilityService.formatCurrency(item.total_actual)}
-      </span>
-    </div>
+          <QuantitySelection
+            quantity={item.quantity}
+            maxQuantity={item.variant.stock}
+            onQuantityChange={onUpdateQuantity}
+            disabled={submitting}
+            showLabel={false}
+          />
+
+          <p className="text-lg my-3 text-green-600">
+            {UtilityService.formatCurrency(item.total_actual)}
+          </p>
+
+        </div>
   </div>
 );
 
-
 // QuantitySelector Component
-const QuantitySelector = ({ quantity, maxStock, onDecrease, onIncrease, disabled }) => (
+const QuantitySelector = ({
+  quantity,
+  maxStock,
+  onDecrease,
+  onIncrease,
+  disabled,
+}) => (
   <div className="flex items-center space-x-2">
     <button
       onClick={onDecrease}
@@ -125,7 +160,7 @@ const CartSummary = ({ totalPrice, onSubmitOrder, submitting, hasItems }) => (
         </span>
       </div>
     </div>
-    
+
     <button
       onClick={onSubmitOrder}
       disabled={submitting || !hasItems}
@@ -137,12 +172,10 @@ const CartSummary = ({ totalPrice, onSubmitOrder, submitting, hasItems }) => (
           Membuat Order...
         </>
       ) : (
-        'Buat Order Penjualan'
+        "Buat Order Penjualan"
       )}
     </button>
   </>
 );
 
-
-
-export default ShoppingCartComponent
+export default ShoppingCartComponent;

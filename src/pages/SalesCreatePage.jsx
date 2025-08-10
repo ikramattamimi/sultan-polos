@@ -186,7 +186,7 @@ const SalesCreatePage = () => {
       }));
 
       // Buat penjualan
-      await SaleService.createSaleAndItems(saleData, saleItems);
+      await SaleService.create(saleData, saleItems);
 
       loadData();
       alert("Order berhasil dibuat!");

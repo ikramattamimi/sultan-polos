@@ -378,7 +378,7 @@ const IncomeStatementPage = () => {
               <td class="center">Ukuran</td>
               <td class="center">Warna</td>
               <td class="center">Qty</td>
-              <td class="center">Harga Pokok</td>
+              <td class="center">HPP</td>
               <td class="center">Total HPP</td>
             </tr>
             ${HPP_breakdown.map((item, index) => {

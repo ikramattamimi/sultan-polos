@@ -535,7 +535,7 @@ const HPPDetailsTab = ({ calculationDetails, loadingDetails }) => {
                 Qty
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Harga Pokok
+                HPP
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Harga Jual

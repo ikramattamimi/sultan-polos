@@ -204,7 +204,7 @@ const SaleItemRow = ({ item }) => (
     </td>
     <td className="px-6 py-4 whitespace-nowrap">
       <div className="text-sm text-gray-900">
-        {item.product_variants?.partner || '-'}
+        {item.product_variants?.products?.partner || '-'}
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-center">

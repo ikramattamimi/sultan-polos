@@ -21,11 +21,13 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
           <Menu size={24} />
         </button>
       ) : (
-        <>
-          <div className="logo mb-5 flex items-center gap-2 px-3 py-2">
-            <Crown size={28} />
-            <span className="font-bold text-lg">SULTAN POLOS</span>
-          </div>
+          <>
+          <NavLink to="/" className="m-0 p-0">
+            <div className="logo mb-5 flex items-center gap-2 px-3 py-2">
+              <Crown size={28} />
+              <span className="font-bold text-lg">SULTAN POLOS</span>
+            </div>
+          </NavLink>
           <button
             className="absolute top-3 right-[-16px] z-10 bg-gray-200 rounded-full p-1 border border-gray-300 hover:bg-gray-300 transition-all"
             // style={{ width: 28, height: 28 }}
@@ -36,12 +38,12 @@ const Sidebar = ({ collapsed, setCollapsed }) => {
             <ChevronLeft size={20} />
           </button>
           <ul className="flex-1 pl-4 pr-2 transition-all duration-300">
-            <li className="my-2">
+            {/* <li className="my-2">
               <NavLink to="/" className="flex items-center gap-2">
                 <Home size={20} />
                 Dashboard
               </NavLink>
-            </li>
+            </li> */}
             <li className="my-2">
               <DropdownMenu
                 title={

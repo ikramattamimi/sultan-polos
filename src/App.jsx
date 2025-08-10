@@ -1,6 +1,7 @@
 import {
   createBrowserRouter,
   createRoutesFromElements,
+  Navigate,
   Route,
   RouterProvider,
 } from "react-router-dom";
@@ -35,7 +36,8 @@ function App() {
       <>
         <Route path="/" element={<AdminLayout />}>
 
-          <Route index element={<AdminHome />} />
+          {/* <Route index element={<AdminHome />} /> */}
+          <Route index element={<Navigate to="sales" replace />} />
           <Route path="dashboard" id="dashboard" element={<AdminHome />} loader={dashboardLoader} />
 
           {/* Inventory Routes */}

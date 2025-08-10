@@ -94,10 +94,10 @@ const ProductForm = ({
   const fetchPartners = async () => {
     try {
       const partnersData = await ProductService.getUniquePartners();
-      if (partnersData && !partnersData.includes('Tambah Mitra Baru')) partnersData.push('Tambah Mitra Baru');
+      // if (partnersData && !partnersData.includes('Tambah Mitra Baru')) partnersData.push('Tambah Mitra Baru');
       setPartners(partnersData || []);
     } catch (err) {
-      setPartners(['Tambah Mitra Baru']);
+      // setPartners(['Tambah Mitra Baru']);
     }
   };
 
@@ -220,7 +220,20 @@ const ProductForm = ({
       />
 
       {/* Mitra Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <Input
+        label="Nama Mitra"
+        value={product.partner}
+        onChange={handlePartnerChange}
+        // disabled={submitting}
+        placeholder="Masukkan nama mitra"
+        list="partner-list"
+      />
+      <datalist id="partner-list">
+        {partners.map((c, idx) => (
+          <option key={idx} value={c} />
+        ))}
+      </datalist>
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Select
           id="partner"
           name="partner"
@@ -230,7 +243,6 @@ const ProductForm = ({
           placeholder="Pilih Mitra"
           options={partners}
         />
-        {/* Custom Mitra Input */}
         {showCustomPartner && (
           <div>
             <Input
@@ -244,7 +256,7 @@ const ProductForm = ({
             />
           </div>
         )}
-      </div>
+      </div> */}
 
       <div className="flex gap-2 pt-1">
         <button

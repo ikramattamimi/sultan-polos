@@ -18,6 +18,14 @@ const OrderConfirmationModal = ({
   const [isPaid, setIsPaid] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState("");
 
+  // Helper untuk membatasi nilai pembayaran 0..totalPrice
+  const clampAmount = (val) => {
+    const n = Number(val);
+    if (Number.isNaN(n)) return "";
+    const max = Number(totalPrice) || 0;
+    return Math.min(Math.max(0, n), max);
+  };
+
   // Set tanggal order otomatis ke hari ini saat modal dibuka
   useEffect(() => {
     if (open) {
@@ -44,6 +52,13 @@ const OrderConfirmationModal = ({
       setPaymentAmount("");
     }
   }, [isPaid]);
+
+  // Clamp paymentAmount ketika totalPrice berubah
+  useEffect(() => {
+    if (paymentAmount === "" || isPaid) return;
+    const clamped = clampAmount(paymentAmount);
+    if (clamped !== paymentAmount) setPaymentAmount(clamped);
+  }, [totalPrice]);
 
   if (!open) return null;
   return (
@@ -88,7 +103,7 @@ const OrderConfirmationModal = ({
           <PriceInput
             label="Total Pembayaran"
             value={paymentAmount}
-            onChange={e => setPaymentAmount(e.target.value)}
+            onChange={(v) => setPaymentAmount(clampAmount(v))}
             disabled={isPaid}
           />
           <div className="flex items-center mt-2">

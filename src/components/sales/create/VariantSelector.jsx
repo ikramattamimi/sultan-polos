@@ -20,6 +20,7 @@ const VariantSelector = ({
   const [isPrinted, setIsPrinted] = useState(false);
   const [selectedPrintType, setSelectedPrintType] = useState(null);
   const [actualPrice, setActualPrice] = useState(0);
+  const [autoActualPrice, setAutoActualPrice] = useState(false);
 
   // Reset state ketika produk berubah
   useEffect(() => {
@@ -29,6 +30,13 @@ const VariantSelector = ({
     setIsPrinted(false);
     setSelectedPrintType(null);
   }, [product]);
+
+  // Sinkronkan harga aktual dengan referensi saat checkbox aktif atau referensi berubah
+  useEffect(() => {
+    if (autoActualPrice) {
+      setActualPrice(product.reference_price || 0);
+    }
+  }, [autoActualPrice, product?.reference_price]);
 
   // Group variants by color
   const colorGroups = variants.reduce((acc, variant) => {
@@ -139,25 +147,39 @@ const VariantSelector = ({
 
       <div className="grid grid-cols-2 gap-8">
 
-        <div>
-          <div className="flex gap-3">
-            <PriceInput 
-              label="Referensi Harga Satuan"
-              value={product.reference_price || 0}
-              leftIcon="Rp"
-              disabled
-            />
-          </div>
+        <div className="w-50">
+          <PriceInput 
+            label="Referensi Harga Satuan"
+            value={product.reference_price || 0}
+            leftIcon="Rp"
+            disabled
+          />
         </div>
-        <div>
-          <div className="flex gap-3">
-            <PriceInput
-              label="Harga Satuan Aktual"
-              value={actualPrice}
-              onChange={setActualPrice}
-              required
+        <div className="w-50">
+          <PriceInput
+            label="Harga Satuan Aktual"
+            value={actualPrice}
+            onChange={setActualPrice}
+            leftIcon="Rp"
+            required
+            disabled={autoActualPrice}
+          />
+          
+          <label className="flex items-center text-sm mt-2">
+            <input
+              type="checkbox"
+              className="mr-2 h-4 w-4 border text-blue-600 focus:ring-blue-500 border-gray-100 rounded"
+              checked={autoActualPrice}
+              onChange={(e) => {
+                const checked = e.target.checked;
+                setAutoActualPrice(checked);
+                if (checked) {
+                  setActualPrice(product.reference_price || 0);
+                }
+              }}
             />
-          </div>
+            Samakan dengan referensi
+          </label>
         </div>
       </div>
 

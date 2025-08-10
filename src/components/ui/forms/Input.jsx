@@ -18,6 +18,7 @@ const Input = ({
                  leftIcon,
                  rightIcon,
                  onRightIconClick,
+                 onLeftIconClick,
                  rightIconClassName = '',
                  leftIconClassName = '',
                  ...props
@@ -69,7 +70,7 @@ const Input = ({
 
     // Border style - apply default jika tidak ada border class di className
     if (!hasClass(className, 'border') && !className.includes('border-')) {
-      classes.push('border');
+      classes.push('border-0');
     }
 
     // Border radius - apply default jika tidak ada rounded class di className
@@ -144,7 +145,10 @@ const Input = ({
       <div className="relative">
         {/* Left Icon */}
         {leftIcon && (
-          <div className={`${getIconPosition('left')} pointer-events-none z-10 ps-3 ${leftIconClassName}`}>
+          <div
+            className={`${getIconPosition('left')} z-10 ${onLeftIconClick ? 'cursor-pointer' : 'pointer-events-none'} ps-3 ${leftIconClassName}`}
+            onClick={onLeftIconClick}
+          >
             {typeof leftIcon === "string"
               ? (
                 <span className={`${iconSizeClasses[size]} flex items-center justify-center`}>

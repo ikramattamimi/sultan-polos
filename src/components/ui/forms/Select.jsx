@@ -13,6 +13,7 @@ const Select = ({
                   required = false,
                   disabled = false,
                   className = '',
+                  marginBottom = true,
                   size = 'md',
                   id,
                   // Dynamic props untuk options
@@ -116,7 +117,7 @@ const Select = ({
   };
 
   return (
-    <div className="mb-4">
+    <div className={`${marginBottom ? 'mb-4' : ''}`}>
       {label && (
         <label
           htmlFor={selectId}

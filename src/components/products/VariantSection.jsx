@@ -2,7 +2,7 @@ import React from 'react';
 import VariantList from './VariantList.jsx';
 
 // Component untuk Section Varian
-const VariantSection = ({ product, show, onAddVariant, onDeleteVariant }) => {
+const VariantSection = ({ product, show, onAddVariant, onDeleteVariant, onUpdateVariant }) => {
   if (!show) return null;
 
   return (
@@ -14,6 +14,7 @@ const VariantSection = ({ product, show, onAddVariant, onDeleteVariant }) => {
         variants={product.product_variants} 
         onDelete={(variantId) => onDeleteVariant(product.id, variantId)} 
         onAdd={onAddVariant}
+        onUpdate={onUpdateVariant}
       />
     </div>
   );

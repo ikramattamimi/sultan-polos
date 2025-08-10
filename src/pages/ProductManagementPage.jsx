@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Search, X} from 'lucide-react';
 
 // Components
-import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch} from '../components/products/index.js';
+import {ProductCard, ProductManagementHeader, ProductModal, ProductSearch, ProductTabs, PartnerFilter} from '../components/products/index.js';
 import {EmptyState} from '../components/common/index.js';
 
 // Services
@@ -24,6 +24,7 @@ const ProductManagementPage = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchFilter, setShowSearchFilter] = useState(false);
+  const [partnerFilter, setPartnerFilter] = useState('all'); // all | with | without
 
   // Function untuk mengelompokkan produk berdasarkan tipe
   const groupProductsByType = (products) => {
@@ -50,26 +51,36 @@ const ProductManagementPage = () => {
     );
   };
 
+  const hasPartner = (p) => Boolean(p?.partner && String(p.partner).trim().length > 0);
+
+  const applyPartnerFilter = (list) => {
+    if (partnerFilter === 'with') return list.filter(hasPartner);
+    if (partnerFilter === 'without') return list.filter(p => !hasPartner(p));
+    return list;
+  };
+
   // Function untuk mendapatkan produk berdasarkan tab aktif dan search
   const getFilteredProducts = () => {
     let filtered = products;
 
-    // Filter berdasarkan search query terlebih dahulu
+    // search
     filtered = filterProductsBySearch(filtered, searchQuery);
 
-    // Kemudian filter berdasarkan tab
-    if (activeTab === 'all') {
-      return filtered;
-    }
+    // partner filter
+    filtered = applyPartnerFilter(filtered);
+
+    // tab by type
+    if (activeTab === 'all') return filtered;
 
     const grouped = groupProductsByType(filtered);
     return grouped[activeTab] || [];
   };
 
-  // Function untuk mendapatkan grouped products berdasarkan search
+  // Function untuk mendapatkan grouped products berdasarkan search (+ partner filter)
   const getSearchedGroupedProducts = () => {
-    const searchFiltered = filterProductsBySearch(products, searchQuery);
-    return groupProductsByType(searchFiltered);
+    let list = filterProductsBySearch(products, searchQuery);
+    list = applyPartnerFilter(list);
+    return groupProductsByType(list);
   };
 
   // Fetch products on component mount
@@ -219,6 +230,19 @@ const ProductManagementPage = () => {
     }
   };
 
+  const handleUpdateVariant = async (variantId, variantData) => {
+  try {
+    setLoading(true);
+    await ProductVariantService.update(variantId, variantData);
+    await fetchProducts();
+    alert('Varian berhasil diperbarui!');
+  } catch (err) {
+    setError('Gagal memperbarui varian. Silakan coba lagi.');
+  } finally {
+    setLoading(false);
+  }
+};
+
   const handleDeleteVariant = async (productId, variantId) => {
     if (!window.confirm('Apakah Anda yakin ingin menghapus varian ini?')) {
       return;
@@ -331,15 +355,21 @@ const ProductManagementPage = () => {
           </div>
         )}
 
-        {/* Product Search Component */}
-        <ProductSearch
-          searchQuery={searchQuery}
-          onSearchChange={handleSearchChange}
-          onClearSearch={handleClearSearch}
-          totalResults={totalSearchResults}
-          onToggleFilter={() => setShowSearchFilter(!showSearchFilter)}
-          className="mb-6"
-        />
+        {/* Search + Partner dropdown in one row */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <ProductSearch
+            searchQuery={searchQuery}
+            onSearchChange={handleSearchChange}
+            onClearSearch={handleClearSearch}
+            totalResults={totalSearchResults}
+            onToggleFilter={() => setShowSearchFilter(!showSearchFilter)}
+            className="md:flex-1"
+          />
+          <PartnerFilter
+            value={partnerFilter}
+            onChange={setPartnerFilter}
+          />
+        </div>
 
         {/* Add Product Modal */}
         <ProductModal
@@ -360,92 +390,19 @@ const ProductManagementPage = () => {
         {/* Products List dengan Tabs */}
         {products.length > 0 ? (
           <div>
-            {/* Tabs Navigation */}
-            <div className="bg-white rounded-lg shadow-sm mb-6 p-1">
-              <div className="flex gap-1 overflow-x-auto">
-                <button
-                  onClick={() => setActiveTab('all')}
-                  className={`flex-shrink-0 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 relative ${
-                    activeTab === 'all'
-                      ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    Semua Produk
-                    <span className={`inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold shadow-md border-2 ${
-                      activeTab === 'all'
-                        ? 'bg-white text-blue-600 border-blue-200 shadow-blue-200/50'
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 shadow-blue-500/30'
-                    }`}>
-                      {totalSearchResults}
-                    </span>
-                  </span>
-                </button>
+            {/* Tabs dipindahkan ke component ProductTabs */}
+            <ProductTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              groupedProducts={searchedGroupedProducts}
+              totalSearchResults={totalSearchResults}
+              filteredCount={filteredProducts.length}
+              searchQuery={searchQuery}
+              onClearSearch={handleClearSearch}
+            />
 
-                {Object.entries(searchedGroupedProducts).map(([typeName, typeProducts]) => (
-                  <button
-                    key={typeName}
-                    onClick={() => setActiveTab(typeName)}
-                    className={`flex-shrink-0 px-6 py-3 rounded-md text-sm font-medium transition-all duration-200 relative ${
-                      activeTab === typeName
-                        ? 'bg-blue-500 text-white shadow-lg transform scale-105'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                    }`}
-                  >
-                    <span className="flex items-center gap-3">
-                      {typeName}
-                      <span className={`inline-flex items-center justify-center min-w-[24px] h-6 px-2 rounded-full text-xs font-bold shadow-md border-2 ${
-                        activeTab === typeName
-                          ? 'bg-white text-blue-600 border-blue-200 shadow-blue-200/50'
-                          : 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-blue-400 shadow-blue-500/30'
-                      }`}>
-                        {typeProducts.length}
-                      </span>
-                    </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Tab Content */}
+            {/* Products Display */}
             <div className="transition-all duration-300">
-              {/* Header untuk tab aktif dengan search info */}
-              {(activeTab !== 'all' || searchQuery) && (
-                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-6 border border-blue-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-800">
-                        {activeTab === 'all'
-                          ? `Hasil Pencarian "${searchQuery}"`
-                          : `Produk Tipe ${activeTab}${searchQuery ? ` - "${searchQuery}"` : ''}`
-                        }
-                      </h2>
-                      <p className="text-gray-600 mt-1">
-                        Menampilkan {filteredProducts.length} produk
-                        {activeTab !== 'all' ? ` dari tipe ${activeTab}` : ''}
-                        {searchQuery ? ` yang cocok dengan pencarian` : ''}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-lg border-2 border-blue-400">
-                        {filteredProducts.length} produk
-                      </div>
-                      {searchQuery && (
-                        <button
-                          onClick={handleClearSearch}
-                          className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1"
-                        >
-                          <X className="w-4 h-4" />
-                          Bersihkan
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Products Display */}
               {filteredProducts.length > 0 ? (
                 <div className="space-y-6">
                   {filteredProducts.map((product) => (
@@ -456,6 +413,7 @@ const ProductManagementPage = () => {
                       onToggleVariants={toggleVariants}
                       showVariants={showVariants[product.id]}
                       onAddVariant={handleAddVariant}
+                      onUpdateVariant={handleUpdateVariant}
                       onDeleteVariant={handleDeleteVariant}
                       onUpdateStock={handleUpdateStock}
                       onUpdateProduct={handleUpdateProduct}

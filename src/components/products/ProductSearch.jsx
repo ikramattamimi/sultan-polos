@@ -12,7 +12,7 @@ const ProductSearch = ({
                          className = ''
                        }) => {
   return (
-    <div className={`bg-white rounded-lg shadow-sm p-4 ${className}`}>
+    <div className={`bg-white rounded-lg shadow-sm ${className}`}>
       <div className="flex items-center gap-4">
         {/* Search Input dengan Input component */}
         <div className="flex-1">

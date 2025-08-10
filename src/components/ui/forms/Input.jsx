@@ -144,7 +144,7 @@ const Input = ({
       <div className="relative">
         {/* Left Icon */}
         {leftIcon && (
-          <div className={`${getIconPosition('left')} pointer-events-none z-10 ${leftIconClassName}`}>
+          <div className={`${getIconPosition('left')} pointer-events-none z-10 ps-3 ${leftIconClassName}`}>
             {typeof leftIcon === "string"
               ? (
                 <span className={`${iconSizeClasses[size]} flex items-center justify-center`}>

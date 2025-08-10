@@ -53,12 +53,20 @@ const OrderConfirmationModal = ({
     }
   }, [isPaid]);
 
-  // Clamp paymentAmount ketika totalPrice berubah
   useEffect(() => {
     if (paymentAmount === "" || isPaid) return;
     const clamped = clampAmount(paymentAmount);
     if (clamped !== paymentAmount) setPaymentAmount(clamped);
   }, [totalPrice]);
+
+  const handleConfirm = () => {
+    const amount = isPaid ? (Number(totalPrice) || 0) : (Number(paymentAmount) || 0);
+    onConfirm({
+      orderDate,
+      isPaid,
+      paymentAmount: clampAmount(amount)
+    });
+  };
 
   if (!open) return null;
   return (
@@ -121,13 +129,21 @@ const OrderConfirmationModal = ({
           </div>
         </div>
         <div className="flex justify-end gap-2">
-          <button onClick={onCancel} className="px-4 py-2 rounded bg-gray-200">Batal</button>
           <button
-            onClick={() => onConfirm({ orderDate, isPaid, paymentAmount })}
-            className="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            type="button"
+            onClick={onCancel}
             disabled={submitting}
+            className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
-            {submitting ? "Memproses..." : "Konfirmasi & Buat Order"}
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={handleConfirm}
+            disabled={submitting}
+            className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors disabled:opacity-50"
+          >
+            Konfirmasi
           </button>
         </div>
       </div>

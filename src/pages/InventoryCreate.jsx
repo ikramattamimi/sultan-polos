@@ -40,9 +40,9 @@ const InventoryCreate = () => {
       newErrors.selling_price = "Harga jual harus lebih dari 0";
     }
 
-    if (!convection.stock || parseInt(convection.stock) < 0) {
-      newErrors.stock = "Stock tidak boleh negatif";
-    }
+    // if (!convection.stock || parseInt(convection.stock) < 0) {
+    //   newErrors.stock = "Stock tidak boleh negatif";
+    // }
 
     if (!convection.color.trim()) {
       newErrors.color = "Warna wajib diisi";

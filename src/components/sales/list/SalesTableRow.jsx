@@ -21,9 +21,9 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale, isSelected, onSelectR
             <div className="text-sm text-gray-900">
                 {UtilityService.formatDate(sale.sale_date)}
             </div>
-            <div className="text-sm text-gray-500">
+            {/* <div className="text-sm text-gray-500">
                 {UtilityService.formatTime(sale.sale_date)}
-            </div>
+            </div> */}
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm text-gray-900">
@@ -36,8 +36,8 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale, isSelected, onSelectR
             </div>
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
-      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-        Selesai
+      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${sale.status === "completed" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}>
+        {sale.status === "completed" ? "Lunas" : "Belum Lunas"}
       </span>
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

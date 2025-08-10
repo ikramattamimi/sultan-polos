@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { ProductService } from "../services/ProductService.js";
 import { SaleService } from "../services/SaleService.js";
 import MasterDataService from "../services/MasterDataService.js";
+import UtilityService from "../services/UtilityServices.js";
 
 // Import komponen modular
 import ErrorAlert from "../components/common/ErrorAlert.jsx";
@@ -143,21 +144,14 @@ const SalesCreatePage = () => {
   };
 
   // Handler submit order dari modal
-  const handleConfirmOrder = async () => {
-    // if (!customer || customer.trim() === "") {
-    //   alert("Silakan isi nama customer terlebih dahulu.");
-    //   return;
-    // }
+  const handleConfirmOrder = async (payload) => {
+    // payload: { orderDate, isPaid, paymentAmount }
     setShowOrderModal(false);
-    await handleSubmitOrder();
+    await handleSubmitOrder(payload);
   };
 
   // Handle submit order
-  const handleSubmitOrder = async () => {
-    // if (!customer || customer.trim() === "") {
-    //   alert('Silakan pilih atau isi nama customer terlebih dahulu.');
-    //   return;
-    // }
+  const handleSubmitOrder = async (paymentInfo) => {
     if (cartItems.length === 0) {
       alert("Silakan tambahkan item ke keranjang sebelum submit.");
       return;
@@ -167,12 +161,21 @@ const SalesCreatePage = () => {
       setSubmitting(true);
       setError(null);
 
+      const total = getTotalActualPrice();
+      const rawAmount = Number(paymentInfo?.paymentAmount) || 0;
+      const paymentAmount = Math.max(0, Math.min(total, rawAmount));
+      const status = paymentAmount >= total ? "completed" : "pending";
+
       // Siapkan data penjualan
       const saleData = {
         order_number: orderNumber,
         customer: customer,
-        total_price: getTotalActualPrice(),
-        sale_date: new Date().toISOString(),
+        total_price: total,
+        sale_date: paymentInfo?.orderDate
+          ? UtilityService.wibLocalToUtcIso(paymentInfo.orderDate)
+          : new Date().toISOString(),
+        status,
+        payment_amount: paymentAmount
       };
 
       // Siapkan item penjualan
@@ -185,8 +188,13 @@ const SalesCreatePage = () => {
         print_type_id: item.print_type_id,
       }));
 
-      // Buat penjualan
-      await SaleService.create(saleData, saleItems);
+      // Buat penjualan + payment_history awal
+      await SaleService.create(saleData, saleItems, {
+        amount: paymentAmount,
+        date: paymentInfo?.orderDate
+          ? UtilityService.wibLocalToUtcIso(paymentInfo.orderDate)
+          : undefined
+      });
 
       loadData();
       alert("Order berhasil dibuat!");

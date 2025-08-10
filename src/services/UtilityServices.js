@@ -1,4 +1,3 @@
-
 // ===========================================
 // UTILITY FUNCTIONS
 // ===========================================
@@ -22,20 +21,36 @@ export const UtilityService = {
     }).format(amount)
   },
 
-  // Format date
+  // Format date (WIB)
   formatDate(date) {
     return new Intl.DateTimeFormat('id-ID', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
+      timeZone: 'Asia/Jakarta',
     }).format(new Date(date));
   },
 
-  // Format time
+  // Format time (WIB)
   formatTime(date) {
     return new Intl.DateTimeFormat('id-ID', {
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Jakarta',
+    }).format(new Date(date));
+  },
+
+  // Format date + time (WIB)
+  formatDateTime(date) {
+    return new Intl.DateTimeFormat('id-ID', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'Asia/Jakarta',
     }).format(new Date(date));
   },
 
@@ -86,7 +101,32 @@ export const UtilityService = {
   extractNumericValue(value) {
     if (!value) return '';
     return value.toString().replace(/[^\d]/g, "");
-  }
+  },
+
+  // Konversi string tanpa zona waktu (ex: '2025-08-11T03:20') sebagai WIB -> ISO UTC
+  wibLocalToUtcIso(dateInput) {
+    if (!dateInput) return new Date().toISOString();
+
+    if (typeof dateInput === 'string') {
+      // Jika sudah punya offset/Z, langsung normalize ke ISO UTC
+      if (/([zZ]|[+\-]\d{2}:\d{2})$/.test(dateInput)) {
+        return new Date(dateInput).toISOString();
+      }
+
+      // Parse 'YYYY-MM-DD' atau 'YYYY-MM-DDTHH:mm[:ss[.SSS]]'
+      const m = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2})(?::(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?)?)?$/.exec(dateInput);
+      if (m) {
+        const y = +m[1], mo = +m[2], d = +m[3];
+        const hh = +(m[4] ?? 0), mm = +(m[5] ?? 0), ss = +(m[6] ?? 0), ms = +(m[7] ?? 0);
+        // WIB = UTC+7, jadi kurangi 7 jam untuk dapat UTC
+        const utcMs = Date.UTC(y, mo - 1, d, hh - 7, mm, ss, ms);
+        return new Date(utcMs).toISOString();
+      }
+    }
+
+    // Fallback untuk Date/number atau format lain
+    return new Date(dateInput).toISOString();
+  },
 }
 
 export default UtilityService

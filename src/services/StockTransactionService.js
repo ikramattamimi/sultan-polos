@@ -28,9 +28,9 @@ export const StockTransactionService = {
     if (getErr) throw getErr;
 
     const newStock = (variant?.stock || 0) + quantity;
-    if (newStock < 0) {
-      throw new Error(`Stok produk tidak boleh negatif (variant_id=${variantId})`);
-    }
+    // if (newStock < 0) {
+    //   throw new Error(`Stok produk tidak boleh negatif (variant_id=${variantId})`);
+    // }
 
     const { error: updErr } = await supabase
       .from('product_variants')

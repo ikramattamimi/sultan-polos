@@ -16,6 +16,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import UtilityService from '../../services/UtilityServices.js';
+import SaleService from '../../services/SaleService.js';
+import PriceInput from '../ui/forms/PriceInput.jsx';
 
 // ===========================================
 // SALE DETAIL MODAL
@@ -50,6 +52,9 @@ const SaleDetailModal = ({ sale, onClose }) => {
 
           {/* Sale Summary */}
           <SaleSummary sale={sale} />
+          
+          {/* Payment Section */}
+          <PaymentSection sale={sale} />
         </div>
 
         <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4">
@@ -273,6 +278,129 @@ const SaleSummary = ({ sale }) => {
             <span className="text-gray-900">Total Pembayaran:</span>
             <span className="text-green-600">{UtilityService.formatCurrency(sale.total_price)}</span>
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Payment Section
+const PaymentSection = ({ sale }) => {
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState(() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  });
+  const [updating, setUpdating] = useState(false);
+  const [localSale, setLocalSale] = useState(sale);
+
+  const total = Number(localSale.total_price) || 0;
+  const paid = Number(localSale.payment_amount) || 0;
+  const remain = Math.max(0, total - paid);
+  const status = localSale.status || (paid >= total ? 'completed' : 'pending');
+
+  const statusBadge = (
+    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+      status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+    }`}>
+      {status === 'completed' ? 'Selesai' : 'Pending'}
+    </span>
+  );
+
+  const handleAddPayment = async () => {
+    const amt = Number(amount);
+    if (!amt || amt <= 0) {
+      alert('Masukkan jumlah pembayaran yang valid');
+      return;
+    }
+    if (amt > remain) {
+      if (!window.confirm('Jumlah melebihi sisa. Lanjutkan untuk melunasi?')) return;
+    }
+
+    try {
+      setUpdating(true);
+      const updated = await SaleService.addPayment(localSale.id, amt, date);
+      // Refresh detail sale untuk history terbaru
+      const refreshed = await SaleService.getById(localSale.id);
+      setLocalSale(refreshed);
+      setAmount('');
+      alert('Pembayaran berhasil ditambahkan');
+    } catch (e) {
+      console.error('Error add payment:', e);
+      alert('Gagal menambahkan pembayaran');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  return (
+    <div className="mt-6 bg-gray-50 rounded-lg p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Pembayaran</h3>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+        <div>
+          <p className="text-sm text-gray-600">Total</p>
+          <p className="text-lg font-bold text-gray-900">{UtilityService.formatCurrency(total)}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-600">Sudah Dibayar</p>
+          <p className="text-lg font-bold text-green-600">{UtilityService.formatCurrency(paid)}</p>
+        </div>
+        <div>
+          <p className="text-sm text-gray-600">Sisa</p>
+          <p className="text-lg font-bold text-orange-600">{UtilityService.formatCurrency(remain)}</p>
+        </div>
+        <div className="flex items-end">{statusBadge}</div>
+      </div>
+
+      <div className="mb-4">
+        <p className="text-sm font-medium text-gray-700 mb-2">Riwayat Pembayaran</p>
+        <div className="border border-gray-200 rounded-md divide-y divide-gray-200">
+          {(localSale.payment_histories || []).length === 0 ? (
+            <div className="p-3 text-sm text-gray-500">Belum ada pembayaran</div>
+          ) : (
+            (localSale.payment_histories || [])
+              .sort((a, b) => new Date(b.date) - new Date(a.date))
+              .map(ph => (
+                <div key={ph.id} className="flex items-center justify-between p-3 text-sm">
+                  <span>{UtilityService.formatDate(ph.date)}</span>
+                  <span className="font-medium">{UtilityService.formatCurrency(ph.payment)}</span>
+                </div>
+              ))
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">Tanggal Pembayaran</label>
+          <input
+            type="date"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            className="w-full border border-gray-200 rounded-md px-3 py-2"
+            disabled={updating}
+          />
+        </div>
+        <div>
+          <label className="block text-sm text-gray-700 mb-1">Jumlah Pembayaran</label>
+          <PriceInput
+            value={amount}
+            onChange={setAmount}
+            placeholder="0"
+            disabled={updating}
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            onClick={handleAddPayment}
+            disabled={updating}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+          >
+            {updating ? 'Menyimpan...' : 'Tambah Pembayaran'}
+          </button>
         </div>
       </div>
     </div>

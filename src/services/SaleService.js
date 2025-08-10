@@ -60,7 +60,8 @@ export const SaleService = {
             colors(name, hex_code)
           ),
           print_types(name, price)
-        )
+        ),
+        payment_histories(*)
       `)
       .eq('id', id)
       .single()
@@ -104,8 +105,7 @@ export const SaleService = {
     return { ...sale, sale_items: items }
   },
 
-  // Contoh create (pastikan panggil ini saat menyimpan sale + items)
-  async create(saleData, saleItems) {
+  async create(saleData, saleItems, initialPayment = null) {
     // Simpan sale
     const { data: sale, error: saleErr } = await supabase
       .from('sales')
@@ -127,7 +127,53 @@ export const SaleService = {
       await StockTransactionService.recordProductTransaction(it.variant_id, -it.quantity, 'SALE');
     }
 
+    // Catat payment_histories awal jika ada
+    if (initialPayment && Number(initialPayment.amount) > 0) {
+      const paymentDate = initialPayment.date || new Date().toISOString();
+      const { error: payErr } = await supabase
+        .from('payment_histories')
+        .insert([{ sale_id: sale.id, payment: Number(initialPayment.amount), date: paymentDate }]);
+      if (payErr) throw payErr;
+    }
+
     return { sale, items };
+  },
+
+  // Tambah pembayaran ke sale + update payment_amount & status
+  async addPayment(saleId, amount, date) {
+    if (!saleId) throw new Error('saleId wajib');
+    const amt = Number(amount);
+    if (!amt || amt <= 0) throw new Error('Jumlah pembayaran harus > 0');
+
+    // Ambil sale untuk hitung status
+    const { data: sale, error: getErr } = await supabase
+      .from('sales')
+      .select('id,total_price,payment_amount')
+      .eq('id', saleId)
+      .single();
+    if (getErr) throw getErr;
+
+    const paymentDate = date ? new Date(date).toISOString() : new Date().toISOString();
+
+    // Insert payment_histories
+    const { error: phErr } = await supabase
+      .from('payment_histories')
+      .insert([{ sale_id: saleId, payment: amt, date: paymentDate }]);
+    if (phErr) throw phErr;
+
+    // Update sales.payment_amount & status
+    const newPaid = (Number(sale?.payment_amount) || 0) + amt;
+    const newStatus = newPaid >= Number(sale.total_price) ? 'completed' : 'pending';
+
+    const { data: updated, error: updErr } = await supabase
+      .from('sales')
+      .update({ payment_amount: newPaid, status: newStatus })
+      .eq('id', saleId)
+      .select()
+      .single();
+    if (updErr) throw updErr;
+
+    return updated;
   },
 
   // Get sales by date range

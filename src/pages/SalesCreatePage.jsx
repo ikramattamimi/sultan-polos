@@ -91,6 +91,7 @@ const SalesCreatePage = () => {
       id: Date.now(),
       variant_id: variant.id,
       product_name: product.name,
+      partner: product.partner || null,
       variant_color: variant.colors?.name || "N/A",
       variant_color_hex: variant.colors?.hex_code || "N/A",
       variant_size: variant.sizes?.name || "N/A",
@@ -101,7 +102,7 @@ const SalesCreatePage = () => {
       actual_price: actualPrice,
       is_printed: isPrinted,
       print_type: printType,
-      total_actual: actualPrice * quantity,
+      total_actual: (printPrice + actualPrice) * quantity,
       print_type_id: printType?.id || null,
     };
 
@@ -165,6 +166,22 @@ const SalesCreatePage = () => {
       const rawAmount = Number(paymentInfo?.paymentAmount) || 0;
       const paymentAmount = Math.max(0, Math.min(total, rawAmount));
       const status = paymentAmount >= total ? "completed" : "pending";
+      
+      // Ambil nama mitra unik dari cartItems
+      const seenPartners = new Set();
+      const partnersArr = cartItems
+        .map(item => {
+          const name = typeof item.partner === "string" ? item.partner : item.partner?.name;
+          return name?.trim();
+        })
+        .filter(Boolean)
+        .filter(name => {
+          const key = name.toLowerCase();
+          if (seenPartners.has(key)) return false;
+          seenPartners.add(key);
+          return true;
+        });
+      const partnersStr = partnersArr.join(";");
 
       // Siapkan data penjualan
       const saleData = {
@@ -175,7 +192,8 @@ const SalesCreatePage = () => {
           ? UtilityService.wibLocalToUtcIso(paymentInfo.orderDate)
           : new Date().toISOString(),
         status,
-        payment_amount: paymentAmount
+        payment_amount: paymentAmount,
+        partners: partnersStr
       };
 
       // Siapkan item penjualan

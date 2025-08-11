@@ -91,16 +91,17 @@ const VariantSelector = ({
   const calculateTotalPrice = () => {
     if (!selectedVariant) return 0;
     
-    const unitPrice = product.reference_price || 0;
-    const printPrice = isPrinted && selectedPrintType ? selectedPrintType.price : 0;
+    const unitPrice = parseInt(product.reference_price) || 0;
+    const printPrice = isPrinted && selectedPrintType ? parseInt(selectedPrintType.price) : 0;
     return (unitPrice + printPrice) * quantity;
   };
 
   const calculateActualPrice = () => {
     if (!selectedVariant) return 0;
     
-    const price = actualPrice || 0;
-    return price * quantity;
+    const price = parseInt(actualPrice) || 0;
+    const printPrice = isPrinted && selectedPrintType ? parseInt(selectedPrintType.price) : 0;
+    return (price + printPrice) * quantity;
   };
 
   return (
@@ -513,19 +514,18 @@ const SizeSelection = ({ sizeOptions, selectedVariant, onSelectVariant }) => (
       Pilih Ukuran
     </h5>
     <div className="flex flex-wrap gap-3">
-      {sizeOptions.map(({ id, sizeName, stock, variant }) => (
+      {sizeOptions.map(({ id, sizeName, variant }) => (
         <button
           key={id}
           type="button"
           onClick={() => onSelectVariant(variant)}
-          disabled={stock === 0}
           className={`px-4 py-2 rounded-lg border text-sm font-medium transition-colors ${
             selectedVariant?.id === id
               ? 'border-blue-500 bg-blue-50 text-blue-900'
               : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-          } ${stock === 0 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+          }`}
         >
-          {sizeName} {stock === 0 ? '(Habis)' : ''}
+          {sizeName}
         </button>
       ))}
     </div>

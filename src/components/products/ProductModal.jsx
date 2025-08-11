@@ -27,7 +27,7 @@ const ProductModal = ({
       await onAdd({
         name: product.name,
         category: product.category,
-        type: product.type,
+        type: parseInt(product.type),
         basePrice: parseInt(product.basePrice),
         referencePrice: product.referencePrice ? parseInt(product.referencePrice) : null,
         description: product.description,

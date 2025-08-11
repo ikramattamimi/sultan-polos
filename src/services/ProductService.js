@@ -69,6 +69,21 @@ export const ProductService = {
     return uniquePartners.sort()
   },
 
+  // Get unique partners from product_variants
+  async getUniquePartnersArray() {
+    const { data, error } = await supabase
+    .from('products')
+    .select('partner')
+    .not('partner', 'is', null)
+    .not('partner', 'eq', '')
+
+    if (error) throw error
+
+    // Extract unique partners
+    const uniquePartners = [...data.map(item => item.partner)].filter(Boolean)
+    return uniquePartners.sort()
+  },
+
   // Get product by ID
   async getById(id, includeVariants = true) {
     let query = supabase

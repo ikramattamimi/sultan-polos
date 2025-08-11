@@ -55,70 +55,64 @@ const EmptyCart = () => (
 // CartItem Component
 const CartItem = ({ item, onRemove, onUpdateQuantity, submitting }) => (
   <div className="border border-gray-200 rounded-lg p-4">
-    <div className="flex justify-between items-start mb-2">
-      <div className="flex flex-col gap-2">
-        <h4 className="font-medium text-gray-900">{item.product_name}</h4>
-        <div className="flex gap-2 items-center text-xs">
-          <div>
-            <span className="text-gray-400 me-3">Ukuran:</span>
+    <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex-1 min-w-0 flex flex-col gap-2">
+        <h4 className="font-medium text-gray-900 break-words">
+          {item.product_name}
+        </h4>
+
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          <div className="inline-flex items-center gap-2">
+            <span className="text-gray-400">Ukuran:</span>
             <SizeBadge size={item.variant_size} />
           </div>
-          <div>
-            <span className="text-gray-400 me-3">Warna:</span>
-            <ColorBadge
-              color={item.variant_color_hex}
-              title={item.variant_color}
-            />
+          <div className="inline-flex items-center gap-2">
+            <span className="text-gray-400">Warna:</span>
+            <ColorBadge color={item.variant_color_hex} title={item.variant_color} />
           </div>
           {item.print_type && (
-            <div>
-              <span className="text-gray-400 me-3">Sablon:</span>
+            <div className="inline-flex items-center gap-2">
+              <span className="text-gray-400">Sablon:</span>
               <SizeBadge size={item.print_type.name} />
             </div>
           )}
         </div>
-        {/* <p className="text-xs text-gray-500">
-          <span>Stok: {item.variant.stock}</span>
 
-          {item.is_printed && (
-            <span>
-              {" "}
-              | Print ({item.print_type.name}):{" "}
-              {UtilityService.formatCurrency(item.print_price)}
-            </span>
-          )}
-        </p> */}
-
-        <p className="text-sm text-gray-500 line-through">
-          Base:
-          {UtilityService.formatCurrency(item.unit_price + item.print_price)}
+        <p className="text-sm text-gray-500 line-through break-words">
+          Acuan: {UtilityService.formatCurrency(item.unit_price + item.print_price)}
         </p>
-        <p className="text-md text-gray-500">Aktual: {UtilityService.formatCurrency(item.actual_price)}</p>
-
-        
+        <p className="text-sm text-gray-500 break-words">
+          Aktual: {UtilityService.formatCurrency(item.actual_price)}
+        </p>
+        {item.print_price > 0 && (
+          <p className="text-sm text-gray-500 break-words">
+            Sablon: {UtilityService.formatCurrency(item.print_price)}
+          </p>
+        )}
       </div>
+
       <button
         onClick={onRemove}
         disabled={submitting}
-        className="text-red-500 hover:text-red-700 disabled:opacity-50"
+        className="text-red-500 hover:text-red-700 disabled:opacity-50 ml-2 shrink-0"
+        aria-label="Hapus item"
       >
         <X className="h-4 w-4" />
       </button>
     </div>
-    {/* <div className="flex justify-between items-center"> */}
-          <QuantitySelection
-            quantity={item.quantity}
-            maxQuantity={item.variant.stock}
-            onQuantityChange={onUpdateQuantity}
-            disabled={submitting}
-            showLabel={false}
-          />
 
-          <p className="text-lg my-3 text-green-600">
-            {UtilityService.formatCurrency(item.total_actual)}
-          </p>
-
-        {/* </div> */}
+    <div className="flex flex-col justify-between gap-3">
+      <QuantitySelection
+        quantity={item.quantity}
+        maxQuantity={item.variant.stock}
+        onQuantityChange={onUpdateQuantity}
+        disabled={submitting}
+        showLabel={false}
+      />
+      <p className="text-lg text-green-600">
+        {UtilityService.formatCurrency(item.total_actual)}
+      </p>
+    </div>
   </div>
 );
 

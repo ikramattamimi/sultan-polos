@@ -3,6 +3,7 @@ import UtilityService from "../../services/UtilityServices.js";
 import {Download, X} from "lucide-react";
 import {jsPDF} from 'jspdf';
 import {autoTable} from 'jspdf-autotable';
+import ProductService from "../../services/ProductService.js";
 
 const ExportModal = ({ sales, onClose }) => {
   const [exportFormat, setExportFormat] = useState('excel');
@@ -15,16 +16,28 @@ const ExportModal = ({ sales, onClose }) => {
   const [mitraFilter, setMitraFilter] = useState('');
 
   // Get unique mitra list from sales
-  // Get unique mitra list from all sale_items' product_variants.partner
-  const mitraList = Array.from(
-    new Set(
-      sales.flatMap(sale =>
-        (sale.sale_items || []).map(
-          item => item.product_variants?.partner || 'Tanpa Mitra'
-        )
-      )
-    )
-  );
+  const [mitraList, setMitraList] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        const list = await ProductService.getUniquePartnersArray();
+        if (isMounted) {
+          setMitraList(Array.isArray(list) ? list : []);
+        }
+      } catch (error) {
+        console.error('Error fetching mitra list:', error);
+        if (isMounted) {
+          setMitraList([]);
+        }
+      }
+    })();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   // Update filtered count whenever date range changes
   useEffect(() => {
@@ -52,10 +65,10 @@ const ExportModal = ({ sales, onClose }) => {
 
     // Filter berdasarkan mitra jika ada
     if (mitraFilter) {
-      filtered = filtered.filter(sale =>
-        (sale.sale_items || []).some(
-          item => (item.product_variants?.partner || 'Tanpa Mitra') === mitraFilter
-        )
+      filtered = filtered.filter((sale) =>
+        Array.isArray(sale.partners)
+          ? sale.partners.includes(mitraFilter)
+          : (sale.partners || '').includes(mitraFilter)
       );
     }
 
@@ -91,12 +104,12 @@ const ExportModal = ({ sales, onClose }) => {
 
       // Filter berdasarkan mitra jika ada
       if (mitraFilter) {
-        filteredSales = filteredSales.filter(sale =>
-          (sale.sale_items || []).some(
-            item => (item.product_variants?.partner || 'Tanpa Mitra') === mitraFilter
-          )
-        );
-      }
+      filteredSales = filteredSales.filter((sale) =>
+        Array.isArray(sale.partners)
+          ? sale.partners.includes(mitraFilter)
+          : (sale.partners || '').includes(mitraFilter)
+      );
+    }
 
       if (exportFormat === 'excel') {
         exportToExcel(filteredSales);
@@ -232,8 +245,6 @@ const ExportModal = ({ sales, onClose }) => {
         </head>
         <body>
           <!-- Ringkasan -->
-          
-          <!-- Ringkasan -->
           <table style="border-collapse: collapse; width: 100%;">
             <tr>
               <td colspan="2" class="header">LAPORAN PENJUALAN</td>
@@ -243,6 +254,10 @@ const ExportModal = ({ sales, onClose }) => {
               <td>${dateRange.startDate && dateRange.endDate ?
       `${UtilityService.formatDate(dateRange.startDate)} - ${UtilityService.formatDate(dateRange.endDate)}` :
       'Semua Data'}</td>
+            </tr>
+            <tr>
+              <td class="summary-label">Mitra:</td>
+              <td>${mitraFilter ? mitraFilter : 'Semua Mitra'}</td>
             </tr>
             <tr>
               <td class="summary-label">Tanggal Export:</td>
@@ -342,7 +357,6 @@ const ExportModal = ({ sales, onClose }) => {
             </table>
           ` : ''}
         </body>
-                  
         <style>
           table {
             border-collapse: collapse;
@@ -490,6 +504,10 @@ const ExportModal = ({ sales, onClose }) => {
         `Periode: ${UtilityService.formatDate(dateRange.startDate)} - ${UtilityService.formatDate(dateRange.endDate)}` :
         'Periode: Semua Data';
       doc.text(periodText, 20, currentY);
+      currentY += 6;
+
+      // Mitra info
+      doc.text(`Mitra: ${mitraFilter ? mitraFilter : 'Semua Mitra'}`, 20, currentY);
       currentY += 6;
 
       doc.text(`Tanggal Export: ${UtilityService.formatDate(new Date().toISOString())}`, 20, currentY);

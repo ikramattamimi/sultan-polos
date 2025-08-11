@@ -27,6 +27,11 @@ const SalesTableRow = ({ sale, onViewDetail, onDeleteSale, isSelected, onSelectR
         </td>
         <td className="px-6 py-4 whitespace-nowrap">
             <div className="text-sm text-gray-900">
+                {sale.partners ? String(sale.partners).split(";").map(p => p.trim()).filter(Boolean).join(", ") : "-"}
+            </div>
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap">
+            <div className="text-sm text-gray-900">
                 {sale.customer || "-"}
             </div>
         </td>

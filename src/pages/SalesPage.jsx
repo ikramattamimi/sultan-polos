@@ -6,6 +6,7 @@ import { SaleService } from "../services/SaleService.js";
 import { LoadingSpinner, ErrorAlert, ConfirmationModal } from "../components/common";
 import { SalesDetailModal, ExportModal, SalesPageHeader, SalesStatsCards } from "../components/sales";
 import { SalesTable, SalesFilter} from "../components/sales/list";
+import ProductService from "../services/ProductService.js";
 
 const SalesPage = () => {
   // State data
@@ -113,15 +114,8 @@ const SalesPage = () => {
 
       const salesData = await SaleService.getAll();
       setSales(salesData || []);
-      const partnersData = Array.from(
-        new Set(
-          salesData.flatMap(sale =>
-            (sale.sale_items || []).map(
-              item => item.product_variants?.partner || 'Tanpa Mitra'
-            )
-          )
-        )
-      );
+      
+      const partnersData = await ProductService.getUniquePartnersArray();
       setPartners(partnersData || []);
       calculateStats(salesData || []);
     } catch (err) {
@@ -226,10 +220,10 @@ const SalesPage = () => {
 
     // Filter berdasarkan partner
     if (partnerFilter) {
-      filtered = filtered.filter(sale =>
-        (sale.sale_items || []).some(
-          item => (item.product_variants?.partner || 'Tanpa Mitra') === partnerFilter
-        )
+      filtered = filtered.filter((sale) =>
+        Array.isArray(sale.partners)
+          ? sale.partners.includes(partnerFilter)
+          : (sale.partners || '').includes(partnerFilter)
       );
     }
 

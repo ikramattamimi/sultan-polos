@@ -15,7 +15,7 @@ const ProductForm = ({
     id: '',
     name: '',
     category: '',
-    type: '',
+    type: null,
     basePrice: '',
     referencePrice: '',
     description: '',
@@ -120,16 +120,14 @@ const ProductForm = ({
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (product.name && product.category && product.type && product.basePrice) {
-      setLoading(true);
-      try {
-        await onSubmit(product, isEditMode);
-      } catch (err) {
-        setError('Gagal menyimpan produk. Silakan coba lagi.');
-      } finally {
-        setLoading(false);
-      }
+  e.preventDefault();
+    setLoading(true);
+    try {
+      await onSubmit(product, isEditMode);
+    } catch (err) {
+      setError('Gagal menyimpan produk. Silakan coba lagi.');
+    } finally {
+      setLoading(false);
     }
   };
 

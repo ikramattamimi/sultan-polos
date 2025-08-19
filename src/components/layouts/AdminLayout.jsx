@@ -1,27 +1,38 @@
 import React, { useState } from 'react';
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar.jsx";
+import Topbar from "./Topbar.jsx";
 
 const AdminLayout = () => {
-  const [collapsed, setCollapsed] = useState(false);
-
-  // Handler untuk Sidebar agar bisa collapse/expand
-  const handleCollapse = (value) => setCollapsed(value);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
 
   return (
-    <div>
-      <div
-        className={`fixed top-0 left-0 h-full z-20 transition-all duration-300 ${collapsed ? 'w-[60px]' : 'w-[250px]'}`}
-      >
-        <Sidebar collapsed={collapsed} setCollapsed={handleCollapse} />
-      </div>
-
-      <div className="flex gap-5">
-        {/* Spacer agar konten tidak tertutup sidebar */}
-        <div className={collapsed ? 'w-[60px]' : 'w-[250px]'}></div>
-        <div className="m-5 flex-1 min-w-0">
-          <Outlet />
-        </div>
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar */}
+      <Sidebar 
+        collapsed={sidebarCollapsed}
+        setCollapsed={setSidebarCollapsed}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
+      
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar */}
+        <Topbar 
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
+          mobileMenuOpen={mobileMenuOpen}
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-4 lg:p-6">
+            <Outlet />
+          </div>
+        </main>
       </div>
     </div>
   );

@@ -29,16 +29,54 @@ import ConvectionCreatePage from "./pages/ConvectionCreatePage.jsx";
 import SalesPage from "./pages/SalesPage.jsx";
 import SalesCreatePage from "./pages/SalesCreatePage.jsx";
 import FormComponentsDemo from "./pages/FormComponentsDemo.jsx";
+import { useEffect, useState } from "react";
+import LoginPage from "./pages/LoginPage.jsx";
+import AuthService from "./services/AuthService.js";
+import { UserContext } from "./contexts/UserContext.js";
+import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
 
 function App() {
-  const router = createBrowserRouter(
-    createRoutesFromElements(
-      <>
-        <Route path="/" element={<AdminLayout />}>
+  const [user, setUser] = useState({});
+  const [isLoading, setIsLoading] = useState(true);
 
-          {/* <Route index element={<AdminHome />} /> */}
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const loggedUser = await AuthService.checkUser();
+        console.log("Check user:", loggedUser);
+        setUser(loggedUser || {});
+      } catch (error) {
+        console.error("Auth check failed:", error);
+        setUser({});
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  // Show loading spinner while checking auth
+  if (isLoading) {
+    return <div className="flex items-center justify-center">
+      <LoadingSpinner />
+    </div>;
+  }
+
+  // Check if user is authenticated (you might need to adjust this condition)
+  const isAuthenticated = user && Object.keys(user).length > 0;
+
+  const routes = (
+    <>
+      {/* Protected Routes - only accessible when authenticated */}
+      {isAuthenticated ? (
+        <Route path="/" element={<AdminLayout />}>
           <Route index element={<Navigate to="sales" replace />} />
-          <Route path="dashboard" id="dashboard" element={<AdminHome />} loader={dashboardLoader} />
+          <Route
+            path="dashboard"
+            id="dashboard"
+            element={<AdminHome />}
+            loader={dashboardLoader}
+          />
 
           {/* Inventory Routes */}
           <Route>
@@ -49,10 +87,7 @@ function App() {
             />
             <Route path="sales">
               <Route index element={<SalesPage />} />
-              <Route
-                path="create"
-                element={<SalesCreatePage />}
-              />
+              <Route path="create" element={<SalesCreatePage />} />
             </Route>
           </Route>
 
@@ -85,25 +120,30 @@ function App() {
           </Route>
 
           {/* Report Routes */}
-          <Route
-            path="report"
-            element={<Report />}
-            loader={salesReportLoader}
-          />
+          <Route path="report" element={<Report />} loader={salesReportLoader} />
 
           {/* Components */}
           <Route path="components">
             <Route path="forms" element={<FormComponentsDemo />} />
           </Route>
         </Route>
+      ) : (
+        // Redirect all protected routes to login when not authenticated
+        <Route path="/*" element={<Navigate to="/login" replace />} />
+      )}
 
-        <Route path="*" element={<NotFoundPage />} />
-      </>
-    )
+      {/* Public Routes */}
+      <Route path="login" element={<LoginPage />} />
+      <Route path="*" element={<NotFoundPage />} />
+    </>
   );
 
+  const router = createBrowserRouter(createRoutesFromElements(routes));
+
   return (
-    <RouterProvider router={router} />
+    <UserContext.Provider value={user}>
+      <RouterProvider router={router} />
+    </UserContext.Provider>
   );
 }
 

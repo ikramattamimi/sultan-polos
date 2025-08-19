@@ -1,40 +1,64 @@
-// import React, {useState} from 'react';
-import {FaMoon, FaSun} from "react-icons/fa6";
-import {useEffect} from "react";
+import React, { useState, useEffect } from 'react';
+import { FaMoon, FaSun } from "react-icons/fa6";
 
 const DarkMode = () => {
+  const [isDark, setIsDark] = useState(false);
 
   const toggleTheme = () => {
     document.body.classList.toggle("dark");
-
-    const currentTheme = localStorage.getItem("theme");
-    if (currentTheme === "dark") {
-      localStorage.setItem("theme", "light");
-    } else {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    
+    if (newTheme) {
       localStorage.setItem("theme", "dark");
+    } else {
+      localStorage.setItem("theme", "light");
     }
-  }
+  };
 
   useEffect(() => {
     const currentTheme = localStorage.getItem("theme");
-    if (currentTheme === "dark") {
+    const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Check localStorage first, then system preference
+    const shouldBeDark = currentTheme === "dark" || (currentTheme === null && systemTheme);
+    
+    if (shouldBeDark) {
       document.body.classList.add("dark");
+      setIsDark(true);
+      localStorage.setItem("theme", "dark");
     } else {
       document.body.classList.remove("dark");
+      setIsDark(false);
+      localStorage.setItem("theme", "light");
     }
-  }, [])
+  }, []);
 
   return (
-    <div>
-      <button className="p-2 rounded-md flex bg-gray-50 ring-1 ring-gray-300 shadow-sm shadow-gray-400 cursor-pointer" onClick={toggleTheme}>
-        <div className="p-2 text-xl bg-gray-200 rounded-md dark:bg-transparent text-gray-500">
-            <FaSun/>
-        </div>
-        <div className="p-2 text-xl bg-transparent rounded-md dark:bg-gray-300 text-gray-500">
-            <FaMoon/>
-        </div>
-      </button>
-    </div>
+    <button 
+      className="
+        p-2 rounded-lg 
+        bg-gray-100 hover:bg-gray-200 
+        dark:bg-gray-700 dark:hover:bg-gray-600 
+        text-gray-600 dark:text-gray-300
+        transition-all duration-200 ease-in-out
+        min-w-[44px] min-h-[44px] 
+        flex items-center justify-center
+        active:scale-95
+        focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+      " 
+      onClick={toggleTheme}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+    >
+      <div className="text-lg transition-transform duration-300 ease-in-out">
+        {isDark ? (
+          <FaSun className="text-yellow-500" />
+        ) : (
+          <FaMoon className="text-gray-600 dark:text-gray-300" />
+        )}
+      </div>
+    </button>
   );
 };
 

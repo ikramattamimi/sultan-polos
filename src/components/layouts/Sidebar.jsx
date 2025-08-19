@@ -2,117 +2,191 @@ import React from 'react';
 import { NavLink } from "react-router-dom";
 import DarkMode from "../DarkMode.jsx";
 import DropdownMenu from "../DropdownMenu.jsx";
-import { Crown, Home, Package, Factory, FileBarChart2, FileText, Wallet, Menu, ChevronLeft } from 'lucide-react';
+import { Crown, Home, Package, Factory, FileBarChart2, FileText, Wallet, Menu, ChevronLeft, X } from 'lucide-react';
 
-const Sidebar = ({ collapsed, setCollapsed }) => {
+const Sidebar = ({ collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen }) => {
+  // Close mobile menu when clicking on navigation links
+  const handleMobileNavClick = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <nav
-      className={`sidebar shadow h-full flex flex-col transition-all duration-300 ${collapsed ? 'w-[60px] bg-transparent shadow-none' : 'w-[250px] bg-white'}`}
-      style={{ minHeight: '100vh', position: 'relative', background: collapsed ? 'transparent' : undefined }}
-    >
-      {collapsed ? (
-        <button
-          className="flex items-center justify-center mt-4 ml-2 bg-gray-200 rounded p-2 border border-gray-300 hover:bg-gray-300 transition-all"
-          style={{ width: 40, height: 40 }}
-          onClick={() => setCollapsed(false)}
-          aria-label="Expand sidebar"
-        >
-          <Menu size={24} />
-        </button>
-      ) : (
-          <>
-          <NavLink to="/" className="m-0 p-0">
-            <div className="logo mb-5 flex items-center gap-2 px-3 py-2">
-              <Crown size={28} />
-              <span className="font-bold text-lg">SULTAN POLOS</span>
-            </div>
+    <>
+      {/* Mobile overlay */}
+      {mobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
+      <nav
+        className={`
+          sidebar shadow h-full flex flex-col transition-all duration-300 z-50
+          ${/* Mobile styles */ ''}
+          lg:relative lg:translate-x-0
+          ${mobileMenuOpen 
+            ? 'fixed left-0 top-0 w-[280px] bg-white translate-x-0' 
+            : 'fixed left-0 top-0 w-[280px] bg-white -translate-x-full'
+          }
+          ${/* Desktop styles */ ''}
+          ${collapsed 
+            ? 'lg:hidden' 
+            : 'lg:w-[250px] lg:bg-white'
+          }
+        `}
+        style={{ 
+          minHeight: '100vh',
+          background: collapsed && window.innerWidth >= 1024 ? 'transparent' : undefined 
+        }}
+      >
+        {/* Mobile header */}
+        <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200">
+          <NavLink to="/" className="flex items-center gap-2" onClick={handleMobileNavClick}>
+            <Crown size={28} className="text-blue-600" />
+            <span className="font-bold text-lg">SULTAN POLOS</span>
           </NavLink>
           <button
-            className="absolute top-3 right-[-16px] z-10 bg-gray-200 rounded-full p-1 border border-gray-300 hover:bg-gray-300 transition-all"
-            // style={{ width: 28, height: 28 }}
-            onClick={() => setCollapsed(true)}
-            aria-label="Collapse sidebar"
-            title="Hide sidebar"
+            onClick={() => setMobileMenuOpen(false)}
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label="Close menu"
           >
-            <ChevronLeft size={20} />
+            <X size={20} />
           </button>
-          <ul className="flex-1 pl-4 pr-2 transition-all duration-300">
-            {/* <li className="my-2">
-              <NavLink to="/" className="flex items-center gap-2">
-                <Home size={20} />
-                Dashboard
+        </div>
+
+        {/* Desktop collapsed state */}
+        {collapsed ? (
+          <div className="hidden lg:block"></div>
+        ) : (
+          <>
+            {/* Desktop header */}
+            <div className="hidden lg:block relative">
+              <NavLink to="/" className="m-0 p-0">
+                <div className="logo mb-5 flex items-center gap-2 px-3 py-2">
+                  <Crown size={28} className="text-blue-600" />
+                  <span className="font-bold text-lg">SULTAN POLOS</span>
+                </div>
               </NavLink>
-            </li> */}
-            <li className="my-2">
-              <DropdownMenu
-                title={
-                  <span className="flex items-center gap-2">
-                    <Package size={20} />
-                    Inventory
-                  </span>
-                }
-                routes={['/product', '/sales']}
-                collapsed={false}
-              >
-                <ul>
-                  <li><NavLink to="product">Product</NavLink></li>
-                  <li><NavLink to="sales">Sales Order</NavLink></li>
-                </ul>
-              </DropdownMenu>
-            </li>
-            <li className="my-2">
-              <NavLink to="/convection" className="flex items-center gap-2">
-                <Factory size={20} />
-                Convection
-              </NavLink>
-            </li>
-            <li className="my-2">
-              <DropdownMenu
-                title={
-                  <span className="flex items-center gap-2">
-                    <Wallet size={20} />
-                    Finance
-                  </span>
-                }
-                routes={['/income-statement', '/expenses']}
-                collapsed={false}
-              >
-                <ul>
-                  <li><NavLink to="income-statement">Laporan Laba Rugi</NavLink></li>
-                  <li><NavLink to="expenses">Kelola Expenses</NavLink></li>
-                </ul>
-              </DropdownMenu>
-            </li>
-            {/* <li className="my-2">
-              <NavLink to="/report" className="flex items-center gap-2">
-                <FileBarChart2 size={20} />
-                Report
-              </NavLink>
-            </li>
-            <li className="my-2">
-              <DropdownMenu
-                title={
-                  <span className="flex items-center gap-2">
-                    <FileText size={20} />
-                    Components Docs
-                  </span>
-                }
-                routes={['components']}
-                collapsed={false}
-              >
-                <ul>
-                  <li><NavLink to="components/forms">Forms</NavLink></li>
-                </ul>
-              </DropdownMenu>
-            </li> */}
-          </ul>
-          <div className="absolute left-5 bottom-5 transition-all">
-            <DarkMode />
-          </div>
-        </>
-      )}
-    </nav>
+            </div>
+
+            {/* Navigation menu */}
+            <ul className="flex-1 transition-all duration-300 overflow-y-auto">
+              <li>
+                <DropdownMenu
+                  title={
+                    <span className="flex items-center w-full gap-3 p-3 text-gray-700 transition-colors">
+                      <Package size={20} />
+                      <span>Inventory</span>
+                    </span>
+                  }
+                  routes={['/product', '/sales']}
+                  collapsed={false}
+                  titleClassName="rounded-lg hover:bg-blue-100 hover:text-blue-800"
+                >
+                  <ul className="ml-8 mt-2 space-y-1">
+                    <li>
+                      <NavLink 
+                        to="product" 
+                        className={({ isActive }) => 
+                          `block p-2 rounded-lg transition-colors text-sm ${
+                            isActive 
+                              ? 'bg-blue-100 text-blue-800 font-medium' 
+                              : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'
+                          }`
+                        }
+                        onClick={handleMobileNavClick}
+                      >
+                        Product
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink 
+                        to="sales" 
+                        className={({ isActive }) => 
+                          `block p-2 rounded-lg transition-colors text-sm ${
+                            isActive 
+                              ? 'bg-blue-100 text-blue-800 font-medium' 
+                              : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'
+                          }`
+                        }
+                        onClick={handleMobileNavClick}
+                      >
+                        Sales Order
+                      </NavLink>
+                    </li>
+                  </ul>
+                </DropdownMenu>
+              </li>
+              
+              <li>
+                <NavLink 
+                  to="/convection" 
+                  className={({ isActive }) => 
+                    `flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                      isActive 
+                        ? 'bg-blue-100 text-blue-800 font-medium' 
+                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-800'
+                    }`
+                  }
+                  onClick={handleMobileNavClick}
+                >
+                  <Factory size={20} />
+                  <span>Convection</span>
+                </NavLink>
+              </li>
+              
+              <li>
+                <DropdownMenu
+                  title={
+                    <span className="flex items-center gap-3 p-3 text-gray-700 transition-colors">
+                      <Wallet size={20} />
+                      <span>Finance</span>
+                    </span>
+                  }
+                  routes={['/income-statement', '/expenses']}
+                  collapsed={false}
+                  titleClassName="rounded-lg hover:bg-blue-100 hover:text-blue-800"
+                >
+                  <ul className="ml-8 mt-2 space-y-1">
+                    <li>
+                      <NavLink 
+                        to="income-statement" 
+                        className={({ isActive }) => 
+                          `block p-2 rounded-lg transition-colors text-sm ${
+                            isActive 
+                              ? 'bg-blue-100 text-blue-800 font-medium' 
+                              : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'
+                          }`
+                        }
+                        onClick={handleMobileNavClick}
+                      >
+                        Laporan Laba Rugi
+                      </NavLink>
+                    </li>
+                    <li>
+                      <NavLink 
+                        to="expenses" 
+                        className={({ isActive }) => 
+                          `block p-2 rounded-lg transition-colors text-sm ${
+                            isActive 
+                              ? 'bg-blue-100 text-blue-800 font-medium' 
+                              : 'text-gray-600 hover:bg-blue-100 hover:text-blue-800'
+                          }`
+                        }
+                        onClick={handleMobileNavClick}
+                      >
+                        Kelola Expenses
+                      </NavLink>
+                    </li>
+                  </ul>
+                </DropdownMenu>
+              </li>
+            </ul>
+          </>
+        )}
+      </nav>
+    </>
   );
 };
 

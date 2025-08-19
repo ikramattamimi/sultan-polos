@@ -41,7 +41,7 @@ const DropdownMenu = ({
           isCurrentRouteActive() ? 'text-blue-600 font-semibold' : ''
         }`}
       >
-        <span>{title}</span>
+        <span className='w-full'>{title}</span>
         {showIcon && (
           isOpen ? <OpenIcon className="text-sm" /> : <ClosedIcon className="text-sm" />
         )}

@@ -34,6 +34,7 @@ import LoginPage from "./pages/LoginPage.jsx";
 import AuthService from "./services/AuthService.js";
 import { UserContext } from "./contexts/UserContext.js";
 import LoadingSpinner from "./components/common/LoadingSpinner.jsx";
+import ChangePasswordPage from "./pages/ChangePasswordPage.jsx";
 
 function App() {
   const [user, setUser] = useState({});
@@ -57,9 +58,11 @@ function App() {
 
   // Show loading spinner while checking auth
   if (isLoading) {
-    return <div className="flex items-center justify-center">
-      <LoadingSpinner />
-    </div>;
+    return (
+      <div className="flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   // Check if user is authenticated (you might need to adjust this condition)
@@ -69,64 +72,75 @@ function App() {
     <>
       {/* Protected Routes - only accessible when authenticated */}
       {isAuthenticated ? (
-        <Route path="/" element={<AdminLayout />}>
-          <Route index element={<Navigate to="sales" replace />} />
-          <Route
-            path="dashboard"
-            id="dashboard"
-            element={<AdminHome />}
-            loader={dashboardLoader}
-          />
-
-          {/* Inventory Routes */}
-          <Route>
+        <>
+          <Route path="/" element={<AdminLayout />}>
+            <Route index element={<Navigate to="sales" replace />} />
             <Route
-              path="product"
-              element={<ProductManagementPage />}
-              loader={() => productsLoader({ params: { includeVariants: true } })}
+              path="dashboard"
+              id="dashboard"
+              element={<AdminHome />}
+              loader={dashboardLoader}
             />
-            <Route path="sales">
-              <Route index element={<SalesPage />} />
-              <Route path="create" element={<SalesCreatePage />} />
+
+            {/* Inventory Routes */}
+            <Route>
+              <Route
+                path="product"
+                element={<ProductManagementPage />}
+                loader={() =>
+                  productsLoader({ params: { includeVariants: true } })
+                }
+              />
+              <Route path="sales">
+                <Route index element={<SalesPage />} />
+                <Route path="create" element={<SalesCreatePage />} />
+              </Route>
             </Route>
-          </Route>
 
-          {/* Convection Routes */}
-          <Route path="convection">
+            {/* Convection Routes */}
+            <Route path="convection">
+              <Route
+                index
+                element={<ConvectionPage />}
+                loader={convectionsLoader}
+              />
+              <Route
+                path=":id"
+                element={<ConvectionDetailPage />}
+                loader={convectionLoader}
+              />
+              <Route
+                path="create"
+                element={<ConvectionCreatePage />}
+                loader={masterDataLoader}
+              />
+            </Route>
+
+            {/* Finance Routes */}
+            <Route path="income-statement">
+              <Route index element={<IncomeStatementPage />} />
+            </Route>
+
+            <Route path="expenses">
+              <Route index element={<ExpensesPage />} />
+            </Route>
+
+            {/* Report Routes */}
             <Route
-              index
-              element={<ConvectionPage />}
-              loader={convectionsLoader}
+              path="report"
+              element={<Report />}
+              loader={salesReportLoader}
             />
-            <Route
-              path=":id"
-              element={<ConvectionDetailPage />}
-              loader={convectionLoader}
-            />
-            <Route
-              path="create"
-              element={<ConvectionCreatePage />}
-              loader={masterDataLoader}
-            />
-          </Route>
 
-          {/* Finance Routes */}
-          <Route path="income-statement">
-            <Route index element={<IncomeStatementPage />} />
-          </Route>
+            {/* Components */}
+            <Route path="components">
+              <Route path="forms" element={<FormComponentsDemo />} />
+            </Route>
 
-          <Route path="expenses">
-            <Route index element={<ExpensesPage />} />
+            {/* Change Password */}
           </Route>
-
-          {/* Report Routes */}
-          <Route path="report" element={<Report />} loader={salesReportLoader} />
-
-          {/* Components */}
-          <Route path="components">
-            <Route path="forms" element={<FormComponentsDemo />} />
-          </Route>
-        </Route>
+          <Route path="change-password" element={<ChangePasswordPage />} />
+        </>
       ) : (
         // Redirect all protected routes to login when not authenticated
         <Route path="/*" element={<Navigate to="/login" replace />} />

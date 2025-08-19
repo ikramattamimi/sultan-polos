@@ -51,7 +51,7 @@ const Topbar = ({ sidebarCollapsed, setSidebarCollapsed, mobileMenuOpen, setMobi
 
           {/* Mobile logo */}
           <div className="flex items-center gap-2 lg:hidden">
-            <Crown size={24} className="text-blue-600" />
+            <img src="logo-only.png" className="h-8" alt="Logo" />
             <span className="font-bold text-lg">SULTAN POLOS</span>
           </div>
         </div>

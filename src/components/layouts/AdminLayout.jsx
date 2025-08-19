@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar.jsx";
 import Topbar from "./Topbar.jsx";
 
 const AdminLayout = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(true);
+  // Initialize from localStorage or default to false
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const savedState = localStorage.getItem('sidebar-collapsed');
+      return savedState !== null ? JSON.parse(savedState) : false;
+    } catch (error) {
+      // If parsing fails, return default value and clear invalid data
+      localStorage.removeItem('sidebar-collapsed');
+      return false;
+    }
+  });
+  
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Save to localStorage whenever collapsed state changes
+  useEffect(() => {
+    localStorage.setItem('sidebar-collapsed', JSON.stringify(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   return (
     <div className="flex h-screen bg-gray-50">

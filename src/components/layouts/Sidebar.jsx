@@ -1,10 +1,28 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from "react-router-dom";
 import DarkMode from "../DarkMode.jsx";
 import DropdownMenu from "../DropdownMenu.jsx";
-import { Crown, Home, Package, Factory, FileBarChart2, FileText, Wallet, Menu, ChevronLeft, X } from 'lucide-react';
+import { Package, Factory, Wallet, X, Lock } from 'lucide-react';
 
 const Sidebar = ({ collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen }) => {
+  // Initialize mobile menu as closed
+  useEffect(() => {
+    // Ensure mobile menu is closed on component mount
+    if (window.innerWidth < 1024) {
+      setMobileMenuOpen(false);
+    }
+    
+    // Handle window resize
+    const handleResize = () => {
+      if (window.innerWidth < 1024) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [setMobileMenuOpen]);
+
   // Close mobile menu when clicking on navigation links
   const handleMobileNavClick = () => {
     setMobileMenuOpen(false);
@@ -43,7 +61,7 @@ const Sidebar = ({ collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen })
         {/* Mobile header */}
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-gray-200">
           <NavLink to="/" className="flex items-center gap-2" onClick={handleMobileNavClick}>
-            <Crown size={28} className="text-blue-600" />
+            <img src="logo-only.png" className="h-8" alt="Logo" />
             <span className="font-bold text-lg">SULTAN POLOS</span>
           </NavLink>
           <button
@@ -64,14 +82,14 @@ const Sidebar = ({ collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen })
             <div className="hidden lg:block relative">
               <NavLink to="/" className="m-0 p-0">
                 <div className="logo mb-5 flex items-center gap-2 px-3 py-2">
-                  <Crown size={28} className="text-blue-600" />
+                  <img src="logo-only.png" className="h-8" alt="Logo" />
                   <span className="font-bold text-lg">SULTAN POLOS</span>
                 </div>
               </NavLink>
             </div>
 
             {/* Navigation menu */}
-            <ul className="flex-1 transition-all duration-300 overflow-y-auto">
+            <ul className="flex-1 transition-all duration-300 overflow-y-auto space-y-2">
               <li>
                 <DropdownMenu
                   title={
@@ -181,6 +199,23 @@ const Sidebar = ({ collapsed, setCollapsed, mobileMenuOpen, setMobileMenuOpen })
                     </li>
                   </ul>
                 </DropdownMenu>
+              </li>
+
+              <li>
+                <NavLink 
+                  to="/change-password" 
+                  className={({ isActive }) => 
+                    `flex items-center gap-3 p-3 rounded-lg transition-colors ${
+                      isActive 
+                        ? 'bg-blue-100 text-blue-800 font-medium' 
+                        : 'text-gray-700 hover:bg-blue-100 hover:text-blue-800'
+                    }`
+                  }
+                  onClick={handleMobileNavClick}
+                >
+                  <Lock size={20} />
+                  <span>Ubah Password</span>
+                </NavLink>
               </li>
             </ul>
           </>

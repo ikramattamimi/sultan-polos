@@ -45,6 +45,9 @@ const VariantForm = ({
   const [newColor, setNewColor] = useState({ name: '', hex: '#000000' });
   const [showAddColorModal, setShowAddColorModal] = useState(false); // Tambahkan state untuk modal tambah warna
 
+  const [selectedSizes, setSelectedSizes] = useState([]); // Array of selected size IDs
+  const [sizeStocks, setSizeStocks] = useState({}); // { sizeId: stockValue }
+
   const isEditMode = mode === 'edit' && variant;
 
   // Fetch colors, sizes, and convections when component mounts
@@ -164,60 +167,65 @@ const VariantForm = ({
 
     if (
       formData.color_id &&
-      formData.size_id &&
-      (isExistingValid || isCustomValid || isNoneValid) &&
-      formData.stock
+      selectedSizes.length > 0 &&
+      selectedSizes.every(id => sizeStocks[id]) &&
+      (isExistingValid || isCustomValid || isNoneValid)
     ) {
       try {
         setLoading(true);
         setError(null);
 
         const selectedColor = colors.find(c => c.id === parseInt(formData.color_id));
-        const selectedSize = sizes.find(s => s.id === parseInt(formData.size_id));
 
-        let variantData = {
+        // Kirim array varian untuk setiap ukuran
+        const variantsData = selectedSizes.map(sizeId => ({
           color_id: parseInt(formData.color_id),
-          size_id: parseInt(formData.size_id),
-          stock: parseInt(formData.stock),
+          size_id: parseInt(sizeId),
+          stock: parseInt(sizeStocks[sizeId]),
           convection_quantity: parseInt(formData.convection_qty) || 0,
-          // name: `${selectedColor?.name} - ${selectedSize?.name}`
-        };
+          ...(convectionMode === 'existing'
+            ? {
+                convection_id: parseInt(formData.convection_id),
+                convection_json: null
+              }
+            : convectionMode === 'custom'
+            ? {
+                convection_id: null,
+                convection_quantity: null,
+                convection_json: {
+                  material_name: customConvection.material_name,
+                  material_type: customConvection.material_type,
+                  material_category: customConvection.material_category,
+                  color: customConvection.color,
+                  unit: customConvection.unit,
+                  purchase_price: parseFloat(customConvection.purchase_price),
+                  quantity: parseInt(customConvection.quantity),
+                  created_at: isEditMode ? variant.convection_json?.created_at : new Date().toISOString(),
+                  updated_at: new Date().toISOString()
+                }
+              }
+            : {
+                convection_id: null,
+                convection_json: null,
+                convection_quantity: null
+              })
+        }));
 
-        if (convectionMode === 'existing') {
-          variantData.convection_id = parseInt(formData.convection_id);
-          variantData.convection_json = null;
-        } else if (convectionMode === 'custom') {
-          variantData.convection_id = null;
-          variantData.convection_quantity = null;
-            variantData.convection_json = {
-            material_name: customConvection.material_name,
-            material_type: customConvection.material_type,
-            material_category: customConvection.material_category,
-            color: customConvection.color,
-            unit: customConvection.unit,
-            purchase_price: parseFloat(customConvection.purchase_price),
-            quantity: parseInt(customConvection.quantity),
-            created_at: isEditMode ? variant.convection_json?.created_at : new Date().toISOString(),
-            updated_at: new Date().toISOString()
-            };
-          } else if (convectionMode === 'none') {
-            variantData.convection_id = null;
-            variantData.convection_json = null;
-            variantData.convection_quantity = null;
+        if (isEditMode) {
+          // Untuk edit, update satu varian saja
+          await onUpdate(variant.id, variantsData[0]);
+        } else {
+          // Untuk tambah, kirim semua varian
+          for (const v of variantsData) {
+            await onAdd(productId, v);
           }
+        }
 
-          if (isEditMode) {
-            // if ('name' in variantData) delete variantData.name;
-            await onUpdate(variant.id, variantData);
-          } else {
-            await onAdd(productId, variantData);
-          }
-
-          // Reset form on success (only for add mode)
-          if (!isEditMode) {
-            resetForm();
-          }
-
+        if (!isEditMode) {
+          resetForm();
+          setSelectedSizes([]);
+          setSizeStocks({});
+        }
       } catch (err) {
         console.error(`Error ${isEditMode ? 'updating' : 'adding'} variant:`, err);
         setError(`Gagal ${isEditMode ? 'memperbarui' : 'menambahkan'} varian. Silakan coba lagi.`);
@@ -228,8 +236,7 @@ const VariantForm = ({
   };
 
   const validateForm = () => {
-    // Remove selling_price from validation
-    const basicValid = formData.color_id && formData.size_id && formData.stock;
+    const basicValid = formData.color_id && selectedSizes.length > 0 && selectedSizes.every(id => sizeStocks[id]);
     const convectionValid =
       convectionMode === 'existing'
         ? true
@@ -269,7 +276,7 @@ const VariantForm = ({
     <div className="space-y-4">
       <div className="text-sm text-gray-600 mb-4">
         {isEditMode
-          ? 'Ubah data varian produk'
+          ? 'Ubah stok varian produk'
           : 'Lengkapi semua field untuk menambahkan varian produk baru'
         }
       </div>
@@ -281,291 +288,335 @@ const VariantForm = ({
       )}
 
       <div className="space-y-4">
-        {/* Color Selection */}
-        <React.Fragment>
-          <label className="block text-sm font-medium mb-1">Warna</label>
-          <div className="grid grid-cols-5 gap-2 items-center">
-            <div className="col-span-3">
-              <Select
-                value={formData.color_id}
-                onChange={(e) => setFormData({...formData, color_id: e.target.value})}
-                disabled={loading}
-                options={colors}
-                valueKey="id"
-                labelKey="name"
-                placeholder={loading ? 'Memuat warna...' : 'Pilih Warna'}
-                required
-                // Tampilkan preview warna di option
-                renderOption={(color) => (
-                  <div className="flex items-center gap-2">
-                    <ColorCircle color={color.hex_code} size={16} />
-                    <span>{color.name}</span>
-                  </div>
-                )}
-              />
-            </div>
-            <button
-              type="button"
-              className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
-              onClick={() => setShowAddColorModal(true)}
+        {/* Render hanya field stok saat edit */}
+        {isEditMode ? (
+          <div>
+            <label className="block text-sm font-medium mb-1">Stok</label>
+            <NumberInput
+              placeholder="Stok"
+              value={formData.stock}
+              onChange={e => setFormData({ ...formData, stock: e.target.value })}
+              min="0"
+              required={true}
               disabled={loading}
-            >
-              + Warna Baru
-            </button>
-          </div>
-        </React.Fragment>
-
-        {/* Modal Tambah Warna Baru */}
-        {showAddColorModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
-              <h3 className="text-lg font-semibold mb-3">Tambah Warna Baru</h3>
-              <label className="block text-sm font-medium mb-1">Nama Warna</label>
-              <Input
-                type="text"
-                value={newColor.name}
-                onChange={(e) => setNewColor({ ...newColor, name: e.target.value })}
-                placeholder="Contoh: Magenta"
-                disabled={loading}
-                required
-                className="mb-2"
-              />
-              <label className="block text-sm font-medium mt-2 mb-1">Pilih Warna</label>
-              <SketchPicker
-                color={newColor.hex}
-                onChangeComplete={(color) => setNewColor({ ...newColor, hex: color.hex })}
-                disableAlpha
-              />
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-xs">Preview:</span>
-                <ColorCircle color={newColor.hex} title={newColor.name} size={32} />
-                <span className="text-xs text-gray-500">{newColor.hex}</span>
-              </div>
-              {newColor.name && colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase()) && (
-                <div className="text-xs text-red-600 mt-1">Nama warna sudah ada!</div>
-              )}
-              <div className="flex gap-2 mt-4">
-                <button
-                  type="button"
-                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
-                  onClick={async () => {
-                    if (!newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())) return;
-                    await handleAddColor();
-                    // Otomatis pilih warna baru
-                    const latestColors = await MasterDataService.colors.getAll();
-                    const added = latestColors.find(c => c.name === newColor.name && c.hex_code === newColor.hex);
-                    if (added) setFormData({...formData, color_id: added.id.toString()});
-                    setShowAddColorModal(false);
-                  }}
-                  disabled={loading || !newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())}
-                >
-                  Simpan Warna
-                </button>
-                <button
-                  type="button"
-                  className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
-                  onClick={() => setShowAddColorModal(false)}
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Size Selection */}
-        <Select
-          value={formData.size_id}
-          onChange={(e) => setFormData({...formData, size_id: e.target.value})}
-          disabled={loading}
-          options={sizes}
-          valueKey="id"
-          labelKey="name"
-          placeholder={loading ? 'Memuat ukuran...' : 'Pilih Ukuran'}
-          label="Ukuran"
-          required={true}
-        />
-
-        {/* Convection Selection Mode */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Pilih Sumber Konveksi
-          </label>
-          <div className="gap-4 mb-4 flex-wrap">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="convectionMode"
-                value="none"
-                checked={convectionMode === 'none'}
-                onChange={(e) => handleConvectionModeChange(e.target.value)}
-                className="w-4 h-4"
-              />
-              <span>Tanpa Konveksi</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="convectionMode"
-                value="existing"
-                checked={convectionMode === 'existing'}
-                onChange={(e) => handleConvectionModeChange(e.target.value)}
-                className="w-4 h-4"
-              />
-              <span>Pilih dari Konveksi yang Ada</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="radio"
-                name="convectionMode"
-                value="custom"
-                checked={convectionMode === 'custom'}
-                onChange={(e) => handleConvectionModeChange(e.target.value)}
-                className="w-4 h-4"
-              />
-              <span>Buat Konveksi Custom</span>
-            </label>
-          </div>
-
-          {/* Existing Convection Selection */}
-          {convectionMode === 'existing' && (
-            <Select
-              value={formData.convection_id}
-              onChange={(e) => setFormData({...formData, convection_id: e.target.value})}
-              disabled={loading}
-              options={convections.map(convection => ({
-                id: convection.id,
-                name: `${convection.name}${convection.colors ? ` (${convection.colors.name})` : ''}${convection.stock !== undefined ? ` - Stok: ${convection.stock}` : ''}`
-              }))}
-              valueKey="id"
-              labelKey="name"
-              placeholder={loading ? 'Memuat konveksi...' : 'Pilih Konveksi'}
             />
-          )}
+          </div>
+        ) : (
+          <>
+            {/* Color Selection */}
+            <React.Fragment>
+              <label className="block text-sm font-medium mb-1">Warna</label>
+              <div className="grid grid-cols-5 gap-2 items-center">
+                <div className="col-span-3">
+                  <Select
+                    value={formData.color_id}
+                    onChange={(e) => setFormData({...formData, color_id: e.target.value})}
+                    disabled={loading}
+                    options={colors}
+                    valueKey="id"
+                    labelKey="name"
+                    placeholder={loading ? 'Memuat warna...' : 'Pilih Warna'}
+                    required
+                    // Tampilkan preview warna di option
+                    renderOption={(color) => (
+                      <div className="flex items-center gap-2">
+                        <ColorCircle color={color.hex_code} size={16} />
+                        <span>{color.name}</span>
+                      </div>
+                    )}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+                  onClick={() => setShowAddColorModal(true)}
+                  disabled={loading}
+                >
+                  + Warna Baru
+                </button>
+              </div>
+            </React.Fragment>
 
-          {/* Custom Convection Input */}
-          {convectionMode === 'custom' && (
-            <div className="bg-green-50 border border-green-200 rounded-md p-4 space-y-3">
-              <div className="mb-3">
-                <h4 className="font-medium text-green-800 mb-2">Material Konveksi Custom</h4>
-                <p className="text-sm text-green-600">
-                  {isEditMode ? 'Ubah data material konveksi custom' : 'Isi data material konveksi baru yang akan dibuat'}
-                </p>
+            {/* Modal Tambah Warna Baru */}
+            {showAddColorModal && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+                <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
+                  <h3 className="text-lg font-semibold mb-3">Tambah Warna Baru</h3>
+                  <label className="block text-sm font-medium mb-1">Nama Warna</label>
+                  <Input
+                    type="text"
+                    value={newColor.name}
+                    onChange={(e) => setNewColor({ ...newColor, name: e.target.value })}
+                    placeholder="Contoh: Magenta"
+                    disabled={loading}
+                    required
+                    className="mb-2"
+                  />
+                  <label className="block text-sm font-medium mt-2 mb-1">Pilih Warna</label>
+                  <SketchPicker
+                    color={newColor.hex}
+                    onChangeComplete={(color) => setNewColor({ ...newColor, hex: color.hex })}
+                    disableAlpha
+                  />
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs">Preview:</span>
+                    <ColorCircle color={newColor.hex} title={newColor.name} size={32} />
+                    <span className="text-xs text-gray-500">{newColor.hex}</span>
+                  </div>
+                  {newColor.name && colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase()) && (
+                    <div className="text-xs text-red-600 mt-1">Nama warna sudah ada!</div>
+                  )}
+                  <div className="flex gap-2 mt-4">
+                    <button
+                      type="button"
+                      className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                      onClick={async () => {
+                        if (!newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())) return;
+                        await handleAddColor();
+                        // Otomatis pilih warna baru
+                        const latestColors = await MasterDataService.colors.getAll();
+                        const added = latestColors.find(c => c.name === newColor.name && c.hex_code === newColor.hex);
+                        if (added) setFormData({...formData, color_id: added.id.toString()});
+                        setShowAddColorModal(false);
+                      }}
+                      disabled={loading || !newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())}
+                    >
+                      Simpan Warna
+                    </button>
+                    <button
+                      type="button"
+                      className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                      onClick={() => setShowAddColorModal(false)}
+                    >
+                      Batal
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Size Selection */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Ukuran</label>
+              <div className="flex gap-2 flex-wrap">
+                {sizes.map(size => (
+                  <button
+                    key={size.id}
+                    type="button"
+                    className={`px-4 py-2 rounded border font-medium transition-colors
+                      ${selectedSizes.includes(size.id.toString())
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-blue-50'}
+                    `}
+                    onClick={() => {
+                      if (selectedSizes.includes(size.id.toString())) {
+                        setSelectedSizes(selectedSizes.filter(id => id !== size.id.toString()));
+                        setSizeStocks(prev => {
+                          const copy = { ...prev };
+                          delete copy[size.id];
+                          return copy;
+                        });
+                      } else {
+                        setSelectedSizes([...selectedSizes, size.id.toString()]);
+                      }
+                    }}
+                  >
+                    {size.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {selectedSizes.length > 0 && (
+              <div className="mt-3 grid grid-cols-1 gap-2">
+                {selectedSizes.map(sizeId => {
+                  const sizeObj = sizes.find(s => s.id.toString() === sizeId);
+                  return (
+                    <div key={sizeId} className="flex items-center gap-3">
+                      <span className="min-w-[80px] font-medium">{sizeObj?.name}</span>
+                      <NumberInput
+                        placeholder="Stok"
+                        value={sizeStocks[sizeId] || ''}
+                        onChange={e => setSizeStocks({ ...sizeStocks, [sizeId]: e.target.value })}
+                        min="0"
+                        required={true}
+                        disabled={loading}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Convection Selection Mode */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Pilih Sumber Konveksi
+              </label>
+              <div className="gap-4 mb-4 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="convectionMode"
+                    value="none"
+                    checked={convectionMode === 'none'}
+                    onChange={(e) => handleConvectionModeChange(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span>Tanpa Konveksi</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="convectionMode"
+                    value="existing"
+                    checked={convectionMode === 'existing'}
+                    onChange={(e) => handleConvectionModeChange(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span>Pilih dari Konveksi yang Ada</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    name="convectionMode"
+                    value="custom"
+                    checked={convectionMode === 'custom'}
+                    onChange={(e) => handleConvectionModeChange(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span>Buat Konveksi Custom</span>
+                </label>
               </div>
 
-              <div className="grid grid-cols-1 gap-3">
-                <Input
-                  type="text"
-                  placeholder="Nama Material"
-                  value={customConvection.material_name}
-                  onChange={(e) => setCustomConvection({...customConvection, material_name: e.target.value})}
+              {/* Existing Convection Selection */}
+              {convectionMode === 'existing' && (
+                <Select
+                  value={formData.convection_id}
+                  onChange={(e) => setFormData({...formData, convection_id: e.target.value})}
                   disabled={loading}
-                  required={true}
+                  options={convections.map(convection => ({
+                    id: convection.id,
+                    name: `${convection.name}${convection.colors ? ` (${convection.colors.name})` : ''}${convection.stock !== undefined ? ` - Stok: ${convection.stock}` : ''}`
+                  }))}
+                  valueKey="id"
+                  labelKey="name"
+                  placeholder={loading ? 'Memuat konveksi...' : 'Pilih Konveksi'}
                 />
+              )}
 
-                <Input
-                  type="text"
-                  placeholder="Tipe Material"
-                  value={customConvection.material_type}
-                  onChange={(e) => setCustomConvection({...customConvection, material_type: e.target.value})}
-                  disabled={loading}
-                  required={true}
-                />
+              {/* Custom Convection Input */}
+              {convectionMode === 'custom' && (
+                <div className="bg-green-50 border border-green-200 rounded-md p-4 space-y-3">
+                  <div className="mb-3">
+                    <h4 className="font-medium text-green-800 mb-2">Material Konveksi Custom</h4>
+                    <p className="text-sm text-green-600">
+                      {isEditMode ? 'Ubah data material konveksi custom' : 'Isi data material konveksi baru yang akan dibuat'}
+                    </p>
+                  </div>
 
-                <Input
-                  type="text"
-                  placeholder="Kategori Material"
-                  value={customConvection.material_category}
-                  onChange={(e) => setCustomConvection({...customConvection, material_category: e.target.value})}
-                  disabled={loading}
-                  required={true}
-                />
+                  <div className="grid grid-cols-1 gap-3">
+                    <Input
+                      type="text"
+                      placeholder="Nama Material"
+                      value={customConvection.material_name}
+                      onChange={(e) => setCustomConvection({...customConvection, material_name: e.target.value})}
+                      disabled={loading}
+                      required={true}
+                    />
 
-                <Input
-                  type="text"
-                  placeholder="Warna"
-                  value={customConvection.color}
-                  onChange={(e) => setCustomConvection({...customConvection, color: e.target.value})}
-                  disabled={loading}
-                  required={true}
-                />
+                    <Input
+                      type="text"
+                      placeholder="Tipe Material"
+                      value={customConvection.material_type}
+                      onChange={(e) => setCustomConvection({...customConvection, material_type: e.target.value})}
+                      disabled={loading}
+                      required={true}
+                    />
 
-                <Input
-                  type="text"
-                  placeholder="Unit"
-                  value={customConvection.unit}
-                  onChange={(e) => setCustomConvection({...customConvection, unit: e.target.value})}
-                  disabled={loading}
-                  required={true}
-                />
+                    <Input
+                      type="text"
+                      placeholder="Kategori Material"
+                      value={customConvection.material_category}
+                      onChange={(e) => setCustomConvection({...customConvection, material_category: e.target.value})}
+                      disabled={loading}
+                      required={true}
+                    />
 
-                <Input
-                  type="text"
-                  placeholder="Harga Beli"
-                  value={UtilityService.formatNumber(customConvection.purchase_price)}
-                  onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setCustomConvection({...customConvection, purchase_price: value}))}
-                  disabled={loading}
-                  required={true}
-                  label="Harga Beli"
-                />
+                    <Input
+                      type="text"
+                      placeholder="Warna"
+                      value={customConvection.color}
+                      onChange={(e) => setCustomConvection({...customConvection, color: e.target.value})}
+                      disabled={loading}
+                      required={true}
+                    />
 
+                    <Input
+                      type="text"
+                      placeholder="Unit"
+                      value={customConvection.unit}
+                      onChange={(e) => setCustomConvection({...customConvection, unit: e.target.value})}
+                      disabled={loading}
+                      required={true}
+                    />
+
+                    <Input
+                      type="text"
+                      placeholder="Harga Beli"
+                      value={UtilityService.formatNumber(customConvection.purchase_price)}
+                      onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setCustomConvection({...customConvection, purchase_price: value}))}
+                      disabled={loading}
+                      required={true}
+                      label="Harga Beli"
+                    />
+
+                    <NumberInput
+                      placeholder="Jumlah"
+                      value={customConvection.quantity}
+                      onChange={(e) => setCustomConvection({...customConvection, quantity: e.target.value})}
+                      disabled={loading}
+                      min="0"
+                      required={true}
+                    />
+                  </div>
+
+                  <div className="text-xs text-green-600">
+                    💡 Material konveksi custom akan disimpan sebagai JSON data di field convection_json
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Convection Quantity */}
+            {(convectionMode === 'existing' && formData.convection_id) && (
+              <div>
                 <NumberInput
-                  placeholder="Jumlah"
-                  value={customConvection.quantity}
-                  onChange={(e) => setCustomConvection({...customConvection, quantity: e.target.value})}
+                  placeholder="0"
+                  value={formData.convection_qty}
+                  onChange={(e) => {
+                    let val = e.target.value;
+                    // Batasi ke maxConvectionQty jika ada
+                    if (maxConvectionQty !== null && val) {
+                      val = Math.min(Number(val), maxConvectionQty).toString();
+                    }
+                    setFormData({...formData, convection_qty: val});
+                  }}
                   disabled={loading}
                   min="0"
-                  required={true}
+                  max={maxConvectionQty !== null ? maxConvectionQty : undefined}
+                  label="Jumlah Konveksi"
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Jumlah konveksi yang akan digunakan untuk varian ini
+                  {maxConvectionQty !== null && (
+                    <span className="ml-2 text-blue-600">(Maksimal: {maxConvectionQty})</span>
+                  )}
+                </p>
               </div>
-
-              <div className="text-xs text-green-600">
-                💡 Material konveksi custom akan disimpan sebagai JSON data di field convection_json
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Convection Quantity */}
-        {(convectionMode === 'existing' && formData.convection_id) && (
-          <div>
-            <NumberInput
-              placeholder="0"
-              value={formData.convection_qty}
-              onChange={(e) => {
-                let val = e.target.value;
-                // Batasi ke maxConvectionQty jika ada
-                if (maxConvectionQty !== null && val) {
-                  val = Math.min(Number(val), maxConvectionQty).toString();
-                }
-                setFormData({...formData, convection_qty: val});
-              }}
-              disabled={loading}
-              min="0"
-              max={maxConvectionQty !== null ? maxConvectionQty : undefined}
-              label="Jumlah Konveksi"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Jumlah konveksi yang akan digunakan untuk varian ini
-              {maxConvectionQty !== null && (
-                <span className="ml-2 text-blue-600">(Maksimal: {maxConvectionQty})</span>
-              )}
-            </p>
-          </div>
+            )}
+          </>
         )}
-
-        {/* Price and Stock Row */}
-        <div className="grid grid-cols-2 gap-4">
-          <NumberInput
-            placeholder="0"
-            value={formData.stock}
-            onChange={(e) => setFormData({...formData, stock: e.target.value})}
-            disabled={loading}
-            min="0"
-            label="Stok"
-            required={true}
-          />
-        </div>
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">

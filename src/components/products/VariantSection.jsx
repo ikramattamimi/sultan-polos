@@ -6,16 +6,21 @@ const VariantSection = ({ product, show, onAddVariant, onDeleteVariant, onUpdate
   if (!show) return null;
 
   return (
-    <div className="p-6 bg-gray-50">
-      <h4 className="text-lg font-medium text-gray-900 mb-4">Varian Produk</h4>
+    <div className="p-3 sm:p-4 lg:p-6 bg-gray-50">
+      <h4 className="text-sm sm:text-base lg:text-lg font-medium text-gray-900 mb-2 sm:mb-3 lg:mb-4">
+        Varian Produk
+      </h4>
       
-      <VariantList
-        productId={product.id}
-        variants={product.product_variants} 
-        onDelete={(variantId) => onDeleteVariant(product.id, variantId)} 
-        onAdd={onAddVariant}
-        onUpdate={onUpdateVariant}
-      />
+      {/* Container dengan scroll horizontal untuk mobile jika diperlukan */}
+      <div className="w-full">
+        <VariantList
+          productId={product.id}
+          variants={product.product_variants} 
+          onDelete={(variantId) => onDeleteVariant(product.id, variantId)} 
+          onAdd={onAddVariant}
+          onUpdate={onUpdateVariant}
+        />
+      </div>
     </div>
   );
 };

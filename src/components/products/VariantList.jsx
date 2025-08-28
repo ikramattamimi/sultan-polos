@@ -20,8 +20,9 @@ const VariantList = ({ productId, variants, onDelete, onAdd, onUpdate }) => {
 
   return (
     <div>
-      <div className="space-y-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+        {/* Grid responsif untuk color groups */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           {Object.entries(colorGroups).map(([colorName, colorVariants]) => (
             <ColorVariantGroup
               key={colorName}
@@ -36,14 +37,14 @@ const VariantList = ({ productId, variants, onDelete, onAdd, onUpdate }) => {
           ))}
         </div>
 
-        {/* Add New Variant Button */}
+        {/* Add New Variant Button - responsive */}
         <div
           onClick={() => setIsModalOpen(true)}
-          className="bg-green-100 hover:bg-green-200 p-4 rounded-lg border-2 border-dashed border-green-300 flex justify-center items-center cursor-pointer h-24 transition-colors"
+          className="bg-green-100 hover:bg-green-200 p-3 sm:p-4 rounded-lg border-2 border-dashed border-green-300 flex justify-center items-center cursor-pointer h-16 sm:h-20 lg:h-24 transition-colors"
         >
           <div className="text-center">
-            <Plus className="w-6 h-6 mx-auto mb-1 text-green-600" />
-            <span className="text-sm font-medium text-green-700">Tambah Varian</span>
+            <Plus className="w-5 h-5 sm:w-6 sm:h-6 mx-auto mb-1 text-green-600" />
+            <span className="text-xs sm:text-sm font-medium text-green-700">Tambah Varian</span>
           </div>
         </div>
       </div>
@@ -69,24 +70,25 @@ const VariantList = ({ productId, variants, onDelete, onAdd, onUpdate }) => {
   );
 };
 
-// ColorVariantGroup Component
+// ColorVariantGroup Component - responsive
 const ColorVariantGroup = ({ colorName, variants, onSelectVariant, onDeleteVariant }) => (
-  <div className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
-    <div className="flex items-center mb-3">
+  <div className="border border-gray-200 rounded-lg p-3 sm:p-4 bg-white shadow-sm">
+    <div className="flex items-center mb-2 sm:mb-3">
       <div
-        className="w-5 h-5 rounded-full border border-gray-300 mr-3"
+        className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-gray-300 mr-2 sm:mr-3 shrink-0"
         style={{ backgroundColor: variants[0]?.colors?.hex_code || '#ccc' }}
       ></div>
-      <span className="font-semibold text-gray-800 text-lg flex items-center">
-        <Palette className="mr-2 h-4 w-4" />
-        {colorName}
+      <span className="font-semibold text-gray-800 text-base sm:text-lg flex items-center min-w-0">
+        <Palette className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4 shrink-0" />
+        <span className="truncate">{colorName}</span>
       </span>
-      <span className="ml-auto text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">
+      <span className="ml-auto text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded shrink-0">
         {variants.length} varian
       </span>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+    {/* Grid responsif untuk variant cards */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-2">
       {variants.map(variant => (
         <VariantCard
           key={variant.id}
@@ -99,40 +101,73 @@ const ColorVariantGroup = ({ colorName, variants, onSelectVariant, onDeleteVaria
   </div>
 );
 
-// VariantCard Component
+// VariantCard Component - responsive with mobile horizontal layout
 const VariantCard = ({ variant, onSelect, onDelete }) => (
-  <div className="relative bg-gray-50 hover:bg-gray-100 p-3 rounded-lg border border-gray-200 transition-colors group shadow-sm">
+  <div className="relative bg-gray-50 hover:bg-gray-100 p-2 sm:p-3 rounded-lg border border-gray-200 transition-colors group shadow-sm">
     <button
       type="button"
       onClick={onSelect}
       className="w-full text-left"
     >
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-medium flex items-center text-gray-900">
-          <Ruler className="h-3.5 w-3.5 mr-2" />
-          {variant.sizes?.name || 'N/A'}
-        </span>
+      {/* Mobile: horizontal layout */}
+      <div className="flex items-center justify-between sm:block">
+        {/* Size info */}
+        <div className="flex items-center flex-1 min-w-0">
+          <Ruler className="h-3 w-3 sm:h-3.5 sm:w-3.5 mr-1 sm:mr-2 shrink-0 text-gray-500" />
+          <span className="text-xs sm:text-sm font-medium text-gray-900 truncate">
+            {variant.sizes?.name || 'N/A'}
+          </span>
+        </div>
+
+        {/* Mobile: Stock and Delete in same row */}
+        <div className="flex items-center gap-2 sm:hidden shrink-0">
+          <span
+            className={`text-xs px-1.5 py-0.5 rounded inline-flex items-center ${
+              variant.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`}
+            title={`Stok: ${variant.stock ?? 0}`}
+          >
+            <Package className="w-3 h-3 mr-1 shrink-0" />
+            {variant.stock ?? 0}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="bg-red-100 hover:bg-red-200 text-red-700 p-1 rounded transition-opacity"
+            title="Hapus varian"
+          >
+            <Trash2 className="w-3 h-3" />
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop: Stock info in separate row */}
+      <div className="hidden sm:flex items-center mt-2">
         <span
-          className={`text-xs px-2 py-0.5 rounded ${
+          className={`text-xs px-2 py-0.5 rounded inline-flex items-center ${
             variant.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           }`}
           title={`Stok: ${variant.stock ?? 0}`}
         >
-          Stok: {variant.stock}
+          <Package className="w-3 h-3 mr-1 shrink-0" />
+          <span>Stok: </span>
+          {variant.stock ?? 0}
         </span>
       </div>
     </button>
 
-    {/* Delete Button */}
+    {/* Desktop: Delete Button - hidden on mobile since it's inline */}
     <button
       onClick={(e) => {
         e.stopPropagation();
         onDelete();
       }}
-      className="absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+      className="hidden sm:block absolute top-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity z-10"
       title="Hapus varian"
     >
-      <Trash2 className="w-4 h-4" />
+      <Trash2 className="w-3.5 h-3.5" />
     </button>
   </div>
 );

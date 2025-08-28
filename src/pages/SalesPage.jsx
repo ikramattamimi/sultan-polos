@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 
 import { SaleService } from "../services/SaleService.js";
@@ -34,6 +33,22 @@ const SalesPage = () => {
   const [timeFilter, setTimeFilter] = useState("all");
   const [partnerFilter, setPartnerFilter] = useState("");
   const [partners, setPartners] = useState([]);
+
+  // Mobile specific states
+  const [isMobile, setIsMobile] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Handler untuk custom filter agar timeFilter otomatis ke 'all'
   const handleSetDateRange = (updater) => {
@@ -102,6 +117,8 @@ const SalesPage = () => {
     applyFilters();
   }, [sales, searchQuery, dateRange, statusFilter, timeFilter, partnerFilter]);
 
+  // ...existing code... (loadSales, calculateStats, applyFilters, handlers remain the same)
+  
   // Load data penjualan
   const loadSales = async (showRefreshLoader = false) => {
     try {
@@ -246,7 +263,6 @@ const SalesPage = () => {
     }
   };
 
-
   // Handle delete sale
   const handleDeleteSale = (sale) => {
     setSaleToDelete(sale);
@@ -298,6 +314,9 @@ const SalesPage = () => {
     setStatusFilter("all");
     setTimeFilter("all");
     setPartnerFilter("");
+    if (isMobile) {
+      setShowMobileFilters(false);
+    }
   };
 
   // Pagination
@@ -312,7 +331,7 @@ const SalesPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-2 sm:p-4 lg:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Error Alert */}
         {error && <ErrorAlert message={error} onClose={() => setError(null)} />}
@@ -322,38 +341,70 @@ const SalesPage = () => {
           onRefresh={handleRefresh}
           onExport={() => setShowExportModal(true)}
           refreshing={refreshing}
+          isMobile={isMobile}
         />
 
         {/* Stats Cards */}
-        <SalesStatsCards stats={salesStats} />
+        <SalesStatsCards stats={salesStats} isMobile={isMobile} />
 
-        {/* Filters */}
-        <SalesFilter
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          dateRange={dateRange}
-          setDateRange={handleSetDateRange}
-          statusFilter={statusFilter}
-          setStatusFilter={handleSetStatusFilter}
-          timeFilter={timeFilter}
-          setTimeFilter={setTimeFilter}
-          partnerFilter={partnerFilter}
-          partners={partners}
-          setPartnerFilter={setPartnerFilter}
-          onReset={resetFilters}
-        />
+        {/* Mobile Filter Toggle Button */}
+        {isMobile && (
+          <div className="mb-4">
+            <button
+              onClick={() => setShowMobileFilters(!showMobileFilters)}
+              className="w-full bg-white border border-gray-300 rounded-lg px-4 py-2 flex items-center justify-between text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              <span className="flex items-center">
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                Filter & Pencarian
+              </span>
+              <svg 
+                className={`w-4 h-4 transition-transform ${showMobileFilters ? 'rotate-180' : ''}`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* Filters - Mobile Collapsible */}
+        <div className={`${isMobile ? (showMobileFilters ? 'block' : 'hidden') : 'block'}`}>
+          <SalesFilter
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            dateRange={dateRange}
+            setDateRange={handleSetDateRange}
+            statusFilter={statusFilter}
+            setStatusFilter={handleSetStatusFilter}
+            timeFilter={timeFilter}
+            setTimeFilter={setTimeFilter}
+            partnerFilter={partnerFilter}
+            partners={partners}
+            setPartnerFilter={setPartnerFilter}
+            onReset={resetFilters}
+            isMobile={isMobile}
+          />
+        </div>
 
         {/* Sales Table */}
-        <SalesTable
-          sales={currentItems}
-          onViewDetail={handleViewDetail}
-          onDeleteSale={handleDeleteSale}
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-          totalItems={filteredSales.length}
-          onBulkDelete={handleBulkDelete}
-        />
+        <div className="overflow-hidden">
+          <SalesTable
+            sales={currentItems}
+            onViewDetail={handleViewDetail}
+            onDeleteSale={handleDeleteSale}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+            totalItems={filteredSales.length}
+            onBulkDelete={handleBulkDelete}
+            isMobile={isMobile}
+          />
+        </div>
       </div>
 
       {/* Modals */}
@@ -364,6 +415,7 @@ const SalesPage = () => {
             setShowDetailModal(false);
             setSelectedSale(null);
           }}
+          isMobile={isMobile}
         />
       )}
 
@@ -379,6 +431,7 @@ const SalesPage = () => {
           confirmText="Hapus"
           cancelText="Batal"
           type="danger"
+          isMobile={isMobile}
         />
       )}
 
@@ -386,6 +439,7 @@ const SalesPage = () => {
         <ExportModal
           sales={filteredSales}
           onClose={() => setShowExportModal(false)}
+          isMobile={isMobile}
         />
       )}
     </div>
@@ -393,4 +447,3 @@ const SalesPage = () => {
 };
 
 export default SalesPage;
-

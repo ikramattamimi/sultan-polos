@@ -1,29 +1,30 @@
-import {AlertCircle, ChevronDown} from 'lucide-react';
-import {FieldError, HelperText} from "./index.js";
-import React from "react";
+import {AlertCircle, ChevronDown, Search} from 'lucide-react';
+import React, { useState, useRef, useEffect, useMemo } from "react";
 
 const Select = ({
-                  label,
-                  options = [],
-                  value,
-                  onChange,
-                  error,
-                  helperText,
-                  placeholder = 'Pilih option',
-                  required = false,
-                  disabled = false,
-                  className = '',
-                  marginBottom = true,
-                  size = 'md',
-                  id,
-                  // Dynamic props untuk options
-                  valueKey = 'value',
-                  labelKey = 'label',
-                  // Optional group support
-                  groupKey = null,
-                  ...props
-                }) => {
+  label,
+  options = [],
+  value,
+  onChange,
+  error,
+  helperText,
+  placeholder = 'Pilih option',
+  required = false,
+  disabled = false,
+  className = '',
+  marginBottom = true,
+  size = 'md',
+  id,
+  valueKey = 'value',
+  labelKey = 'label',
+  renderOption,
+  searchable = true,
+  ...props
+}) => {
   const selectId = id || `select-${Math.random().toString(36).substr(2, 9)}`;
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const dropdownRef = useRef(null);
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-sm',
@@ -48,7 +49,7 @@ const Select = ({
     if (typeof option === 'string' || typeof option === 'number') {
       return option;
     }
-    return option[valueKey];
+    return typeof valueKey === 'function' ? valueKey(option) : option[valueKey];
   };
 
   // Helper function untuk extract label dari option
@@ -56,68 +57,38 @@ const Select = ({
     if (typeof option === 'string' || typeof option === 'number') {
       return option;
     }
-    return option[labelKey];
+    return typeof labelKey === 'function' ? labelKey(option) : option[labelKey];
   };
 
-  // Helper function untuk extract group dari option
-  const getOptionGroup = (option) => {
-    if (!groupKey || typeof option === 'string' || typeof option === 'number') {
-      return null;
-    }
-    return option[groupKey];
-  };
-
-  // Group options jika ada groupKey
-  const groupedOptions = React.useMemo(() => {
-    if (!groupKey) {
-      return { '': options };
-    }
-
-    return options.reduce((groups, option) => {
-      const group = getOptionGroup(option) || 'Other';
-      if (!groups[group]) {
-        groups[group] = [];
-      }
-      groups[group].push(option);
-      return groups;
-    }, {});
-  }, [options, groupKey]);
-
-  const renderOptions = () => {
-    // Jika tidak ada grouping, render options biasa
-    if (!groupKey) {
-      return options.map((option, index) => (
-        <option key={index} value={getOptionValue(option)}>
-          {getOptionLabel(option)}
-        </option>
-      ));
-    }
-
-    // Jika ada grouping, render dengan optgroup
-    return Object.entries(groupedOptions).map(([groupName, groupOptions]) => {
-      if (groupName === '') {
-        // Options tanpa group
-        return groupOptions.map((option, index) => (
-          <option key={`no-group-${index}`} value={getOptionValue(option)}>
-            {getOptionLabel(option)}
-          </option>
-        ));
-      }
-
-      return (
-        <optgroup key={groupName} label={groupName}>
-          {groupOptions.map((option, index) => (
-            <option key={`${groupName}-${index}`} value={getOptionValue(option)}>
-              {getOptionLabel(option)}
-            </option>
-          ))}
-        </optgroup>
-      );
+  // Filter options by search
+  const filteredOptions = useMemo(() => {
+    if (!search) return options;
+    return options.filter(option => {
+      const label = getOptionLabel(option);
+      return label?.toString().toLowerCase().includes(search.toLowerCase());
     });
-  };
+  }, [options, search, labelKey]);
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    if (!open) return;
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false);
+        setSearch('');
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [open]);
+
+  // Get selected label
+  const selectedLabel = options.find(opt => getOptionValue(opt) === value)
+    ? getOptionLabel(options.find(opt => getOptionValue(opt) === value))
+    : '';
 
   return (
-    <div className={`${marginBottom ? 'mb-4' : ''}`}>
+    <div className={`${marginBottom ? 'mb-4' : ''} relative`}>
       {label && (
         <label
           htmlFor={selectId}
@@ -127,44 +98,85 @@ const Select = ({
           {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
-
-      <div className="relative">
-        <select
-          id={selectId}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          required={required}
-          className={`
-            ${baseClasses}
-            ${sizeClasses[size]}
-            ${errorClasses}
-            ${className}
-            pr-10
-          `}
-          {...props}
+      <button
+        type="button"
+        id={selectId}
+        className={`
+          ${baseClasses}
+          ${sizeClasses[size]}
+          ${errorClasses}
+          ${className}
+          pr-10 flex items-center justify-between
+        `}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => !disabled && setOpen((v) => !v)}
+      >
+        <span className={selectedLabel ? '' : 'text-gray-400'}>
+          {selectedLabel || placeholder}
+        </span>
+        <ChevronDown className="h-5 w-5 text-gray-400 ml-2" />
+      </button>
+      {open && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-md shadow-lg"
         >
-          <option value="">{placeholder}</option>
-          {renderOptions()}
-        </select>
-
-        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <ChevronDown className="h-5 w-5 text-gray-400" />
+          {searchable && (
+            <div className="relative p-2 border-b border-gray-100 dark:border-gray-600">
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                placeholder="Cari..."
+                autoFocus
+                disabled={disabled}
+              />
+              <Search className="absolute right-4 top-5 h-4 w-4 text-gray-400 pointer-events-none" />
+            </div>
+          )}
+          <ul
+            tabIndex={-1}
+            role="listbox"
+            className="max-h-56 overflow-auto py-1"
+          >
+            {filteredOptions.length === 0 && (
+              <li className="px-4 py-2 text-gray-400 text-sm">Tidak ditemukan</li>
+            )}
+            {filteredOptions.map((option, idx) => (
+              <li
+                key={getOptionValue(option)}
+                role="option"
+                aria-selected={getOptionValue(option) === value}
+                className={`px-4 py-2 cursor-pointer flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-900 ${
+                  getOptionValue(option) === value
+                    ? 'bg-blue-100 dark:bg-blue-800 font-semibold'
+                    : ''
+                }`}
+                onClick={() => {
+                  if (disabled) return;
+                  onChange({
+                    target: {
+                      value: getOptionValue(option),
+                    },
+                  });
+                  setOpen(false);
+                  setSearch('');
+                }}
+              >
+                {renderOption ? renderOption(option) : getOptionLabel(option)}
+              </li>
+            ))}
+          </ul>
         </div>
-
-        {error && (
-          <div className="absolute inset-y-0 right-8 flex items-center pr-3 pointer-events-none">
-            <AlertCircle className="h-5 w-5 text-red-500" />
-          </div>
-        )}
-      </div>
-
+      )}
       {error && (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
-
       {helperText && !error && (
         <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
           {helperText}
@@ -175,157 +187,3 @@ const Select = ({
 };
 
 export default Select;
-
-/*
-===========================================
-USAGE EXAMPLES
-===========================================
-
-// 1. Basic usage (backward compatible)
-const basicOptions = [
-  { value: 'red', label: 'Merah' },
-  { value: 'blue', label: 'Biru' },
-  { value: 'green', label: 'Hijau' }
-];
-
-<Select
-  label="Warna"
-  options={basicOptions}
-  value={selectedColor}
-  onChange={(e) => setSelectedColor(e.target.value)}
-/>
-
-// 2. Custom value/label keys
-const products = [
-  { id: 1, name: 'T-Shirt', category: 'Pakaian' },
-  { id: 2, name: 'Celana', category: 'Pakaian' },
-  { id: 3, name: 'Sepatu', category: 'Alas Kaki' }
-];
-
-<Select
-  label="Produk"
-  options={products}
-  valueKey="id"
-  labelKey="name"
-  value={selectedProduct}
-  onChange={(e) => setSelectedProduct(e.target.value)}
-/>
-
-// 3. With grouping
-<Select
-  label="Produk (Grouped)"
-  options={products}
-  valueKey="id"
-  labelKey="name"
-  groupKey="category"
-  value={selectedProduct}
-  onChange={(e) => setSelectedProduct(e.target.value)}
-/>
-
-// 4. Simple string/number arrays
-const sizes = ['S', 'M', 'L', 'XL'];
-const numbers = [1, 2, 3, 4, 5];
-
-<Select
-  label="Ukuran"
-  options={sizes}
-  value={selectedSize}
-  onChange={(e) => setSelectedSize(e.target.value)}
-/>
-
-<Select
-  label="Jumlah"
-  options={numbers}
-  value={selectedNumber}
-  onChange={(e) => setSelectedNumber(e.target.value)}
-/>
-
-// 5. Complex data structure (dari database)
-const colors = [
-  { id: 1, name: 'Merah', hex_code: '#ff0000', created_at: '2024-01-01' },
-  { id: 2, name: 'Biru', hex_code: '#0000ff', created_at: '2024-01-02' }
-];
-
-<Select
-  label="Warna"
-  options={colors}
-  valueKey="id"
-  labelKey="name"
-  value={formData.color_id}
-  onChange={(e) => setFormData({...formData, color_id: e.target.value})}
-  placeholder="Pilih warna"
-  required
-/>
-
-// 6. Nested object properties
-const users = [
-  { id: 1, profile: { name: 'John Doe' }, department: { name: 'IT' } },
-  { id: 2, profile: { name: 'Jane Smith' }, department: { name: 'HR' } }
-];
-
-// For nested properties, you can use dot notation or custom getter
-<Select
-  label="User"
-  options={users}
-  valueKey="id"
-  labelKey={(user) => user.profile.name} // Custom getter function
-  groupKey={(user) => user.department.name} // Custom getter function
-  value={selectedUser}
-  onChange={(e) => setSelectedUser(e.target.value)}
-/>
-
-// 7. Migration examples untuk project ini
-
-// ConvectionForm.jsx - Before:
-<select
-  value={convection.color_id}
-  onChange={(e) => handleInputChange("color_id", e.target.value)}
-  className="w-full md:w-2/3 xl:w-5/6 p-3 border..."
->
-  <option value="">Pilih Warna</option>
-  {colors.map(color => (
-    <option key={color.id} value={color.id}>
-      {color.name}
-    </option>
-  ))}
-</select>
-
-// ConvectionForm.jsx - After:
-<Select
-  label="Warna"
-  options={colors}
-  valueKey="id"
-  labelKey="name"
-  value={convection.color_id}
-  onChange={(e) => handleInputChange("color_id", e.target.value)}
-  placeholder="Pilih Warna"
-  required
-/>
-
-// AddProductModal.jsx - Before:
-<select
-  value={product.category}
-  onChange={(e) => setProduct({...product, category: e.target.value})}
-  className="w-full p-3 border..."
->
-  <option value="">Pilih Kategori</option>
-  {categories.map(category => (
-    <option key={category.id} value={category.id}>
-      {category.name}
-    </option>
-  ))}
-</select>
-
-// AddProductModal.jsx - After:
-<Select
-  label="Kategori"
-  options={categories}
-  valueKey="id"
-  labelKey="name"
-  value={product.category}
-  onChange={(e) => setProduct({...product, category: e.target.value})}
-  placeholder="Pilih Kategori"
-  required
-  disabled={loading}
-/>
-*/

@@ -18,6 +18,7 @@ const Select = ({
   valueKey = 'value',
   labelKey = 'label',
   renderOption,
+  renderSelected, // Tambahkan prop baru
   searchable = true,
   ...props
 }) => {
@@ -82,10 +83,8 @@ const Select = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
-  // Get selected label
-  const selectedLabel = options.find(opt => getOptionValue(opt) === value)
-    ? getOptionLabel(options.find(opt => getOptionValue(opt) === value))
-    : '';
+  // Get selected option object
+  const selectedOption = options.find(opt => getOptionValue(opt) === value);
 
   return (
     <div className={`${marginBottom ? 'mb-4' : ''} relative`}>
@@ -113,8 +112,14 @@ const Select = ({
         aria-expanded={open}
         onClick={() => !disabled && setOpen((v) => !v)}
       >
-        <span className={selectedLabel ? '' : 'text-gray-400'}>
-          {selectedLabel || placeholder}
+        <span className={selectedOption ? '' : 'text-gray-400'}>
+          {selectedOption
+            ? (renderSelected
+                ? renderSelected(selectedOption)
+                : (renderOption
+                    ? renderOption(selectedOption)
+                    : getOptionLabel(selectedOption)))
+            : placeholder}
         </span>
         <ChevronDown className="h-5 w-5 text-gray-400 ml-2" />
       </button>

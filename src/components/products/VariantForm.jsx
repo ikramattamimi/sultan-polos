@@ -3,6 +3,8 @@ import { Plus, Save } from 'lucide-react';
 import MasterDataService from '../../services/MasterDataService.js';
 import {Input, Select, NumberInput} from '../ui/forms';
 import { UtilityService } from '../../services/UtilityServices.js';
+import { SketchPicker } from 'react-color'; // Tambah import
+import ColorCircle from '../common/ColorCircle.jsx';
 
 // Component untuk Form Tambah/Edit Varian (Updated)
 const VariantForm = ({
@@ -39,6 +41,9 @@ const VariantForm = ({
 
   // State for max convection quantity
   const [maxConvectionQty, setMaxConvectionQty] = useState(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [newColor, setNewColor] = useState({ name: '', hex: '#000000' });
+  const [showAddColorModal, setShowAddColorModal] = useState(false); // Tambahkan state untuk modal tambah warna
 
   const isEditMode = mode === 'edit' && variant;
 
@@ -247,6 +252,19 @@ const VariantForm = ({
   const submitIcon = isEditMode ? Save : Plus;
   const loadingText = isEditMode ? 'Memperbarui...' : 'Menambahkan...';
 
+  // Handler untuk tambah warna baru
+  const handleAddColor = async () => {
+    if (newColor.name && newColor.hex) {
+
+      await MasterDataService.colors.create({ name: newColor.name, hex_code: newColor.hex })
+      var colors = await MasterDataService.colors.getAll()
+      
+      setColors(colors);
+      setNewColor({ name: '', hex: '#000000' });
+      setShowColorPicker(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="text-sm text-gray-600 mb-4">
@@ -264,17 +282,96 @@ const VariantForm = ({
 
       <div className="space-y-4">
         {/* Color Selection */}
-        <Select
-          value={formData.color_id}
-          onChange={(e) => setFormData({...formData, color_id: e.target.value})}
-          disabled={loading}
-          options={colors}
-          valueKey="id"
-          labelKey="name"
-          placeholder={loading ? 'Memuat warna...' : 'Pilih Warna'}
-          label="Warna"
-          required={true}
-        />
+        <React.Fragment>
+          <label className="block text-sm font-medium mb-1">Warna</label>
+          <div className="grid grid-cols-5 gap-2 items-center">
+            <div className="col-span-3">
+              <Select
+                value={formData.color_id}
+                onChange={(e) => setFormData({...formData, color_id: e.target.value})}
+                disabled={loading}
+                options={colors}
+                valueKey="id"
+                labelKey="name"
+                placeholder={loading ? 'Memuat warna...' : 'Pilih Warna'}
+                required
+                // Tampilkan preview warna di option
+                renderOption={(color) => (
+                  <div className="flex items-center gap-2">
+                    <ColorCircle color={color.hex_code} size={16} />
+                    <span>{color.name}</span>
+                  </div>
+                )}
+              />
+            </div>
+            <button
+              type="button"
+              className="ml-2 px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200 border border-blue-300"
+              onClick={() => setShowAddColorModal(true)}
+              disabled={loading}
+            >
+              + Warna Baru
+            </button>
+          </div>
+        </React.Fragment>
+
+        {/* Modal Tambah Warna Baru */}
+        {showAddColorModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xs">
+              <h3 className="text-lg font-semibold mb-3">Tambah Warna Baru</h3>
+              <label className="block text-sm font-medium mb-1">Nama Warna</label>
+              <Input
+                type="text"
+                value={newColor.name}
+                onChange={(e) => setNewColor({ ...newColor, name: e.target.value })}
+                placeholder="Contoh: Magenta"
+                disabled={loading}
+                required
+                className="mb-2"
+              />
+              <label className="block text-sm font-medium mt-2 mb-1">Pilih Warna</label>
+              <SketchPicker
+                color={newColor.hex}
+                onChangeComplete={(color) => setNewColor({ ...newColor, hex: color.hex })}
+                disableAlpha
+              />
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-xs">Preview:</span>
+                <ColorCircle color={newColor.hex} title={newColor.name} size={32} />
+                <span className="text-xs text-gray-500">{newColor.hex}</span>
+              </div>
+              {newColor.name && colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase()) && (
+                <div className="text-xs text-red-600 mt-1">Nama warna sudah ada!</div>
+              )}
+              <div className="flex gap-2 mt-4">
+                <button
+                  type="button"
+                  className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm"
+                  onClick={async () => {
+                    if (!newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())) return;
+                    await handleAddColor();
+                    // Otomatis pilih warna baru
+                    const latestColors = await MasterDataService.colors.getAll();
+                    const added = latestColors.find(c => c.name === newColor.name && c.hex_code === newColor.hex);
+                    if (added) setFormData({...formData, color_id: added.id.toString()});
+                    setShowAddColorModal(false);
+                  }}
+                  disabled={loading || !newColor.name || colors.some(c => c.name.toLowerCase() === newColor.name.toLowerCase())}
+                >
+                  Simpan Warna
+                </button>
+                <button
+                  type="button"
+                  className="px-3 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+                  onClick={() => setShowAddColorModal(false)}
+                >
+                  Batal
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Size Selection */}
         <Select

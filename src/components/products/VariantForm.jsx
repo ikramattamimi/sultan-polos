@@ -19,7 +19,8 @@ const VariantForm = ({
     size_id: '',
     convection_id: '',
     stock: '',
-    convection_qty: ''
+    convection_qty: '',
+    hpp: ''
   });
 
   const [convectionMode, setConvectionMode] = useState('none');
@@ -70,7 +71,8 @@ const VariantForm = ({
       size_id: variant.size_id?.toString() || '',
       convection_id: variant.convection_id?.toString() || '',
       stock: variant.stock?.toString() || '',
-      convection_qty: variant.convection_quantity?.toString() || ''
+      convection_qty: variant.convection_quantity?.toString() || '',
+      hpp: variant.hpp?.toString() || ''
     });
 
     // Check if variant has custom convection
@@ -96,7 +98,8 @@ const VariantForm = ({
       size_id: '',
       convection_id: '',
       stock: '',
-      convection_qty: ''
+      convection_qty: '',
+      hpp: ''
     });
     setCustomConvection({
       material_name: '',
@@ -167,55 +170,85 @@ const VariantForm = ({
 
     if (
       formData.color_id &&
-      selectedSizes.length > 0 &&
-      selectedSizes.every(id => sizeStocks[id]) &&
+      (isEditMode || (selectedSizes.length > 0 && selectedSizes.every(id => sizeStocks[id]))) &&
       (isExistingValid || isCustomValid || isNoneValid)
     ) {
       try {
         setLoading(true);
         setError(null);
 
-        const selectedColor = colors.find(c => c.id === parseInt(formData.color_id));
-
-        // Kirim array varian untuk setiap ukuran
-        const variantsData = selectedSizes.map(sizeId => ({
-          color_id: parseInt(formData.color_id),
-          size_id: parseInt(sizeId),
-          stock: parseInt(sizeStocks[sizeId]),
-          convection_quantity: parseInt(formData.convection_qty) || 0,
-          ...(convectionMode === 'existing'
-            ? {
-                convection_id: parseInt(formData.convection_id),
-                convection_json: null
-              }
-            : convectionMode === 'custom'
-            ? {
-                convection_id: null,
-                convection_quantity: null,
-                convection_json: {
-                  material_name: customConvection.material_name,
-                  material_type: customConvection.material_type,
-                  material_category: customConvection.material_category,
-                  color: customConvection.color,
-                  unit: customConvection.unit,
-                  purchase_price: parseFloat(customConvection.purchase_price),
-                  quantity: parseInt(customConvection.quantity),
-                  created_at: isEditMode ? variant.convection_json?.created_at : new Date().toISOString(),
-                  updated_at: new Date().toISOString()
-                }
-              }
-            : {
-                convection_id: null,
-                convection_json: null,
-                convection_quantity: null
-              })
-        }));
-
         if (isEditMode) {
-          // Untuk edit, update satu varian saja
-          await onUpdate(variant.id, variantsData[0]);
+          // Handle update: kirim data dari form
+          const updateData = {
+            color_id: parseInt(formData.color_id),
+            size_id: parseInt(formData.size_id),
+            stock: parseInt(formData.stock),
+            convection_quantity: parseInt(formData.convection_qty) || 0,
+            hpp: parseFloat(formData.hpp) || 0,
+            ...(convectionMode === 'existing'
+              ? {
+                  convection_id: parseInt(formData.convection_id),
+                  convection_json: null
+                }
+              : convectionMode === 'custom'
+              ? {
+                  convection_id: null,
+                  convection_quantity: null,
+                  convection_json: {
+                    material_name: customConvection.material_name,
+                    material_type: customConvection.material_type,
+                    material_category: customConvection.material_category,
+                    color: customConvection.color,
+                    unit: customConvection.unit,
+                    purchase_price: parseFloat(customConvection.purchase_price),
+                    quantity: parseInt(customConvection.quantity),
+                    created_at: variant.convection_json?.created_at || new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  }
+                }
+              : {
+                  convection_id: null,
+                  convection_json: null,
+                  convection_quantity: null
+                })
+          };
+          await onUpdate(variant.id, updateData);
         } else {
           // Untuk tambah, kirim semua varian
+          const selectedColor = colors.find(c => c.id === parseInt(formData.color_id));
+          const variantsData = selectedSizes.map(sizeId => ({
+            color_id: parseInt(formData.color_id),
+            size_id: parseInt(sizeId),
+            stock: parseInt(sizeStocks[sizeId]),
+            convection_quantity: parseInt(formData.convection_qty) || 0,
+            hpp: parseFloat(formData.hpp) || 0,
+            ...(convectionMode === 'existing'
+              ? {
+                  convection_id: parseInt(formData.convection_id),
+                  convection_json: null
+                }
+              : convectionMode === 'custom'
+              ? {
+                  convection_id: null,
+                  convection_quantity: null,
+                  convection_json: {
+                    material_name: customConvection.material_name,
+                    material_type: customConvection.material_type,
+                    material_category: customConvection.material_category,
+                    color: customConvection.color,
+                    unit: customConvection.unit,
+                    purchase_price: parseFloat(customConvection.purchase_price),
+                    quantity: parseInt(customConvection.quantity),
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                  }
+                }
+              : {
+                  convection_id: null,
+                  convection_json: null,
+                  convection_quantity: null
+                })
+          }));
           for (const v of variantsData) {
             await onAdd(productId, v);
           }
@@ -236,6 +269,16 @@ const VariantForm = ({
   };
 
   const validateForm = () => {
+    // Validasi untuk edit mode: hanya cek stok dan hpp
+    if (isEditMode) {
+      return (
+        formData.stock &&
+        formData.hpp &&
+        (!variant.convection_id || formData.convection_qty !== undefined)
+      );
+    }
+
+    // Validasi untuk tambah mode
     const basicValid = formData.color_id && selectedSizes.length > 0 && selectedSizes.every(id => sizeStocks[id]);
     const convectionValid =
       convectionMode === 'existing'
@@ -617,6 +660,20 @@ const VariantForm = ({
             )}
           </>
         )}
+
+        
+        {/* Pada bagian form (bukan edit mode), tambahkan input HPP: */}
+        <Input
+          type="text"
+          placeholder="20.000"
+          value={UtilityService.formatNumber(formData.hpp)}
+          onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setFormData({...formData, hpp: value}))}
+          disabled={loading}
+          label="HPP"
+          leftIcon="Rp"
+          leftIconClassName='pl-3'
+          required
+        />
 
         {/* Action Buttons */}
         <div className="flex gap-3 pt-4">

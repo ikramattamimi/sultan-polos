@@ -104,10 +104,10 @@ const ColorVariantGroup = ({ colorName, variants, onSelectVariant, onDeleteVaria
 // VariantCard Component - responsive with mobile horizontal layout
 const VariantCard = ({ variant, onSelect, onDelete }) => (
   <div className="relative bg-gray-50 hover:bg-gray-100 p-2 sm:p-3 rounded-lg border border-gray-200 transition-colors group shadow-sm">
-    <button
+    <div
       type="button"
       onClick={onSelect}
-      className="w-full text-left"
+      className="w-full text-left cursor-pointer"
     >
       {/* Mobile: horizontal layout */}
       <div className="flex items-center justify-between sm:block">
@@ -156,7 +156,7 @@ const VariantCard = ({ variant, onSelect, onDelete }) => (
           {variant.stock ?? 0}
         </span>
       </div>
-    </button>
+    </div>
 
     {/* Desktop: Delete Button - hidden on mobile since it's inline */}
     <button

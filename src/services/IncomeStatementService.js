@@ -44,7 +44,7 @@ export const IncomeStatementService = {
         sale_items(
           quantity,
           product_variants(
-            products(base_price)
+            hpp
           )
         )
       `)
@@ -58,9 +58,9 @@ export const IncomeStatementService = {
     data.forEach(sale => {
       if (sale.sale_items) {
         sale.sale_items.forEach(item => {
-          const basePrice = item.product_variants?.products?.base_price || 0;
+          const hpp = item.product_variants?.hpp || 0;
           const quantity = item.quantity || 0;
-          totalHPP += basePrice * quantity;
+          totalHPP += hpp * quantity;
         });
       }
     });
@@ -323,10 +323,10 @@ export const IncomeStatementService = {
             actual_price,
             product_variants(
               id,
+              hpp,
               products(
                 id,
-                name,
-                base_price
+                name
               ),
               sizes(name),
               colors(name)
@@ -365,9 +365,9 @@ export const IncomeStatementService = {
             const product = item.product_variants?.products;
             const size = item.product_variants?.sizes?.name || '-';
             const color = item.product_variants?.colors?.name || '-';
-            const basePrice = product?.base_price || 0;
+            const hpp = item.product_variants?.hpp || 0;
             const quantity = item.quantity || 0;
-            const itemHPP = basePrice * quantity;
+            const itemHPP = hpp * quantity;
 
             HPPItems.push({
               id: item.id,
@@ -377,7 +377,7 @@ export const IncomeStatementService = {
               size: size,
               color: color,
               quantity: quantity,
-              base_price: basePrice,
+              hpp: hpp,
               selling_price: item.unit_price || 0,
               total_cogs: itemHPP
             });
@@ -668,7 +668,7 @@ export const IncomeStatementService = {
           ukuran: item.size,
           warna: item.color,
           quantity: item.quantity,
-          harga_pokok: item.base_price,
+          hpp: item.hpp,
           harga_jual: item.selling_price,
           total_cogs: item.total_cogs
         }));

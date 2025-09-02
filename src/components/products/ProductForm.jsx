@@ -16,7 +16,6 @@ const ProductForm = ({
     name: '',
     category: '',
     type: null,
-    basePrice: '',
     referencePrice: '',
     description: '',
     partner: ''
@@ -44,7 +43,6 @@ const ProductForm = ({
         name: productData.name || '',
         category: productData.category_id || '',
         type: productData.type_id || '',
-        basePrice: productData.base_price?.toString() || '',
         referencePrice: productData.reference_price?.toString() || '',
         description: productData.description || '',
         partner: productData.partner || ''
@@ -59,7 +57,6 @@ const ProductForm = ({
         name: '',
         category: '',
         type: '',
-        basePrice: '',
         referencePrice: '',
         description: '',
         partner: ''
@@ -185,18 +182,6 @@ const ProductForm = ({
 
         <Input
           type="text"
-          placeholder="20.000"
-          value={UtilityService.formatNumber(product.basePrice)}
-          onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setProduct({...product, basePrice: value}))}
-          disabled={loading || externalLoading}
-          label="HPP"
-          leftIcon="Rp"
-          leftIconClassName='pl-3'
-          required
-        />
-
-        <Input
-          type="text"
           placeholder="24.000"
           value={UtilityService.formatNumber(product.referencePrice)}
           onChange={(e) => UtilityService.handlePriceInputChange(e, (value) => setProduct({...product, referencePrice: value}))}
@@ -259,7 +244,7 @@ const ProductForm = ({
       <div className="flex gap-2 pt-1">
         <button
           type="submit"
-          disabled={loading || externalLoading || !product.name || !product.category || (selectedCategory?.is_type_needed && !product.type) || !product.basePrice || !product.referencePrice}
+          disabled={loading || externalLoading || !product.name || !product.category || (selectedCategory?.is_type_needed && !product.type) || !product.referencePrice}
           className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-2 rounded transition-colors flex items-center justify-center gap-2 text-sm"
         >
           {loading || externalLoading ? (

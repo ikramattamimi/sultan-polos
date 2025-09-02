@@ -157,6 +157,7 @@ const ProductManagementPage = () => {
         convection_quantity: variantData.convection_quantity,
         convection_json: variantData.convection_json,
         partner: variantData.partner,
+        hpp: variantData.hpp
       });
 
       // Refresh products list to get updated data

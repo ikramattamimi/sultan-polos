@@ -368,7 +368,7 @@ const IncomeStatementPage = () => {
           <!-- Detail HPP -->
           <table style="border-collapse: collapse; width: 100%;">
             <tr>
-              <td colspan="9" class="header">DETAIL HPP (COST OF GOODS SOLD)</td>
+              <td colspan="10" class="header">DETAIL HPP (COST OF GOODS SOLD)</td>
             </tr>
             <tr class="subheader">
               <td class="center">No</td>
@@ -378,7 +378,8 @@ const IncomeStatementPage = () => {
               <td class="center">Ukuran</td>
               <td class="center">Warna</td>
               <td class="center">Qty</td>
-              <td class="center">HPP</td>
+              <td class="center">HPP/Unit</td>
+              <td class="center">Harga Jual</td>
               <td class="center">Total HPP</td>
             </tr>
             ${HPP_breakdown.map((item, index) => {
@@ -392,13 +393,14 @@ const IncomeStatementPage = () => {
                   <td style="mso-number-format: '@';">${item.ukuran || ''}</td>
                   <td style="mso-number-format: '@';">${item.warna || ''}</td>
                   <td style="text-align: center; mso-number-format: '0';">${item.quantity}</td>
-                  <td style="text-align: right; mso-number-format: '#,##0';">${item.harga_pokok}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${item.hpp}</td>
+                  <td style="text-align: right; mso-number-format: '#,##0';">${item.harga_jual}</td>
                   <td style="text-align: right; mso-number-format: '#,##0';">${item.total_cogs}</td>
                 </tr>
               `;
             }).join('')}
             <tr style="border-top: 2px solid #000; font-weight: bold;">
-              <td colspan="8" class="summary-label">Total HPP:</td>
+              <td colspan="9" class="summary-label">Total HPP:</td>
               <td style="text-align: right; mso-number-format: '#,##0'; font-weight: bold;">${summary.total_cogs}</td>
             </tr>
           </table>

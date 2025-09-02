@@ -535,7 +535,7 @@ const HPPDetailsTab = ({ calculationDetails, loadingDetails }) => {
                 Qty
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                HPP
+                HPP/Unit
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Harga Jual
@@ -569,7 +569,7 @@ const HPPDetailsTab = ({ calculationDetails, loadingDetails }) => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <div className="text-sm text-gray-900">
-                    {IncomeStatementService.formatCurrency(item.base_price)}
+                    {IncomeStatementService.formatCurrency(item.hpp)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right">

@@ -237,7 +237,7 @@ const SaleItemCard = ({ item }) => (
       </div>
       
       <div className="flex justify-between">
-        <span>Harga Satuan:</span>
+        <span>Harga Satuan (Acuan):</span>
         <span>{UtilityService.formatCurrency(item.unit_price)}</span>
       </div>
       
@@ -398,7 +398,7 @@ const SaleSummary = ({ sale }) => {
       
       <div className="space-y-2 md:space-y-3">
         <div className="flex justify-between text-sm md:text-base">
-          <span className="text-gray-600">Subtotal Produk:</span>
+          <span className="text-gray-600">Total Harga Acuan:</span>
           <span className="text-gray-900 font-medium">{UtilityService.formatCurrency(subtotal)}</span>
         </div>
         
